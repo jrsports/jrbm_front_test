@@ -30,13 +30,19 @@
         <div v-if="ifLogin">
             <span>{{welcome}}</span>
             <el-button @click="getServerList">选择服务器和球队</el-button>
+            <el-button @click="logout">退出账户</el-button>
         </div>
 
         <el-dialog title="服务器和球队" :visible.sync="serverDialogVisible">
             <el-table :data="serverList">
                 <el-table-column property="serverId" label="服务器" ></el-table-column>
                 <el-table-column property="teamName" label="你的球队" ></el-table-column>
-                <el-table-column label="进入游戏"><el-button @click="getGamePage">进入游戏</el-button></el-table-column>
+                <el-table-column label="进入游戏">
+                    <template slot-scope="scope">
+                        <el-button @click="getGamePage(scope.row)">进入游戏</el-button>
+                    </template>
+
+                </el-table-column>
             </el-table>
         </el-dialog>
 
@@ -72,8 +78,11 @@
             }
         },
         methods: {
-            getGamePage(){
-                this.$router.push({path:"/myteam"})
+            getGamePage(row){
+                //获取点击的服务器并跳转
+                var serverId=row.serverId;
+
+                this.$router.push({path:"/myteam",params:{serverId:}})
             },
             getServerList(){
                 var me=this;
@@ -92,7 +101,7 @@
             },
             onLogin() {
                 var me=this;
-                axios.post("http://www.jrsports.com/api/user/login",{
+                axios.post("http://www.jrsports.com/api/user/userLogin",{
                     username:this.form.username,
                     password:this.form.password,
                     freeLoginType:this.freeLoginType?1:0
@@ -109,6 +118,10 @@
                 }).catch(function (error) {
                     alert(error);
                 });
+            },
+            logout(){
+                localStorage.removeItem("token");
+                location.reload();
             }
         }
     }

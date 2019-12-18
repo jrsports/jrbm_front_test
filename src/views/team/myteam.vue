@@ -11,9 +11,33 @@
 
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
+    import axios from 'axios'
     export default {
         name: "gameindex",
-        components: {Sidebar}
+        components: {Sidebar},
+        mounted(){
+            //初始化时加载球队信息
+            axios.post("http://www.jrsports.com/api/team/login",{
+                username:this.form.username,
+                password:this.form.password,
+                freeLoginType:this.freeLoginType?1:0
+            }).then(function (response) {
+                var loginResponse=response.data;
+                if(loginResponse.code===0){
+                    localStorage.setItem("token",loginResponse.token);
+                    me.loginDialogVisible=false;
+                    me.ifLogin=true;
+                    me.welcome="欢迎"+loginResponse.username;
+                }else{
+                    alert(loginResponse.message);
+                }
+            }).catch(function (error) {
+                alert(error);
+            });
+        },
+        methods:{
+
+        }
     }
 </script>
 
