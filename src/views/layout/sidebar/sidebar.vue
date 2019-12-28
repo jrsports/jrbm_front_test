@@ -1,17 +1,19 @@
 <template>
 
+    <div >
         <el-menu
                 default-active="1"
                 class="el-menu-vertical-demo"
                 @open="handleOpen"
-                @close="handleClose">
+                @close="handleClose"
+                style="height: 800px">
             <el-menu-item index="1">
                 <i class="el-icon-basketball"></i>
-                <span slot="title">我的球队</span>
+                <span slot="title" >我的球队</span>
             </el-menu-item>
             <el-menu-item index="2">
                 <i class="el-icon-menu"></i>
-                <span slot="title">选秀大会</span>
+                <span slot="title" @click="getDraftPage">选秀大会</span>
             </el-menu-item>
             <el-menu-item index="3" disabled>
                 <i class="el-icon-document"></i>
@@ -22,6 +24,8 @@
                 <span slot="title" @click="getMyProfilePage">个人设置</span>
             </el-menu-item>
         </el-menu>
+    </div>
+
 
 
 
@@ -36,6 +40,9 @@
             }
         },
         methods:{
+            getDraftPage(){
+                this.$router.push('/draft')
+            },
             getMyProfilePage(){
                 this.$router.push('/myprofile')
             }

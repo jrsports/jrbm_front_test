@@ -23,6 +23,13 @@ export const constantRouterMap = [
         meta:{
             needLogin:true
         }
+    },
+    {
+        path: "/draft",
+        component: () => import('@/views/draft/draft'),
+        meta:{
+            needLogin:true
+        }
     }
 ]
 
