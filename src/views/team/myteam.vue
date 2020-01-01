@@ -19,25 +19,18 @@
             <el-container>
                 <el-main>
                     <el-row :gutter="20">
-                        <el-col :span="4" style="text-align: center">
+                        <el-col :span="4" style="text-align: center" v-for="player in starting" :key="player">
                             <div class="block">
-                                <el-avatar shape="square" :size="100" :src="squareUrl"></el-avatar>
-                                <span></span>
+                                <el-avatar shape="square" :size="100" :src="player.avatarUrl"></el-avatar>
+                                <p>{{player.chname}}</p>
+                                <p>{{player.enname}}</p>
+                                <p>攻：{{player.offensive}}，防：{{player.defensive}}</p>
+                                <p>位置：{{player.position}}，工资：{{player.salary}}w</p>
                             </div>
                         </el-col>
-                        <el-col :span="5" style="text-align: center">
-                            <div class="block"><el-avatar shape="square" :size="100" :src="squareUrl"></el-avatar></div>
-                        </el-col>
-                        <el-col :span="5" style="text-align: center">
-                            <div class="block"><el-avatar shape="square" :size="100" :src="squareUrl"></el-avatar></div>
-                        </el-col>
-                        <el-col :span="5" style="text-align: center">
-                            <div class="block"><el-avatar shape="square" :size="100" :src="squareUrl"></el-avatar></div>
-                        </el-col>
-                        <el-col :span="5" style="text-align: center">
-                            <div class="block"><el-avatar shape="square" :size="100" :src="squareUrl"></el-avatar></div>
-                        </el-col>
                     </el-row>
+
+
                 </el-main>
             </el-container>
         </el-container>
@@ -46,6 +39,7 @@
 
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
+    // import Chat from "@/views/layout/chat/chat";
     import axios from 'axios'
     export default {
         name: "gameindex",
@@ -69,15 +63,51 @@
             }).catch(function (error) {
                 alert(error);
             });
+            this.getTeamPlayerList();
+        },
+        computed: {
+            starting: function () {
+                return this.playerList.filter(function (player) {
+                    return player.order<=5
+                })
+            },
+            sub:function () {
+                return this.playerList.filter(function (player) {
+                    return player.order>5
+                })
+            }
         },
         data(){
             return{
                 teamName: "null",
-                squareUrl: "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"
+                playerList:[{
+                    avatarUrl:"https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png",
+                    chname:"默认",
+                    enname:"default",
+                    offensive:126,
+                    defensive:110,
+                    position:"PG/SG",
+                    salary:4800,
+                    order:1
+                }]
             }
         },
         methods:{
-
+            getTeamPlayerList(){
+                const me = this;
+                //获取服务器列表和球队
+                axios.post("http://www.jrsports.com/api/user/team/getTeamPlayerList",null,{
+                    headers:{
+                        "userToken":localStorage.getItem("userToken"),
+                        "teamToken":localStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const serverResponse = response.data;
+                    me.playerList=serverResponse.data;
+                }).catch(function (error) {
+                    alert(error);
+                });
+            },
         }
     }
 </script>

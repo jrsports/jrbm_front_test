@@ -67,7 +67,7 @@
 
         <el-dialog title="服务器和球队" :visible.sync="serverDialogVisible">
             <el-table ref="teamTable" :data="teamList" highlight-current-row @current-change="selectTeam">
-                <el-table-column type="index" label="序号"></el-table-column>
+                <el-table-column property="serverId" label="服务器ID"></el-table-column>
                 <el-table-column property="teamId" label="球队ID" ></el-table-column>
                 <el-table-column property="teamName" label="你的球队" ></el-table-column>
 <!--                <el-table-column label="进入游戏">-->
@@ -78,8 +78,28 @@
 <!--                </el-table-column>-->
             </el-table>
             <div style="text-align: right">
-                <el-button @click="getGamePage" :disabled="ifTeamSelected==false" style="margin-top: 30px">进入游戏</el-button>
+                <el-button @click="createTeamDialogVisible=true" :disabled="ifTeamSelected==false || ifServerHasTeam==true" style="margin-top: 30px">创建球队</el-button>
+                <el-button @click="getGamePage" :disabled="ifTeamSelected==false || ifServerHasTeam==false" style="margin-top: 30px">进入游戏</el-button>
             </div>
+        </el-dialog>
+
+        <el-dialog title="创建球队" :visible.sync="createTeamDialogVisible" width="30%">
+            <el-row>
+                <el-col>
+                    <el-form ref="createform" :model="createform" label-width="80px">
+                        <el-form-item label="服务器ID">
+                            <el-input v-model="createform.serverId" disabled></el-input>
+                        </el-form-item>
+                        <el-form-item label="球队名" prop="teamName">
+                            <el-input v-model="createform.teamName"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-col>
+            </el-row>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="createTeamDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="createTeam">创 建</el-button>
+            </span>
         </el-dialog>
 
     </div>
@@ -88,6 +108,7 @@
 <script>
     import axios from 'axios'
     var teamId=-1;
+    var serverId=-1;
     var captchaToken=-1;
     export default {
         name: "index",
@@ -97,6 +118,7 @@
                 loginDialogVisible: false,
                 registerDialogVisible: false,
                 serverDialogVisible:false,
+                createTeamDialogVisible:false,
                 ifLogin:false,
                 captchaUrl:"",
                 form:{
@@ -110,12 +132,18 @@
                     repassword:"",
                     captcha:""
                 },
+                createform:{
+                  serverId:"",
+                  teamName:""
+                },
                 teamList:[{
+                    serverId:"",
                     teamId: "",
                     teamName: ""
                 },
                 ],
-                ifTeamSelected:false
+                ifTeamSelected:false,
+                ifServerHasTeam:false
             }
         },
         mounted(){//主面初始化时，检查是否登录
@@ -155,7 +183,7 @@
                 const me = this;
                 this.ifTeamSelected=false;
                 //获取服务器列表和球队
-                axios.post("http://www.jrsports.com/api/user/user/getTeamList",null,{
+                axios.post("http://www.jrsports.com/api/user/user/getServerTeamList",null,{
                     headers:{
                         "userToken":localStorage.getItem("userToken")
                     }
@@ -169,7 +197,14 @@
             },
             selectTeam(val) {
                 teamId=val.teamId;
+                serverId=val.serverId;
+                this.createform.serverId=serverId;
                 this.ifTeamSelected=true;
+                if(teamId==null){
+                    this.ifServerHasTeam=false;
+                }else{
+                    this.ifServerHasTeam=true;
+                }
                 this.currentRow = val;
             },
             onLogin() {
@@ -223,6 +258,27 @@
                     }else{
                         me.getCaptcha();
                         alert(registerResponse.message);
+                    }
+                }).catch(function (error) {
+                    alert(error);
+                });
+            },
+            createTeam(){
+                const me=this;
+                axios.post("http://www.jrsports.com/api/user/team/createTeam",{
+                    serverId:me.createform.serverId,
+                    teamName:me.createform.teamName
+                },{
+                    headers:{
+                        "userToken":localStorage.getItem("userToken")
+                    }
+                }).then(function (response) {
+                    const createResponse=response.data;
+                    if(createResponse.code==0){
+                        me.getTeamList();
+                        me.createTeamDialogVisible=false;
+                    }else{
+                        alert(createResponse.msg);
                     }
                 }).catch(function (error) {
                     alert(error);
