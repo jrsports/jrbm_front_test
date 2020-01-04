@@ -30,6 +30,13 @@ export const constantRouterMap = [
         meta:{
             needLogin:true
         }
+    },
+    {
+        path: "/match",
+        component: () => import('@/views/match/match'),
+        meta:{
+            needLogin:true
+        }
     }
 ]
 
