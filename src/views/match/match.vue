@@ -55,8 +55,10 @@
             }
         },
         methods:{
-            startMatchMaking(){ //初始化weosocket
-                const url = "ws://www.jrsports.com/api/matchmaking/matchmaking?tid=1";
+            async startMatchMaking(){ //连接websocket
+                await this.applyWsToken();
+                const wsToken=localStorage.getItem("wsToken")
+                const url = "ws://www.jrsports.com/api/matchmaking/matchmaking?wsToken="+wsToken;
                 // const url = "ws://localhost:9999/matchmaking?tid=1";
                 this.websock = new WebSocket(url);
                 this.websock.onmessage = this.websocketonmessage;
@@ -64,22 +66,49 @@
                 this.websock.onerror = this.websocketonerror;
                 this.websock.onclose = this.websocketclose;
             },
+            applyWsToken(){
+                axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": localStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const serverResponse = response.data;
+                    if(serverResponse.code==0){
+                       localStorage.setItem("wsToken",serverResponse.data);
+                    }else{
+                        alert(serverResponse.msg);
+                    }
+
+                }).catch(function (error) {
+                    alert(error);
+                });
+            },
             websocketonopen(){ //连接建立之后执行send方法发送数据
                 // this.websocketsend(this.user)
                 // console.log(111);
             },
             websocketonerror(){//连接建立失败重连
+                this.$message({
+                    message:"连接异常，正在重连",
+                    type:"error"
+                });
                 this.initWebSocket()
             },
-            websocketonmessage(e){
-                let _this = this //数据接收
-                if (e.data == '连接成功') {//这个判断是我业务需求才加的
-                    return
+            websocketonmessage(msg){
+                const me=this;
+                const response=JSON.parse(msg);
+                if(response.code==0){
+                    me.$message({
+                        message:response.msg,
+                        type:"info"
+                    });
+                }else{
+                    me.$message({
+                        message:"服务器出错",
+                        type:"error"
+                    });
                 }
-                //业务需求，将socket接收到的值存进vuex
-                _this.$store.store.dispatch('RESET_ID') //先调用reset方法置空vuex > store里面的scorketId（为什么置空，下面标题3解释）
-                _this.$store.store.dispatch('SAVE_ID', JSON.parse(e.data).areaId) //重新给store中的scorketId赋值（数据格式问题先转了json）
-                // console.log(_this.$store.store.state.scorketId);
             },
             websocketsend(Data){//数据发送
                 this.websock.send(Data)
