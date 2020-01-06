@@ -16,8 +16,21 @@
             </el-aside>
             <el-container>
                 <el-main>
-                    <el-button @click="startMatchMaking">开始匹配</el-button>
+                    <el-button @click="startMatchMaking" v-if="startBtnVisible">开始匹配</el-button>
+                    <el-button @click="cancelMatchMaking" v-if="cancelBtnVisible">取消匹配</el-button>
                 </el-main>
+
+
+                <el-dialog title="比赛确认" :visible.sync="matchConfirmDialogVisible" width="30%">
+                   <el-button type="success" @click="confirmMatch">确认</el-button>
+                </el-dialog>
+
+                <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" width="30%">
+                    <ul class="infinite-list" style="overflow:auto">
+                        <li v-for="i in liveContent" :key="i" class="infinite-list-item">{{ i }}</li>
+                    </ul>
+                </el-dialog>
+
             </el-container>
         </el-container>
     </el-container>
@@ -26,6 +39,7 @@
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import axios from "axios";
+
     export default {
         name: "match",
         components: {Sidebar},
@@ -52,13 +66,19 @@
         data() {
             return {
                 teamName: "null",
+                matchConfirmDialogVisible: false,
+                startBtnVisible:true,
+                cancelBtnVisible:false,
+                matchLiveDialogVisible:false,
+                matchId:-1,
+                liveContent:["比赛直播开始"]
             }
         },
-        methods:{
-            async startMatchMaking(){ //连接websocket
+        methods: {
+            async startMatchMaking() { //连接websocket
                 await this.applyWsToken();
-                const wsToken=localStorage.getItem("wsToken")
-                const url = "ws://www.jrsports.com/api/matchmaking/matchmaking?wsToken="+wsToken;
+                const wsToken = localStorage.getItem("wsToken")
+                const url = "ws://www.jrsports.com/api/matchmaking/matchmaking?wsToken=" + wsToken;
                 // const url = "ws://localhost:9999/matchmaking?tid=1";
                 this.websock = new WebSocket(url);
                 this.websock.onmessage = this.websocketonmessage;
@@ -66,7 +86,17 @@
                 this.websock.onerror = this.websocketonerror;
                 this.websock.onclose = this.websocketclose;
             },
-            applyWsToken(){
+            async matchLive() { //连接websocket
+                await this.applyWsToken();
+                const wsToken = localStorage.getItem("wsToken")
+                const url = "ws://www.jrsports.com/api/matchserver/matchlive?wsToken=" + wsToken+"&matchId="+this.matchId;
+                this.websock = new WebSocket(url);
+                this.websock.onmessage = this.websocketonmessage;
+                this.websock.onopen = this.websocketonopen;
+                this.websock.onerror = this.websocketonerror;
+                this.websock.onclose = this.websocketclose;
+            },
+            applyWsToken() {
                 axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
@@ -74,9 +104,9 @@
                     }
                 }).then(function (response) {
                     const serverResponse = response.data;
-                    if(serverResponse.code==0){
-                       localStorage.setItem("wsToken",serverResponse.data);
-                    }else{
+                    if (serverResponse.code == 0) {
+                        localStorage.setItem("wsToken", serverResponse.data);
+                    } else {
                         alert(serverResponse.msg);
                     }
 
@@ -84,36 +114,82 @@
                     alert(error);
                 });
             },
-            websocketonopen(){ //连接建立之后执行send方法发送数据
-                // this.websocketsend(this.user)
-                // console.log(111);
+            confirmMatch(){
+               this.websocketsend("confirm");
             },
-            websocketonerror(){//连接建立失败重连
+            cancelMatchMaking(){
+               this.websocketsend("stop");
+            },
+            websocketonopen() { //连接建立之后执行send方法发送数据
+
+            },
+            websocketonerror() {//连接建立失败重连
                 this.$message({
-                    message:"连接异常，正在重连",
-                    type:"error"
+                    message: "连接异常，正在重连",
+                    type: "error"
                 });
                 this.initWebSocket()
             },
-            websocketonmessage(msg){
-                const me=this;
-                const response=JSON.parse(msg);
-                if(response.code==0){
+            websocketonmessage(msg) {
+                const me = this;
+                const response = JSON.parse(msg.data);
+                if (response.code == 0) {
+                    if(response.type==0){
+                        //加入匹配池成功
+                        this.startBtnVisible=false;
+                        this.cancelBtnVisible=true;
+                        me.$message({
+                            message:response.message,
+                            type: "success"
+                        });
+                    }else if(response.type==1){
+                        //匹配到对手
+                        this.matchConfirmDialogVisible=true;
+                        me.$message({
+                            message:response.message,
+                            type: "success"
+                        });
+                    }else if(response.type==3){
+                       //双方都确认
+                        me.$message({
+                            message:response.message,
+                            type: "success"
+                        });
+                        this.cancelBtnVisible=false;
+                        this.matchLiveDialogVisible=true;
+                        this.matchConfirmDialogVisible=false;
+                        // this.websock.close();
+                    } else if(response.type==8) {
+                        this.matchId=response.data;
+                        this.matchLive();
+                    } else if(response.type==16){
+                        //取消匹配成功
+                        this.startBtnVisible=true;
+                        this.cancelBtnVisible=false;
+                        me.$message({
+                            message:response.message,
+                            type: "success"
+                        });
+                    } else if(response.type==99){
+                        //比赛直播
+                        this.liveContent.push(response.message);
+                    }else{
+                        me.$message({
+                            message:response.message,
+                            type: "success"
+                        });
+                    }
+                } else {
                     me.$message({
-                        message:response.msg,
-                        type:"info"
-                    });
-                }else{
-                    me.$message({
-                        message:"服务器出错",
-                        type:"error"
+                        message: "服务器出错",
+                        type: "error"
                     });
                 }
             },
-            websocketsend(Data){//数据发送
+            websocketsend(Data) {//数据发送
                 this.websock.send(Data)
             },
-            websocketclose(e){  //关闭
+            websocketclose(e) {  //关闭
                 console.log('断开连接', e)
             }
         }
