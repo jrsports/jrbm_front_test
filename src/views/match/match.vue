@@ -22,13 +22,38 @@
 
 
                 <el-dialog title="比赛确认" :visible.sync="matchConfirmDialogVisible" width="30%">
-                   <el-button type="success" @click="confirmMatch">确认</el-button>
+                   <el-button type="success" style="width: 100%" @click="confirmMatch">确认</el-button>
                 </el-dialog>
 
-                <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" width="30%">
-                    <ul class="infinite-list" style="overflow:auto">
-                        <li v-for="i in liveContent" :key="i" class="infinite-list-item">{{ i }}</li>
+                <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" width="60%">
+                    <h3>{{scores}}</h3>
+                    <ul class="infinite-list" style="height: 500px;overflow-y:scroll;">
+                        <li v-for="i in liveContent" :key="i" style="list-style-type:none;">{{ i }}</li>
                     </ul>
+                    <el-table ref="statTable" :data="stats">
+                        <el-table-column property="order" label="球员序号"></el-table-column>
+                        <el-table-column property="chname" label="姓名" ></el-table-column>
+                        <el-table-column property="time" label="上场时间" ></el-table-column>
+                        <el-table-column property="score" label="得分" ></el-table-column>
+                        <el-table-column property="rebound" label="篮板" ></el-table-column>
+                        <el-table-column property="assist" label="助攻" ></el-table-column>
+                        <el-table-column property="steal" label="抢断" ></el-table-column>
+                        <el-table-column property="turnover" label="失误" ></el-table-column>
+                        <el-table-column property="block" label="盖帽" ></el-table-column>
+                        <el-table-column property="beBlocked" label="被盖" ></el-table-column>
+                        <el-table-column property="foul" label="犯规" ></el-table-column>
+                        <el-table-column property="totalAttempt" label="总出手数" ></el-table-column>
+                        <el-table-column property="totalIn" label="总命中数" ></el-table-column>
+                        <el-table-column property="threeAttempt" label="三分出手" ></el-table-column>
+                        <el-table-column property="threeIn" label="三分命中" ></el-table-column>
+
+                        <!--                <el-table-column label="进入游戏">-->
+                        <!--                    <template slot-scope="scope">-->
+                        <!--                        <el-button @click="getGamePage(scope.row)">进入游戏</el-button>-->
+                        <!--                    </template>-->
+
+                        <!--                </el-table-column>-->
+                    </el-table>
                 </el-dialog>
 
             </el-container>
@@ -71,7 +96,11 @@
                 cancelBtnVisible:false,
                 matchLiveDialogVisible:false,
                 matchId:-1,
-                liveContent:["比赛直播开始"]
+                liveContent:["比赛直播开始"],
+                scores:"",
+                stats:[{
+
+                }]
             }
         },
         methods: {
@@ -171,8 +200,11 @@
                             type: "success"
                         });
                     } else if(response.type==99){
+                        var d=response.data;
                         //比赛直播
-                        this.liveContent.push(response.message);
+                        this.liveContent.unshift(d.message);
+                        this.scores=d.homeStats.score+":"+d.awayStats.score;
+                        this.stats=d.stats;
                     }else{
                         me.$message({
                             message:response.message,
