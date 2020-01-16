@@ -25,8 +25,8 @@
                    <el-button type="success" style="width: 100%" @click="confirmMatch">确认</el-button>
                 </el-dialog>
 
-                <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" width="60%">
-                    <h3>{{scores}}</h3>
+                <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" width="100%">
+                    <h3>{{scores}}{{matchTime}}</h3>
                     <ul class="infinite-list" style="height: 500px;overflow-y:scroll;">
                         <li v-for="i in liveContent" :key="i" style="list-style-type:none;">{{ i }}</li>
                     </ul>
@@ -46,6 +46,9 @@
                         <el-table-column property="totalIn" label="总命中数" ></el-table-column>
                         <el-table-column property="threeAttempt" label="三分出手" ></el-table-column>
                         <el-table-column property="threeIn" label="三分命中" ></el-table-column>
+                        <el-table-column property="freeThrowAttempt" label="罚球出手" ></el-table-column>
+                        <el-table-column property="freeThrowIn" label="罚球命中" ></el-table-column>
+
 
                         <!--                <el-table-column label="进入游戏">-->
                         <!--                    <template slot-scope="scope">-->
@@ -100,13 +103,14 @@
                 scores:"",
                 stats:[{
 
-                }]
+                }],
+                matchTime:""
             }
         },
         methods: {
-            async startMatchMaking() { //连接websocket
-                await this.applyWsToken();
-                const wsToken = localStorage.getItem("wsToken")
+            startMatchMaking() { //连接websocket
+                this.applyWsToken();
+                const wsToken = localStorage.getItem("wsToken");
                 const url = "ws://www.jrsports.com/api/matchmaking/matchmaking?wsToken=" + wsToken;
                 // const url = "ws://localhost:9999/matchmaking?tid=1";
                 this.websock = new WebSocket(url);
@@ -115,9 +119,9 @@
                 this.websock.onerror = this.websocketonerror;
                 this.websock.onclose = this.websocketclose;
             },
-            async matchLive() { //连接websocket
-                await this.applyWsToken();
-                const wsToken = localStorage.getItem("wsToken")
+            matchLive() { //连接websocket
+                this.applyWsToken();
+                const wsToken = localStorage.getItem("wsToken");
                 const url = "ws://www.jrsports.com/api/matchserver/matchlive?wsToken=" + wsToken+"&matchId="+this.matchId;
                 this.websock = new WebSocket(url);
                 this.websock.onmessage = this.websocketonmessage;
@@ -125,8 +129,8 @@
                 this.websock.onerror = this.websocketonerror;
                 this.websock.onclose = this.websocketclose;
             },
-            applyWsToken() {
-                axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
+            async applyWsToken() {
+                await axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": localStorage.getItem("teamToken")
@@ -204,6 +208,7 @@
                         //比赛直播
                         this.liveContent.unshift(d.message);
                         this.scores=d.homeStats.score+":"+d.awayStats.score;
+                        this.matchTime=d.matchTime;
                         this.stats=d.stats;
                     }else{
                         me.$message({
