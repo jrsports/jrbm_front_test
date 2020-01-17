@@ -204,12 +204,15 @@
                             type: "success"
                         });
                     } else if(response.type==99){
-                        var d=response.data;
+                        const d = response.data;
                         //比赛直播
                         this.liveContent.unshift(d.message);
                         this.scores=d.homeStats.score+":"+d.awayStats.score;
-                        this.matchTime=d.matchTime;
                         this.stats=d.stats;
+                    }else if(response.type==98){
+                        const t = response.data;
+                        //时间更新
+                        this.matchTime=t.matchTime;
                     }else{
                         me.$message({
                             message:response.message,
