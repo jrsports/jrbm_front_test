@@ -30,10 +30,10 @@
                     <ul class="infinite-list" style="height: 500px;overflow-y:scroll;">
                         <li v-for="i in liveContent" :key="i" style="list-style-type:none;">{{ i }}</li>
                     </ul>
-                    <el-table ref="statTable" :data="stats">
+                    <el-table ref="statTable" :data="stats" :row-class-name="onCourt">
                         <el-table-column property="order" label="球员序号"></el-table-column>
                         <el-table-column property="chname" label="姓名" ></el-table-column>
-                        <el-table-column property="time" label="上场时间" ></el-table-column>
+                        <el-table-column property="timeMinutes" label="上场时间" ></el-table-column>
                         <el-table-column property="score" label="得分" ></el-table-column>
                         <el-table-column property="rebound" label="篮板" ></el-table-column>
                         <el-table-column property="assist" label="助攻" ></el-table-column>
@@ -67,7 +67,7 @@
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import axios from "axios";
-
+    var onCourtPlayers;
     export default {
         name: "match",
         components: {Sidebar},
@@ -153,6 +153,14 @@
             cancelMatchMaking(){
                this.websocketsend("stop");
             },
+            onCourt({rowIndex}){
+                for(var i of onCourtPlayers){
+                    if(rowIndex==i){
+                        return 'success-row';
+                    }
+                }
+                return '';
+            },
             websocketonopen() { //连接建立之后执行send方法发送数据
 
             },
@@ -209,10 +217,12 @@
                         this.liveContent.unshift(d.message);
                         this.scores=d.homeStats.score+":"+d.awayStats.score;
                         this.stats=d.stats;
+                        onCourtPlayers=d.onCourtPlayers;
+                        console.log(onCourtPlayers);
                     }else if(response.type==98){
                         const t = response.data;
                         //时间更新
-                        this.matchTime=t.matchTime;
+                        this.matchTime=t.matchTimeStr;
                     }else{
                         me.$message({
                             message:response.message,
