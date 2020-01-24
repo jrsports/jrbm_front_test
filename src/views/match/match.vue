@@ -22,7 +22,7 @@
 
 
                 <el-dialog title="比赛确认" :visible.sync="matchConfirmDialogVisible" width="30%">
-                   <el-button type="success" style="width: 100%" @click="confirmMatch">确认</el-button>
+                   <el-button type="success" v-if="matchConfirmBtnVisible" style="width: 100%" @click="confirmMatch" >确认</el-button>
                 </el-dialog>
 
                 <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" width="100%">
@@ -98,6 +98,7 @@
                 startBtnVisible:true,
                 cancelBtnVisible:false,
                 matchLiveDialogVisible:false,
+                matchConfirmBtnVisible:true,
                 matchId:-1,
                 liveContent:["比赛直播开始"],
                 scores:"",
@@ -186,6 +187,7 @@
                     }else if(response.type==1){
                         //匹配到对手
                         this.matchConfirmDialogVisible=true;
+                        this.cancelBtnVisible=false;
                         me.$message({
                             message:response.message,
                             type: "success"
@@ -196,11 +198,17 @@
                             message:response.message,
                             type: "success"
                         });
-                        this.cancelBtnVisible=false;
                         this.matchLiveDialogVisible=true;
                         this.matchConfirmDialogVisible=false;
                         // this.websock.close();
-                    } else if(response.type==8) {
+                    } else if(response.type==5){
+                        //本方确认成功
+                        this.matchConfirmBtnVisible=false;
+                        me.$message({
+                            message:response.message,
+                            type: "success"
+                        });
+                    }else if(response.type==8) {
                         this.matchId=response.data;
                         this.matchLive();
                     } else if(response.type==16){
