@@ -23,6 +23,7 @@
 
                 <el-dialog title="比赛确认" :visible.sync="matchConfirmDialogVisible" width="30%">
                    <el-button type="success" v-if="matchConfirmBtnVisible" style="width: 100%" @click="confirmMatch" >确认</el-button>
+                    <h3 v-if="ifConfirmed" style="text-align: center">已确认</h3>
                 </el-dialog>
 
                 <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" width="100%">
@@ -99,6 +100,7 @@
                 cancelBtnVisible:false,
                 matchLiveDialogVisible:false,
                 matchConfirmBtnVisible:true,
+                ifConfirmed:false,
                 matchId:-1,
                 liveContent:["比赛直播开始"],
                 scores:"",
@@ -204,6 +206,7 @@
                     } else if(response.type==5){
                         //本方确认成功
                         this.matchConfirmBtnVisible=false;
+                        this.ifConfirmed=true;
                         me.$message({
                             message:response.message,
                             type: "success"
