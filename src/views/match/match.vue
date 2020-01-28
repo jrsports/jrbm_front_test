@@ -122,8 +122,8 @@
                 this.websock.onerror = this.websocketonerror;
                 this.websock.onclose = this.websocketclose;
             },
-            matchLive() { //连接websocket
-                this.applyWsToken();
+            async matchLive() { //连接websocket
+                await this.applyWsToken();
                 const wsToken = localStorage.getItem("wsToken");
                 const url = "ws://www.jrsports.com/api/matchserver/matchlive?wsToken=" + wsToken+"&matchId="+this.matchId;
                 this.websock = new WebSocket(url);
@@ -132,8 +132,8 @@
                 this.websock.onerror = this.websocketonerror;
                 this.websock.onclose = this.websocketclose;
             },
-            async applyWsToken() {
-                await axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
+            applyWsToken() {
+                axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": localStorage.getItem("teamToken")
