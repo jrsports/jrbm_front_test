@@ -79,8 +79,8 @@
             //初始化时加载球队信息
             axios.post("http://www.jrsports.com/api/user/team/getTeamInfo", null, {
                 headers: {
-                    "userToken": localStorage.getItem("userToken"),
-                    "teamToken": localStorage.getItem("teamToken")
+                    "userToken": sessionStorage.getItem("userToken"),
+                    "teamToken": sessionStorage.getItem("teamToken")
                 }
             }).then(function (response) {
                 const teamInfoResponse = response.data;
@@ -129,8 +129,8 @@
                 //获取服务器列表和球队
                 axios.post("http://www.jrsports.com/api/user/team/getTeamPlayerList", null, {
                     headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": localStorage.getItem("teamToken")
+                        "userToken": sessionStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
                     }
                 }).then(function (response) {
                     const serverResponse = response.data;
@@ -167,8 +167,8 @@
                     toUpId:toUpId
                 }, {
                     headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": localStorage.getItem("teamToken")
+                        "userToken": sessionStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
                     }
                 }).then(function (response) {
                     const serverResponse = response.data;

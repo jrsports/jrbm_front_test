@@ -147,14 +147,14 @@
             }
         },
         mounted(){//主面初始化时，检查是否登录
-            if(localStorage.getItem("userToken")!=null){
+            if(sessionStorage.getItem("userToken")!=null){
                 this.ifLogin=true
             }
         },
         methods: {
             getGamePage(){
                 //球队已经登录
-                // if(localStorage.getItem("teamToken")!=null){
+                // if(sessionStorage.getItem("teamToken")!=null){
                 //     this.$router.push('/myteam');
                 //     return;
                 // }
@@ -164,12 +164,12 @@
                     teamId:teamId
                 },{
                     headers:{
-                        "userToken":localStorage.getItem("userToken")
+                        "userToken":sessionStorage.getItem("userToken")
                     }
                 }).then(function (response) {
                     const loginResponse=response.data;
                     if(loginResponse.code===0){
-                        localStorage.setItem("teamToken",loginResponse.teamToken);
+                        sessionStorage.setItem("teamToken",loginResponse.teamToken);
                         me.$router.push('/myteam');
                     }else{
                         alert(loginResponse.message);
@@ -185,7 +185,7 @@
                 //获取服务器列表和球队
                 axios.post("http://www.jrsports.com/api/user/user/getServerTeamList",null,{
                     headers:{
-                        "userToken":localStorage.getItem("userToken")
+                        "userToken":sessionStorage.getItem("userToken")
                     }
                 }).then(function (response) {
                     const serverResponse = response.data;
@@ -216,7 +216,7 @@
                 }).then(function (response) {
                     const loginResponse=response.data;
                     if(loginResponse.code===0){
-                        localStorage.setItem("userToken",loginResponse.userToken);
+                        sessionStorage.setItem("userToken",loginResponse.userToken);
                         me.loginDialogVisible=false;
                         me.ifLogin=true;
                         me.welcome="欢迎"+loginResponse.username;
@@ -251,7 +251,7 @@
                 }).then(function (response) {
                     const registerResponse=response.data;
                     if(registerResponse.code==0){
-                        localStorage.setItem("userToken",registerResponse.userToken);
+                        sessionStorage.setItem("userToken",registerResponse.userToken);
                         me.regDialogVisible=false;
                         me.ifLogin=true;
                         me.welcome="欢迎"+registerResponse.username;
@@ -270,7 +270,7 @@
                     teamName:me.createform.teamName
                 },{
                     headers:{
-                        "userToken":localStorage.getItem("userToken")
+                        "userToken":sessionStorage.getItem("userToken")
                     }
                 }).then(function (response) {
                     const createResponse=response.data;
@@ -285,8 +285,8 @@
                 });
             },
             logout(){
-                localStorage.removeItem("userToken");
-                localStorage.removeItem("teamToken");
+                sessionStorage.removeItem("userToken");
+                sessionStorage.removeItem("teamToken");
                 location.reload();
             }
         }

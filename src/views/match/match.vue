@@ -18,15 +18,24 @@
                 <el-main>
                     <el-button @click="startMatchMaking" v-if="startBtnVisible">开始匹配</el-button>
                     <el-button @click="cancelMatchMaking" v-if="cancelBtnVisible">取消匹配</el-button>
+                    <el-card class="box-card" v-if="ongoingmatchVisible">
+                        <div slot="header" class="clearfix">
+                            <span>正在进行的比赛</span>
+                            <el-button style="float: right; padding: 3px 0" type="text" @click="enterLive">进入比赛</el-button>
+                        </div>
+                        <div style="text-align:center">
+                            主队-{{homeTeamName}} vs 客队-{{awayTeamName}}
+                        </div>
+                    </el-card>
                 </el-main>
 
 
-                <el-dialog title="比赛确认" :visible.sync="matchConfirmDialogVisible" width="30%">
+                <el-dialog title="比赛确认" :visible.sync="matchConfirmDialogVisible" close-on-click-modal=false width="30%">
                    <el-button type="success" v-if="matchConfirmBtnVisible" style="width: 100%" @click="confirmMatch" >确认</el-button>
                     <h3 v-if="ifConfirmed" style="text-align: center">已确认</h3>
                 </el-dialog>
 
-                <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" width="100%">
+                <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" close-on-click-modal=false width="100%" @close="quitLive">
                     <h3>{{scores}}{{matchTime}}</h3>
                     <ul class="infinite-list" style="height: 500px;overflow-y:scroll;">
                         <li v-for="i in liveContent" :key="i" style="list-style-type:none;">{{ i }}</li>
@@ -73,75 +82,119 @@
         name: "match",
         components: {Sidebar},
         mounted() {
-            const me = this;
-            //初始化时加载球队信息
-            axios.post("http://www.jrsports.com/api/user/team/getTeamInfo", null, {
-                headers: {
-                    "userToken": localStorage.getItem("userToken"),
-                    "teamToken": localStorage.getItem("teamToken")
-                }
-            }).then(function (response) {
-                const teamInfoResponse = response.data;
-                if (teamInfoResponse.code === 0) {
-                    console.log(teamInfoResponse);
-                    me.teamName = teamInfoResponse.data.teamName;
-                } else {
-                    alert(teamInfoResponse.message);
-                }
-            }).catch(function (error) {
-                alert(error);
-            });
+            this.iniTeam();
+            this.getOngoingMatch();
         },
         data() {
             return {
                 teamName: "null",
                 matchConfirmDialogVisible: false,
-                startBtnVisible:true,
+                startBtnVisible:false,
                 cancelBtnVisible:false,
                 matchLiveDialogVisible:false,
                 matchConfirmBtnVisible:true,
+                ongoingmatchVisible:false,
                 ifConfirmed:false,
                 matchId:-1,
-                liveContent:["比赛直播开始"],
+                ticket:"",
+                liveContent:["比赛直播即将开始"],
                 scores:"",
                 stats:[{
 
                 }],
-                matchTime:""
+                matchTime:"",
+                homeTeamName:"",
+                awayTeamName:""
             }
         },
         methods: {
-            startMatchMaking() { //连接websocket
-                this.applyWsToken();
-                const wsToken = localStorage.getItem("wsToken");
-                const url = "ws://www.jrsports.com/api/matchmaking/matchmaking?wsToken=" + wsToken;
-                // const url = "ws://localhost:9999/matchmaking?tid=1";
-                this.websock = new WebSocket(url);
-                this.websock.onmessage = this.websocketonmessage;
-                this.websock.onopen = this.websocketonopen;
-                this.websock.onerror = this.websocketonerror;
-                this.websock.onclose = this.websocketclose;
-            },
-            async matchLive() { //连接websocket
-                await this.applyWsToken();
-                const wsToken = localStorage.getItem("wsToken");
-                const url = "ws://www.jrsports.com/api/matchserver/matchlive?wsToken=" + wsToken+"&matchId="+this.matchId;
-                this.websock = new WebSocket(url);
-                this.websock.onmessage = this.websocketonmessage;
-                this.websock.onopen = this.websocketonopen;
-                this.websock.onerror = this.websocketonerror;
-                this.websock.onclose = this.websocketclose;
-            },
-            applyWsToken() {
-                axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
+            iniTeam(){
+                const me = this;
+                //初始化时加载球队信息
+                axios.post("http://www.jrsports.com/api/user/team/getTeamInfo", null, {
                     headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": localStorage.getItem("teamToken")
+                        "userToken": sessionStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const teamInfoResponse = response.data;
+                    if (teamInfoResponse.code === 0) {
+                        console.log(teamInfoResponse);
+                        me.teamName = teamInfoResponse.data.teamName;
+                    } else {
+                        alert(teamInfoResponse.message);
+                    }
+                }).catch(function (error) {
+                    alert(error);
+                });
+            },
+            getOngoingMatch(){
+                const me = this;
+                //初始化时加载球队信息
+                axios.post("http://www.jrsports.com/api/matchserver/match/getOngoingMatch", null, {
+                    headers: {
+                        "userToken": sessionStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const ongoingResponse = response.data;
+                    if (ongoingResponse.code === 0) {
+                        if(ongoingResponse.data==null){
+                            //无正在进行比赛，可以匹配
+                            me.startBtnVisible=true;
+                        }else{
+                            //展示比赛简要信息
+                            me.ongoingmatchVisible=true;
+                            me.homeTeamName=ongoingResponse.data.homeTeamName;
+                            me.awayTeamName=ongoingResponse.data.awayTeamName;
+                            me.matchId=ongoingResponse.data.matchId;
+                        }
+                    } else {
+                        alert(ongoingResponse.message);
+                    }
+                }).catch(function (error) {
+                    alert(error);
+                });
+            },
+            enterLive(){
+                this.matchLiveDialogVisible=true;
+                this.matchLive(this.matchId);
+            },
+            quitLive(){
+                console.log("close dialog");
+                this.websock.close();
+            },
+            async startMatchMaking() { //连接websocket
+                await this.applyWsToken();
+                const wsToken = sessionStorage.getItem("wsToken");
+                const url = "ws://www.jrsports.com/api/ws/matchmaking/matchmaking?wsToken=" + wsToken;
+                this.websock = new WebSocket(url);
+                this.websock.onmessage = this.websocketonmessage;
+                this.websock.onopen = this.websocketonopen;
+                this.websock.onerror = this.websocketonerror;
+                this.websock.onclose = this.websocketclose;
+            },
+             async matchLive(matchId) { //连接websocket
+                await this.applyWsToken();
+                await this.applyTicket(matchId);
+                const wsToken = sessionStorage.getItem("wsToken");
+                const url = "ws://www.jrsports.com/api/ws/matchserver/matchlive?ticket="+this.ticket+"&wsToken="+wsToken;
+                this.websock = new WebSocket(url);
+                this.websock.onmessage = this.websocketonmessage;
+                this.websock.onopen = this.websocketonopen;
+                this.websock.onerror = this.websocketonerror;
+                this.websock.onclose = this.websocketclose;
+            },
+            async applyWsToken() {
+                await axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
+                    headers: {
+                        "userToken": sessionStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
                     }
                 }).then(function (response) {
                     const serverResponse = response.data;
                     if (serverResponse.code == 0) {
-                        localStorage.setItem("wsToken", serverResponse.data);
+                        sessionStorage.setItem("wsToken", serverResponse.data);
                     } else {
                         alert(serverResponse.msg);
                     }
@@ -150,6 +203,26 @@
                     alert(error);
                 });
             },
+            async applyTicket(matchId){
+                const me=this;
+                await axios.get("http://www.jrsports.com/api/matchserver/ticket/apply?matchId="+matchId, {
+                    headers: {
+                        "userToken": sessionStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const serverResponse = response.data;
+                    if (serverResponse.code == 0) {
+                        me.ticket=serverResponse.data;
+                    } else {
+                        alert(serverResponse.msg);
+                    }
+
+                }).catch(function (error) {
+                    alert(error);
+                });
+            },
+
             confirmMatch(){
                this.websocketsend("confirm");
             },
@@ -202,6 +275,7 @@
                         });
                         this.matchLiveDialogVisible=true;
                         this.matchConfirmDialogVisible=false;
+                        // this.ongoingmatchVisible=true;
                         // this.websock.close();
                     } else if(response.type==5){
                         //本方确认成功
@@ -212,8 +286,8 @@
                             type: "success"
                         });
                     }else if(response.type==8) {
-                        this.matchId=response.data;
-                        this.matchLive();
+                        //比赛创建
+                        this.matchLive(response.data);
                     } else if(response.type==16){
                         //取消匹配成功
                         this.startBtnVisible=true;
@@ -234,7 +308,12 @@
                         const t = response.data;
                         //时间更新
                         this.matchTime=t.matchTimeStr;
-                    }else{
+                    }else if(response.type==-1){
+                        me.$message({
+                            message:response.message,
+                            type: "warning"
+                        });
+                    }else {
                         me.$message({
                             message:response.message,
                             type: "success"
@@ -251,7 +330,11 @@
                 this.websock.send(Data)
             },
             websocketclose(e) {  //关闭
-                console.log('断开连接', e)
+                this.$message({
+                    message:"断开连接 "+e,
+                    type: "warning"
+                });
+                location.reload();
             }
         }
     }
