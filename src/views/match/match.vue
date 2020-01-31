@@ -103,7 +103,8 @@
                     <ul class="infinite-list" style="height: 500px;overflow-y:scroll;">
                         <li v-for="i in liveContent" :key="i" style="list-style-type:none;">{{ i }}</li>
                     </ul>
-                    <el-table ref="statTable" :data="stats" :row-class-name="onCourt">
+                    <el-table ref="statTable" :data="stats" :row-class-name="onCourt" highlight-current-row
+                              @current-change="handleSubstitute">
                         <el-table-column property="order" label="球员序号"></el-table-column>
                         <el-table-column property="chname" label="姓名"></el-table-column>
                         <el-table-column property="timeMinutes" label="上场时间"></el-table-column>
@@ -196,7 +197,9 @@
                 homeTeamName: "",
                 awayTeamName: "",
                 matchCount: 0,
-                ongoingPrompt: "匹配"
+                ongoingPrompt: "匹配",
+                playerIn:-1,
+                playerOut:-1
             }
         },
         methods: {
@@ -296,6 +299,47 @@
                 }).catch(function (error) {
                     alert(error);
                 });
+            },
+            substituteOnCourt() {
+                console.log("发送换人请求"+this.playerIn+" "+this.playerOut);
+                const me = this;
+                axios.post("http://www.jrsports.com/api/matchserver/match/substitute", {
+                    ticket:me.ticket,
+                    substituteRequestDetailList:[{
+                        playerIn:me.playerIn,
+                        playerOut:me.playerOut
+                    }]
+                }, {
+                    headers: {
+                        "userToken": sessionStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const substituteResponse = response.data;
+                    if (substituteResponse.code === 0) {
+                        me.$message({
+                            message: substituteResponse.msg,
+                            type: "success"
+                        });
+                    } else {
+                        me.$message({
+                            message: substituteResponse.msg,
+                            type: "warning"
+                        });
+                    }
+                    me.playerIn=-1;
+                    me.playerOut=-1;
+                }).catch(function (error) {
+                    alert(error);
+                });
+            },
+            handleSubstitute(val){
+                if(this.playerIn>=0){
+                    this.playerOut=val.order;
+                    this.substituteOnCourt();
+                }else{
+                    this.playerIn=val.order;
+                }
             },
             enterLive() {
                 this.matchLiveDialogVisible = true;
@@ -452,11 +496,14 @@
                         this.scores = d.homeStats.score + ":" + d.awayStats.score;
                         this.stats = d.stats;
                         onCourtPlayers = d.onCourtPlayers;
-                        console.log(onCourtPlayers);
                     } else if (response.type == 98) {
                         const t = response.data;
                         //时间更新
                         this.matchTime = t.matchTimeStr;
+                    } else if (response.type == 97) {
+                        const d = response.data;
+                        //换人请求
+                        this.liveContent.unshift(d.message);
                     } else if (response.type == -1) {
                         me.$message({
                             message: response.message,
