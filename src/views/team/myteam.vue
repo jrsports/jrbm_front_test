@@ -68,7 +68,6 @@
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
     // import Chat from "@/views/layout/chat/chat";
-    import axios from 'axios'
     var ifSubstitute=false;
     var substituteList=[];
     export default {
@@ -77,9 +76,9 @@
         mounted() {
             const me = this;
             //初始化时加载球队信息
-            axios.post("http://www.jrsports.com/api/user/team/getTeamInfo", null, {
+            this.axios.post("http://www.jrsports.com/api/user/team/getTeamInfo", null, {
                 headers: {
-                    "userToken": sessionStorage.getItem("userToken"),
+                    "userToken": localStorage.getItem("userToken"),
                     "teamToken": sessionStorage.getItem("teamToken")
                 }
             }).then(function (response) {
@@ -90,8 +89,6 @@
                 } else {
                     alert(teamInfoResponse.message);
                 }
-            }).catch(function (error) {
-                alert(error);
             });
             this.getTeamPlayerList();
         },
@@ -127,16 +124,14 @@
             getTeamPlayerList() {
                 const me = this;
                 //获取服务器列表和球队
-                axios.post("http://www.jrsports.com/api/user/team/getTeamPlayerList", null, {
+                this.axios.post("http://www.jrsports.com/api/user/team/getTeamPlayerList", null, {
                     headers: {
-                        "userToken": sessionStorage.getItem("userToken"),
+                        "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
                     }
                 }).then(function (response) {
                     const serverResponse = response.data;
                     me.playerList = serverResponse.data;
-                }).catch(function (error) {
-                    alert(error);
                 });
             },
             selectPlayer(event,upId){
@@ -162,12 +157,12 @@
             substitute(fromUpId,toUpId){
                 const me = this;
                 //获取服务器列表和球队
-                axios.post("http://www.jrsports.com/api/user/team/substitutePlayer", {
+                this.axios.post("http://www.jrsports.com/api/user/team/substitutePlayer", {
                     fromUpId:fromUpId,
                     toUpId:toUpId
                 }, {
                     headers: {
-                        "userToken": sessionStorage.getItem("userToken"),
+                        "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
                     }
                 }).then(function (response) {
@@ -182,8 +177,6 @@
                         alert(serverResponse.msg);
                     }
 
-                }).catch(function (error) {
-                    alert(error);
                 });
             },
         }

@@ -106,7 +106,6 @@
 </template>
 
 <script>
-    import axios from 'axios'
     var teamId=-1;
     var serverId=-1;
     var captchaToken=-1;
@@ -147,7 +146,7 @@
             }
         },
         mounted(){//主面初始化时，检查是否登录
-            if(sessionStorage.getItem("userToken")!=null){
+            if(localStorage.getItem("userToken")!=null){
                 this.ifLogin=true
             }
         },
@@ -160,11 +159,11 @@
                 // }
                 const me=this;
                 //球队登录
-                axios.post("http://www.jrsports.com/api/user/team/teamLogin",{
+                this.axios.post("http://www.jrsports.com/api/user/team/teamLogin",{
                     teamId:teamId
                 },{
                     headers:{
-                        "userToken":sessionStorage.getItem("userToken")
+                        "userToken":localStorage.getItem("userToken")
                     }
                 }).then(function (response) {
                     const loginResponse=response.data;
@@ -174,8 +173,6 @@
                     }else{
                         alert(loginResponse.message);
                     }
-                }).catch(function (error) {
-                    alert(error);
                 });
 
             },
@@ -183,15 +180,13 @@
                 const me = this;
                 this.ifTeamSelected=false;
                 //获取服务器列表和球队
-                axios.post("http://www.jrsports.com/api/user/user/getServerTeamList",null,{
+                this.axios.post("http://www.jrsports.com/api/user/user/getServerTeamList",null,{
                     headers:{
-                        "userToken":sessionStorage.getItem("userToken")
+                        "userToken":localStorage.getItem("userToken")
                     }
                 }).then(function (response) {
                     const serverResponse = response.data;
                     me.teamList=serverResponse.data;
-                }).catch(function (error) {
-                    alert(error);
                 });
                 this.serverDialogVisible=true
             },
@@ -209,39 +204,42 @@
             },
             onLogin() {
                 var me=this;
-                axios.post("http://www.jrsports.com/api/user/user/userLogin",{
+                this.axios.post("http://www.jrsports.com/api/user/user/userLogin",{
                     username:this.form.username,
                     password:this.form.password,
                     freeLoginType:this.freeLoginType?1:0
                 }).then(function (response) {
                     const loginResponse=response.data;
-                    if(loginResponse.code===0){
-                        sessionStorage.setItem("userToken",loginResponse.userToken);
-                        me.loginDialogVisible=false;
-                        me.ifLogin=true;
-                        me.welcome="欢迎"+loginResponse.username;
+                    if(loginResponse.code===0) {
+                        localStorage.setItem("userToken", loginResponse.userToken);
+                        me.loginDialogVisible = false;
+                        me.ifLogin = true;
+                        me.welcome = "欢迎" + loginResponse.username;
+                        me.$message({
+                            message: loginResponse.msg,
+                            type: "success"
+                        });
                     }else{
-                        alert(loginResponse.message);
+                        me.$message({
+                            message: loginResponse.msg,
+                            type: "warning"
+                        });
                     }
-                }).catch(function (error) {
-                    alert(error);
                 });
             },
             getCaptcha() {
                 var me=this;
-                axios.get("http://www.jrsports.com/api/user/captcha/",{
+                this.axios.get("http://www.jrsports.com/api/user/captcha/",{
 
                 }).then(function (response) {
                     const captchaResponse=response.data;
                     me.captchaUrl=captchaResponse.captcha;
                     captchaToken=captchaResponse.captchaToken;
-                }).catch(function (error) {
-                    alert(error);
                 });
             },
             onRegister() {
                 var me=this;
-                axios.post("http://www.jrsports.com/api/user/user/userRegister",{
+                this.axios.post("http://www.jrsports.com/api/user/user/userRegister",{
                     username:this.regform.username,
                     password:this.regform.password,
                     rePassword:this.regform.repassword,
@@ -251,7 +249,7 @@
                 }).then(function (response) {
                     const registerResponse=response.data;
                     if(registerResponse.code==0){
-                        sessionStorage.setItem("userToken",registerResponse.userToken);
+                        localStorage.setItem("userToken",registerResponse.userToken);
                         me.regDialogVisible=false;
                         me.ifLogin=true;
                         me.welcome="欢迎"+registerResponse.username;
@@ -259,18 +257,16 @@
                         me.getCaptcha();
                         alert(registerResponse.message);
                     }
-                }).catch(function (error) {
-                    alert(error);
                 });
             },
             createTeam(){
                 const me=this;
-                axios.post("http://www.jrsports.com/api/user/team/createTeam",{
+                this.axios.post("http://www.jrsports.com/api/user/team/createTeam",{
                     serverId:me.createform.serverId,
                     teamName:me.createform.teamName
                 },{
                     headers:{
-                        "userToken":sessionStorage.getItem("userToken")
+                        "userToken":localStorage.getItem("userToken")
                     }
                 }).then(function (response) {
                     const createResponse=response.data;
@@ -280,12 +276,10 @@
                     }else{
                         alert(createResponse.msg);
                     }
-                }).catch(function (error) {
-                    alert(error);
                 });
             },
             logout(){
-                sessionStorage.removeItem("userToken");
+                localStorage.removeItem("userToken");
                 sessionStorage.removeItem("teamToken");
                 location.reload();
             }

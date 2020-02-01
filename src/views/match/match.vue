@@ -40,6 +40,7 @@
                             <el-table
                                     :data="finishedMatchData"
                                     style="width: 100%"
+                                    max-height="500"
                                     :row-class-name="tableRowClassName">
                                 <el-table-column
                                         prop="matchId"
@@ -163,7 +164,6 @@
 
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
-    import axios from "axios";
 
     var onCourtPlayers;
     export default {
@@ -213,9 +213,9 @@
             iniTeam() {
                 const me = this;
                 //初始化时加载球队信息
-                axios.post("http://www.jrsports.com/api/user/team/getTeamInfo", null, {
+                this.axios.post("http://www.jrsports.com/api/user/team/getTeamInfo", null, {
                     headers: {
-                        "userToken": sessionStorage.getItem("userToken"),
+                        "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
                     }
                 }).then(function (response) {
@@ -225,15 +225,13 @@
                     } else {
                         alert(teamInfoResponse.message);
                     }
-                }).catch(function (error) {
-                    alert(error);
                 });
             },
             getOngoingMatch() {
                 const me = this;
-                axios.post("http://www.jrsports.com/api/matchserver/match/getOngoingMatch", null, {
+                this.axios.post("http://www.jrsports.com/api/matchserver/match/getOngoingMatch", null, {
                     headers: {
-                        "userToken": sessionStorage.getItem("userToken"),
+                        "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
                     }
                 }).then(function (response) {
@@ -253,15 +251,13 @@
                     } else {
                         alert(ongoingResponse.message);
                     }
-                }).catch(function (error) {
-                    alert(error);
                 });
             },
             getFinishedMatch() {
                 const me = this;
-                axios.post("http://www.jrsports.com/api/matchserver/match/getFinishedMatch", null, {
+                this.axios.post("http://www.jrsports.com/api/matchserver/match/getFinishedMatch", null, {
                     headers: {
-                        "userToken": sessionStorage.getItem("userToken"),
+                        "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
                     }
                 }).then(function (response) {
@@ -272,15 +268,13 @@
                     } else {
                         alert(matchInfoResponse.message);
                     }
-                }).catch(function (error) {
-                    alert(error);
                 });
             },
             viewStats(row) {
                 const me = this;
-                axios.post("http://www.jrsports.com/api/matchserver/match/getMatchStats/"+row.matchId,null, {
+                this.axios.post("http://www.jrsports.com/api/matchserver/match/getMatchStats/"+row.matchId,null, {
                     headers: {
-                        "userToken": sessionStorage.getItem("userToken"),
+                        "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
                     }
                 }).then(function (response) {
@@ -296,14 +290,12 @@
                     } else {
                         alert(matchStatsResponse.message);
                     }
-                }).catch(function (error) {
-                    alert(error);
                 });
             },
             substituteOnCourt() {
                 console.log("发送换人请求"+this.playerIn+" "+this.playerOut);
                 const me = this;
-                axios.post("http://www.jrsports.com/api/matchserver/match/substitute", {
+                this.axios.post("http://www.jrsports.com/api/matchserver/match/substitute", {
                     ticket:me.ticket,
                     substituteRequestDetailList:[{
                         playerIn:me.playerIn,
@@ -311,7 +303,7 @@
                     }]
                 }, {
                     headers: {
-                        "userToken": sessionStorage.getItem("userToken"),
+                        "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
                     }
                 }).then(function (response) {
@@ -329,8 +321,6 @@
                     }
                     me.playerIn=-1;
                     me.playerOut=-1;
-                }).catch(function (error) {
-                    alert(error);
                 });
             },
             handleSubstitute(val){
@@ -380,9 +370,9 @@
                 this.websock.onclose = this.websocketclose;
             },
             async applyWsToken() {
-                await axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
+                await this.axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
                     headers: {
-                        "userToken": sessionStorage.getItem("userToken"),
+                        "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
                     }
                 }).then(function (response) {
@@ -393,15 +383,13 @@
                         alert(serverResponse.msg);
                     }
 
-                }).catch(function (error) {
-                    alert(error);
                 });
             },
             async applyTicket(matchId) {
                 const me = this;
-                await axios.post("http://www.jrsports.com/api/matchserver/ticket/apply/" + matchId, null,{
+                await this.axios.post("http://www.jrsports.com/api/matchserver/ticket/apply/" + matchId, null,{
                     headers: {
-                        "userToken": sessionStorage.getItem("userToken"),
+                        "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
                     }
                 }).then(function (response) {
@@ -412,8 +400,6 @@
                         alert(serverResponse.msg);
                     }
 
-                }).catch(function (error) {
-                    alert(error);
                 });
             },
             confirmMatch() {
