@@ -74,23 +74,9 @@
         name: "gameindex",
         components: {Sidebar},
         mounted() {
-            const me = this;
-            //初始化时加载球队信息
-            this.axios.post("http://www.jrsports.com/api/user/team/getTeamInfo", null, {
-                headers: {
-                    "userToken": localStorage.getItem("userToken"),
-                    "teamToken": sessionStorage.getItem("teamToken")
-                }
-            }).then(function (response) {
-                const teamInfoResponse = response.data;
-                if (teamInfoResponse.code === 0) {
-                    console.log(teamInfoResponse);
-                    me.teamName = teamInfoResponse.data.teamName;
-                } else {
-                    alert(teamInfoResponse.message);
-                }
-            });
+            this.teamName=sessionStorage.getItem("teamName");
             this.getTeamPlayerList();
+            this.handleGlobalWs();
         },
         computed: {
             starting: function () {
@@ -121,6 +107,17 @@
             }
         },
         methods: {
+            handleGlobalWs(){
+                const me=this;
+                this.globalws.ws.onmessage = function(msg) {
+                    const response = JSON.parse(msg.data);
+                    me.$message({
+                        message: response.message,
+                        type: "success"
+                    });
+                };
+            },
+
             getTeamPlayerList() {
                 const me = this;
                 //获取服务器列表和球队

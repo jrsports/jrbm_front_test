@@ -170,7 +170,7 @@
         name: "match",
         components: {Sidebar},
         mounted() {
-            this.iniTeam();
+            this.teamName=sessionStorage.getItem("teamName");
             this.getOngoingMatch();
             this.getFinishedMatch();
         },
@@ -209,23 +209,6 @@
                 } else {
                     return 'warning-row'
                 }
-            },
-            iniTeam() {
-                const me = this;
-                //初始化时加载球队信息
-                this.axios.post("http://www.jrsports.com/api/user/team/getTeamInfo", null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const teamInfoResponse = response.data;
-                    if (teamInfoResponse.code === 0) {
-                        me.teamName = teamInfoResponse.data.teamName;
-                    } else {
-                        alert(teamInfoResponse.message);
-                    }
-                });
             },
             getOngoingMatch() {
                 const me = this;

@@ -37,6 +37,13 @@ export const constantRouterMap = [
         meta:{
             needLogin:true
         }
+    },
+    {
+        path: "/freemarket",
+        component: () => import('@/views/freemarket/freemarket'),
+        meta:{
+            needLogin:true
+        }
     }
 ]
 

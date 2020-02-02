@@ -5,6 +5,12 @@ import ElementUI from 'element-ui'
 import axios from './interceptors/authInterceptor'
 import 'element-ui/lib/theme-chalk/index.css'
 import locale from 'element-ui/lib/locale/lang/zh-CN'
+// main.js
+import globalws from './global/globalWebsocket'
+
+Vue.prototype.globalws = globalws;
+
+
 
 Vue.use(ElementUI,{locale});
 Vue.config.productionTip = false;

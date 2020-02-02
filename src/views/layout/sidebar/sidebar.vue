@@ -17,7 +17,7 @@
             </el-menu-item>
             <el-menu-item index="3">
                 <i class="el-icon-document"></i>
-                <span slot="title">自由市场</span>
+                <span slot="title" @click="getFreeMarketPage">自由市场</span>
             </el-menu-item>
             <el-menu-item index="4">
                 <i class="el-icon-document"></i>
@@ -55,6 +55,9 @@
             },
             getMatchPage(){
                 this.$router.push('/match')
+            },
+            getFreeMarketPage(){
+                this.$router.push('/freemarket')
             }
         }
     }
