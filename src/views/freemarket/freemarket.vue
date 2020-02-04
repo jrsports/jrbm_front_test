@@ -30,7 +30,7 @@
                             </div>
                         </el-col>
                         <el-col :span="4">
-                            <h4 style="text-align:right">自由球员人数：{{freePlayerCount}}</h4>
+                            <h4 style="text-align:right" :class="{'newColor':newPlayerColorDisplay}">当前自由球员人数：{{freePlayerCount}}</h4>
                         </el-col>
                     </el-row>
                     <el-row :gutter="20">
@@ -42,8 +42,8 @@
                                     </el-col>
                                     <el-col :span="16">
                                         <div>
-                                            <h3>{{fp.basicPlayer.chname}}<span>{{fp.basicPlayer.enname}}</span></h3>
-                                            <h3>{{fp.basicPlayer.position}}|<span>进攻：{{fp.basicPlayer.offensive}}防守：{{fp.basicPlayer.defensive}}</span></h3>
+                                            <h3>{{fp.player.chname}}<span>{{fp.player.enname}}</span></h3>
+                                            <h3>{{fp.player.position}}|<span>进攻：{{fp.player.offensive}}防守：{{fp.player.defensive}}</span></h3>
                                             <h4>原属球队：{{fp.source}}</h4>
                                         </div>
                                     </el-col>
@@ -103,6 +103,7 @@
                 position:"PG",
                 offerDialogVisible:false,
                 lastFpId:-1,
+                newPlayerColorDisplay:false,
                 positionFilterOptions: [{
                     value: '1',
                     label: 'PG（控球后卫）'
@@ -135,6 +136,7 @@
         mounted(){
             this.teamName=sessionStorage.getItem("teamName");
             this.refreshFreePlayer();
+            this.iniFreemarketWebsocket();
             setInterval(this.startTimer,1000);
         },
         methods:{
@@ -178,6 +180,7 @@
                     const freeResponse = response.data;
                     if (freeResponse.code === 0) {
                         const newFreePlayerList=freeResponse.data;
+                        me.freePlayerCount=newFreePlayerList.length;
                         me.freePlayerListData=[];
                         newFreePlayerList.forEach(function (item) {
                             item.timeLeft=me.secondsToTime(parseInt((item.expireTimeStamp-new Date().getTime())/1000));
@@ -189,6 +192,57 @@
                             type: "warning"
                         });
                     }
+                });
+            },
+            async iniFreemarketWebsocket(){
+                await this.applyWsToken();
+                const wsToken = sessionStorage.getItem("wsToken");
+                const url = "ws://www.jrsports.com/api/ws/freemarket/free?wsToken=" + wsToken;
+                this.freemarketWs = new WebSocket(url);
+                this.freemarketWs.onopen=this.freemarketWsOnopen;
+                this.freemarketWs.onclose=this.freemarketWsOnclose;
+                this.freemarketWs.onmessage=this.freemarketWsOnmessage;
+                this.freemarketWs.onerror=this.freemarketWsOnerror;
+            },
+            freemarketWsOnopen(){
+                this.$message({
+                    message: "已连接到自由市场",
+                    type: "success"
+                });
+            },
+            freemarketWsOnclose(){
+
+            },
+            freemarketWsOnmessage(msg){
+                const response = JSON.parse(msg.data);
+                if(response.type==2){
+                    this.freePlayerCount=response.freePlayerCount;
+                    this.newPlayerColorDisplay=true;
+                    this.$notify({
+                        title: '自由市场消息',
+                        message: '有新的球员流入自由市场',
+                        type: 'success'
+                    });
+                }
+
+            },
+            freemarketWsOnerror(){
+
+            },
+            async applyWsToken() {
+                await this.axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const serverResponse = response.data;
+                    if (serverResponse.code == 0) {
+                        sessionStorage.setItem("wsToken", serverResponse.data);
+                    } else {
+                        alert(serverResponse.msg);
+                    }
+
                 });
             },
             secondsToTime(s) {
@@ -222,5 +276,8 @@
         height:120px;
         margin-left: 10px;
         margin-top: 10px;
+    }
+    .newColor{
+        color: seagreen;
     }
 </style>
