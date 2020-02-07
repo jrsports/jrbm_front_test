@@ -1,14 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-Vue.use(Router)
+Vue.use(Router);
 
 export const constantRouterMap = [
     {
         path:"/",
         component: () => import('@/views/home/index'),
         meta:{
-            needLogin:false
+            needLogin:false,
         }
     },
     {

@@ -1,6 +1,6 @@
 import ElementUI from 'element-ui'
 import axios from 'axios'
-import router from '../router/router'
+// import router from '../router/router'
 
 axios.interceptors.response.use(
     response => {
@@ -12,17 +12,17 @@ axios.interceptors.response.use(
                     message: error.response.data.message,
                     type: "warning",
                     onClose:()=>{
-                        localStorage.removeItem("userToken");
-                        sessionStorage.removeItem("teamToken");
-                        console.log(router.currentRoute.path);
-                        if(router.currentRoute.path !== '/'){
-                            router.replace({
-                                path: '/',
-                                query: { redirect: router.currentRoute.path },
-                            })
-                        }else{
-                            location.reload();
-                        }
+                        // localStorage.removeItem("userToken");
+                        // sessionStorage.removeItem("teamToken");
+                        // console.log(router.currentRoute.path);
+                        // if(router.currentRoute.path !== '/'){
+                        //     router.replace({
+                        //         path: '/',
+                        //         query: { redirect: router.currentRoute.path },
+                        //     })
+                        // }else{
+                        //     location.reload();
+                        // }
 
                     }
                 });

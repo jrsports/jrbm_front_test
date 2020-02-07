@@ -74,9 +74,9 @@
         name: "gameindex",
         components: {Sidebar},
         mounted() {
+            console.log("子组件 mounted");
             this.teamName=sessionStorage.getItem("teamName");
             this.getTeamPlayerList();
-            this.handleGlobalWs();
         },
         computed: {
             starting: function () {
@@ -107,18 +107,10 @@
             }
         },
         methods: {
-            handleGlobalWs(){
-                const me=this;
-                this.globalws.ws.onmessage = function(msg) {
-                    const response = JSON.parse(msg.data);
-                    me.$message({
-                        message: response.message,
-                        type: "success"
-                    });
-                };
-            },
+
 
             getTeamPlayerList() {
+                console.log("执行getTeam");
                 const me = this;
                 //获取服务器列表和球队
                 this.axios.post("http://www.jrsports.com/api/user/team/getTeamPlayerList", null, {

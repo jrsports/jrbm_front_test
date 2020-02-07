@@ -151,45 +151,6 @@
             }
         },
         methods: {
-            async localSocket() {
-                const me=this;
-                await this.applyWsToken();
-                const wsToken = sessionStorage.getItem("wsToken");
-                let that = this;
-                if ("WebSocket" in window) {
-                    const url = "ws://www.jrsports.com/api/ws/global/global?wsToken=" + wsToken;
-                    that.globalws.ws = new WebSocket(url);
-                } else {
-                    // 浏览器不支持 WebSocket
-                    console.log("您的浏览器不支持 WebSocket!");
-                }
-                this.globalws.ws.onopen=function () {
-                    me.startHeartBeat();
-                }
-            },
-            async applyWsToken() {
-                await this.axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const serverResponse = response.data;
-                    if (serverResponse.code == 0) {
-                        sessionStorage.setItem("wsToken", serverResponse.data);
-                    } else {
-                        alert(serverResponse.msg);
-                    }
-
-                });
-            },
-            startHeartBeat(){
-                setInterval(this.sendHeartBeat,3000);
-            },
-            sendHeartBeat(){
-                console.log("send heartbeat");
-                this.globalws.ws.send(JSON.stringify({type:-100,time:new Date().getTime()}))
-            },
             async getGamePage(){
                 await this.teamLogin();
             },
@@ -206,7 +167,7 @@
                     const loginResponse=response.data;
                     if(loginResponse.code===0){
                         sessionStorage.setItem("teamToken",loginResponse.teamToken);
-                        me.localSocket();
+                        me.globalws.connectToGlobalServer();
                         me.loadTeamInfo();
                         me.$router.push('/myteam');
                     }else{
@@ -217,9 +178,9 @@
                     }
                 });
             },
-            loadTeamInfo(){
+            async loadTeamInfo(){
                 //初始化时加载球队信息
-                this.axios.post("http://www.jrsports.com/api/user/team/getTeamInfo", null, {
+                await this.axios.post("http://www.jrsports.com/api/user/team/getTeamInfo", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")

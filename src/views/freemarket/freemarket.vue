@@ -195,7 +195,7 @@
                 });
             },
             async iniFreemarketWebsocket(){
-                await this.applyWsToken();
+                await this.globalws.applyWsToken();
                 const wsToken = sessionStorage.getItem("wsToken");
                 const url = "ws://www.jrsports.com/api/ws/freemarket/free?wsToken=" + wsToken;
                 this.freemarketWs = new WebSocket(url);
@@ -228,22 +228,6 @@
             },
             freemarketWsOnerror(){
 
-            },
-            async applyWsToken() {
-                await this.axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const serverResponse = response.data;
-                    if (serverResponse.code == 0) {
-                        sessionStorage.setItem("wsToken", serverResponse.data);
-                    } else {
-                        alert(serverResponse.msg);
-                    }
-
-                });
             },
             secondsToTime(s) {
                 let h;
