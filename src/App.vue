@@ -33,8 +33,8 @@
             //     });
             // },
         },
-        async beforeCreate(){
-            console.log("beforeCreate start");
+        async created(){
+            console.log("根组件created");
             //刷新所有页面时，判断球队是否已经登录，如果登录了，需要重新连接websocket
             if(sessionStorage.getItem("teamToken")){
                 //拿原来的token去刷新，换取新的token
@@ -42,10 +42,11 @@
                 //重连
                 await this.globalws.connectToGlobalServer();
             }
-            console.log("beforeCreate finish");
         },
         mounted(){
-
+            console.log("根组件 mounted");
+            console.log(this.globalws.mountedMethods);
+            this.globalws.mountedMethods();
         },
         async beforeDestroy(){
             // alert("beforeDestroy");

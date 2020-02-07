@@ -1,6 +1,9 @@
 import Vue from 'vue'
 export default {
     ws: {},
+    mountedMethods:function () {
+        console.log("mountedMethods");
+    },
     async connectToGlobalServer() {
         const me = this;
         await this.applyWsToken();
@@ -50,7 +53,6 @@ export default {
         };
     },
     async refreshTeamToken() {
-        console.log("refresh");
         const me=this;
         await Vue.prototype.axios.post("http://www.jrsports.com/api/user/team/refreshTeamToken", null, {
             headers: {
