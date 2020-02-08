@@ -53,7 +53,7 @@
                                         <el-button plain type="info">球员详情</el-button>
                                     </el-col>
                                     <el-col :span="12" style="text-align: center">
-                                        <el-button plain type="success">谈判报价</el-button>
+                                        <el-button plain type="success" @click="addOfferDialogVisible=true;addOfferForm.fpId=fp.fpId">谈判报价</el-button>
                                     </el-col>
                                 </el-row>
                                 <el-row style="margin-top: 30px">
@@ -61,7 +61,7 @@
                                         <span>剩余时间：{{fp.timeLeft}}</span>
                                     </el-col>
                                     <el-col :span="12" style="text-align: center">
-                                        <el-button type="text" @click="offerDialogVisible = true">报价情况</el-button>
+                                        <el-button type="text" @click="getOfferList(fp.fpId);offerDialogVisible = true">报价情况</el-button>
                                     </el-col>
                                 </el-row>
 
@@ -74,9 +74,32 @@
                             <el-table-column type="index" label="排名" width="50"></el-table-column>
                             <el-table-column property="teamName" label="球队"></el-table-column>
                             <el-table-column property="offer" label="报价"></el-table-column>
-                            <el-table-column property="offerTime" label="报价时间"></el-table-column>
+                            <el-table-column property="offerDate" label="报价时间"></el-table-column>
                             <el-table-column property="intention" label="意向"></el-table-column>
                         </el-table>
+                    </el-dialog>
+                    <el-dialog title="报价" :visible.sync="addOfferDialogVisible">
+                        <el-row>
+                            <el-col span="18">
+                                <el-form ref="addOfferForm" :model="addOfferForm" label-width="100px">
+                                    <el-form-item
+                                            v-for="(offer, index) in addOfferForm.addOfferData"
+                                            :label="'第' + (index+1)+'年'"
+                                            :key="index"
+                                    >
+                                        <el-input-number v-model="offer.salary" @change="calculateTotalSalary" :min="0" :max="5000" label="当年薪资" style="width: 200px;margin-right:10px"></el-input-number><el-button v-if="index>0" @click.prevent="removeOffer(offer)">删除</el-button>
+                                    </el-form-item>
+                                    <el-form-item>
+                                        <el-button type="primary" @click="addOffer()">报价</el-button>
+                                        <el-button v-if="addYearBtnVisible" @click="addOff">新增一年</el-button>
+                                    </el-form-item>
+                                </el-form>
+                            </el-col>
+                            <el-col span="6">
+                                <h3>总计：{{addOfferForm.totalYear}}年{{addOfferForm.totalSalary}}万</h3>
+                            </el-col>
+                        </el-row>
+
                     </el-dialog>
                 </el-main>
             </el-container>
@@ -102,8 +125,10 @@
                 originalTeam:"originalTeam",
                 position:"PG",
                 offerDialogVisible:false,
+                addOfferDialogVisible:false,
                 lastFpId:-1,
                 newPlayerColorDisplay:false,
+                addYearBtnVisible:true,
                 positionFilterOptions: [{
                     value: '1',
                     label: 'PG（控球后卫）'
@@ -122,13 +147,24 @@
                 }],
                 positionFilterData:[],
                 offerData:[
-                    {
-                        teamName:"koliday",
-                        offer:"3年2500万",
-                        offerTime:"2020/2/3 16:14:18",
-                        intention:"97%"
-                    }
+                    // {
+                    //     teamName:"koliday",
+                    //     offer:"3年2500万",
+                    //     offerTime:"2020/2/3 16:14:18",
+                    //     intention:"97%"
+                    // }
                 ],
+                addOfferForm:{
+                    fpId:-1,
+                    totalYear:1,
+                    totalSalary:0,
+                    addOfferData:[
+                        {
+                            year:1,
+                            salary:0
+                        }
+                        ],
+                },
                 freePlayerListData:[]
             }
 
@@ -194,6 +230,55 @@
                     }
                 });
             },
+            getOfferList(fpId){
+                const me = this;
+                this.axios.post("http://www.jrsports.com/api/freemarket/offer/getOfferList/"+fpId, null, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const freeResponse = response.data;
+                    if (freeResponse.code === 0) {
+                        me.offerData=freeResponse.data;
+                        me.offerData.forEach(function(item){
+                            item.offer=item.contract.totalYear+"年"+item.contract.totalSalary+"万"
+                        });
+                    } else {
+                        me.$message({
+                            message: freeResponse.msg,
+                            type: "warning"
+                        });
+                    }
+                });
+            },
+            addOffer(){
+                const me = this;
+                this.axios.post("http://www.jrsports.com/api/freemarket/offer/addOffer", {
+                    fpId:this.addOfferForm.fpId,
+                    contractPerYearList:this.addOfferForm.addOfferData
+                }, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const freeResponse = response.data;
+                    if (freeResponse.code === 0) {
+                        me.offerData=freeResponse.data;
+                        me.$message({
+                            message: "报价成功",
+                            type: "success"
+                        });
+                        me.addOfferDialogVisible=false;
+                    } else {
+                        me.$message({
+                            message: freeResponse.msg,
+                            type: "warning"
+                        });
+                    }
+                });
+            },
             async iniFreemarketWebsocket(){
                 await this.globalws.applyWsToken();
                 const wsToken = sessionStorage.getItem("wsToken");
@@ -244,6 +329,30 @@
                 this.freePlayerListData.forEach(function (item) {
                     item.timeLeft=me.secondsToTime(parseInt((item.expireTimeStamp-new Date().getTime())/1000));
                 });
+            },
+            removeOffer(item) {
+                const index = this.addOfferForm.addOfferData.indexOf(item);
+                this.addOfferForm.totalYear--;
+                this.addOfferForm.addOfferData.splice(index, 1)
+                this.calculateTotalSalary();
+                this.addYearBtnVisible=true;
+            },
+            addOff(){
+                if(++this.addOfferForm.totalYear==5){
+                    this.addYearBtnVisible=false;
+                }
+                this.addOfferForm.addOfferData.push({
+                    year: this.addOfferForm.totalYear,
+                    salary:0
+                });
+                this.calculateTotalSalary()
+            },
+            calculateTotalSalary(){
+                let total = 0;
+                this.addOfferForm.addOfferData.forEach(function(item){
+                    total+=item.salary;
+                });
+                this.addOfferForm.totalSalary=total;
             }
         }
     }

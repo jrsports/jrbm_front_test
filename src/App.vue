@@ -38,7 +38,7 @@
             //刷新所有页面时，判断球队是否已经登录，如果登录了，需要重新连接websocket
             if(sessionStorage.getItem("teamToken")){
                 //拿原来的token去刷新，换取新的token
-                await this.globalws.refreshTeamToken();
+                // await this.globalws.refreshTeamToken();
                 //重连
                 await this.globalws.connectToGlobalServer();
             }

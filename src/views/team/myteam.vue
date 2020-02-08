@@ -79,8 +79,8 @@
         mounted() {
             console.log("子组件mounted");
             this.teamName=sessionStorage.getItem("teamName");
-            this.globalws.mountedMethods=this.getTeamPlayerList;
-            // this.getTeamPlayerList();
+            // this.globalws.mountedMethods=this.getTeamPlayerList;
+            this.getTeamPlayerList();
         },
         computed: {
             starting: function () {
