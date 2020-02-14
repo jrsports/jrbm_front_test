@@ -3,14 +3,7 @@
 
     <el-container>
         <el-header>
-            <el-menu mode="horizontal" style="text-align: right">
-                <el-submenu index="1">
-                    <template slot="title">欢迎{{teamName}}</template>
-                    <el-menu-item index="2-1">我的账户</el-menu-item>
-                    <el-menu-item index="2-2">充值</el-menu-item>
-                    <el-menu-item index="2-3">设置</el-menu-item>
-                </el-submenu>
-            </el-menu>
+            <nav-bar></nav-bar>
         </el-header>
         <el-container>
             <el-aside width="200px">
@@ -67,12 +60,13 @@
 
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
+    import NavBar from "@/views/layout/header/header"
     // import Chat from "@/views/layout/chat/chat";
     var ifSubstitute=false;
     var substituteList=[];
     export default {
         name: "gameindex",
-        components: {Sidebar},
+        components: {Sidebar,NavBar},
         created(){
             console.log("子组件created");
         },

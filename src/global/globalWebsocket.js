@@ -1,6 +1,7 @@
 import Vue from 'vue'
 export default {
     ws: {},
+    drawerVisible: false,
     mountedMethods:function () {
         console.log("mountedMethods");
     },
@@ -46,10 +47,21 @@ export default {
         const me = Vue.prototype;
         this.ws.onmessage = function (msg) {
             const response = JSON.parse(msg.data);
-            me.$message({
-                message: response.message,
-                type: "success"
-            });
+            if(response.type==22){
+                const message=JSON.parse(response.message);
+                console.log(message.title);
+                console.log(message.content);
+                me.$notify.info({
+                    title: message.title,
+                    message: message.content
+                });
+            }else{
+                me.$message({
+                    message: response.message,
+                    type: "success"
+                });
+            }
+
         };
     },
     async refreshTeamToken() {
