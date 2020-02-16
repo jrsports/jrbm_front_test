@@ -24,6 +24,10 @@
                 <span slot="title" @click="getMatchPage">比赛</span>
             </el-menu-item>
             <el-menu-item index="5">
+                <i class="el-icon-menu"></i>
+                <span slot="title" @click="getSignPage">签约中心</span>
+            </el-menu-item>
+            <el-menu-item index="6">
                 <i class="el-icon-setting"></i>
                 <span slot="title" @click="getMyProfilePage">个人设置</span>
             </el-menu-item>
@@ -58,7 +62,10 @@
             },
             getFreeMarketPage(){
                 this.$router.push('/freemarket')
-            }
+            },
+            getSignPage(){
+                this.$router.push('/sign')
+            },
         }
     }
 </script>

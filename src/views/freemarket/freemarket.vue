@@ -33,6 +33,9 @@
                             <h4 style="text-align:right" :class="{'newColor':newPlayerColorDisplay}">当前自由球员人数：{{freePlayerCount}}</h4>
                         </el-col>
                     </el-row>
+                    <el-row>
+                        <el-button type="info" plain @click="signHistoryDialogVisible=true;getHistoryOfferList()">查看签约历史</el-button>
+                    </el-row>
                     <el-row :gutter="20">
                         <el-col :span="8" v-for="fp in freePlayerListData" :key="fp">
                             <div class="freePlayer">
@@ -101,6 +104,38 @@
                         </el-row>
 
                     </el-dialog>
+                    <el-dialog title="签约历史" :visible.sync="signHistoryDialogVisible">
+                        <el-table :data="signHistoryData">
+                            <el-table-column property="playerName" label="球员"></el-table-column>
+                            <el-table-column property="offerCount" label="报价人数"></el-table-column>
+                            <el-table-column property="intendedOfferCount" label="球员心仪报价"></el-table-column>
+                            <el-table-column property="expireTime" label="球员过期时间"></el-table-column>
+                            <el-table-column property="status" label="状态"></el-table-column>
+                            <el-table-column property="offerFlowId" label="流程ID" width="0"></el-table-column>
+                            <el-table-column label="签约流程">
+                                <template slot-scope="scope">
+                                    <el-button
+                                            size="mini"
+                                            @click="signFlowDialogVisible=true;viewSignFlow(scope.row)">查看</el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-dialog>
+                    <el-dialog title="签约流程" :visible.sync="signFlowDialogVisible">
+                        <el-steps :active="1" finish-status="success" align-center >
+                            <el-step title="签署流程发起" :description="offerFlow.flowStartTime"></el-step>
+                            <el-step title="签署中" :description="offerFlow.currentProgress"></el-step>
+                            <el-step title="签署完成" :description="offerFlow.flowFinishTime"></el-step>
+                        </el-steps>
+                        <el-table :data="signFlowData">
+                            <el-table-column type="index" label="意向排名"></el-table-column>
+                            <el-table-column property="teamName" label="候选球队"></el-table-column>
+                            <el-table-column property="sendTime" label="发送时间"></el-table-column>
+                            <el-table-column property="expireTime" label="过期时间"></el-table-column>
+                            <el-table-column property="signTime" label="（拒绝）签署时间"></el-table-column>
+                            <el-table-column property="status" label="签署状态"></el-table-column>
+                        </el-table>
+                    </el-dialog>
                 </el-main>
             </el-container>
         </el-container>
@@ -126,9 +161,16 @@
                 position:"PG",
                 offerDialogVisible:false,
                 addOfferDialogVisible:false,
+                signHistoryDialogVisible:false,
+                signFlowDialogVisible:false,
                 lastFpId:-1,
                 newPlayerColorDisplay:false,
                 addYearBtnVisible:true,
+                offerFlow:{
+                    flowStartTime:"2020/2/16 11:46",
+                    flowFinishTime:"2020/2/16 11:46",
+                    currentProgress:"等待 ccTeam 同意签约"
+                },
                 positionFilterOptions: [{
                     value: '1',
                     label: 'PG（控球后卫）'
@@ -153,6 +195,39 @@
                     //     offerTime:"2020/2/3 16:14:18",
                     //     intention:"97%"
                     // }
+                ],
+                signFlowData:[
+                    {
+                        teamName:"Koliday",
+                        sendTime:"2020/2/16 12:12",
+                        expireTime:"2020/2/16 14:12",
+                        signTime:"2020/2/16 13:27",
+                        status:"已拒绝"
+                    },
+                    {
+                        teamName:"ccTeam",
+                        sendTime:"2020/2/16 12:12",
+                        expireTime:"2020/2/16 14:12",
+                        signTime:"",
+                        status:"待签署"
+                    },
+                    {
+                        teamName:"kkTeam",
+                        sendTime:"",
+                        expireTime:"",
+                        signTime:"",
+                        status:"未发送"
+                    }
+                ],
+                signHistoryData:[
+                    {
+                        playerName:"朱-霍勒迪",
+                        offerCount:5,
+                        intendedOfferCount:3,
+                        expireTime:"2020/2/16 17:09",
+                        status:"签约中",
+                        offerFlowId:1
+                    }
                 ],
                 addOfferForm:{
                     fpId:-1,
@@ -244,6 +319,47 @@
                         me.offerData.forEach(function(item){
                             item.offer=item.contract.totalYear+"年"+item.contract.totalSalary+"万"
                         });
+                    } else {
+                        me.$message({
+                            message: freeResponse.msg,
+                            type: "warning"
+                        });
+                    }
+                });
+            },
+            getHistoryOfferList(){
+                const me = this;
+                this.axios.post("http://www.jrsports.com/api/freemarket/free/getHistory", {
+                    pageNo:1,
+                    pageSize:10
+                }, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const freeResponse = response.data;
+                    if (freeResponse.code === 0) {
+                        me.signHistoryData=freeResponse.data.recordList;
+                    } else {
+                        me.$message({
+                            message: freeResponse.msg,
+                            type: "warning"
+                        });
+                    }
+                });
+            },
+            viewSignFlow(row){
+                const me = this;
+                this.axios.post("http://www.jrsports.com/api/freemarket/offer/getSignFlow/"+row.offerFlowId, null, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const freeResponse = response.data;
+                    if (freeResponse.code === 0) {
+                        me.signFlowData=freeResponse.data.teamCandidateList;
                     } else {
                         me.$message({
                             message: freeResponse.msg,

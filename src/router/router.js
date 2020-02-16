@@ -44,8 +44,15 @@ export const constantRouterMap = [
         meta:{
             needLogin:true
         }
+    },
+    {
+        path: "/sign",
+        component: () => import('@/views/sign/sign'),
+        meta:{
+            needLogin:true
+        }
     }
-]
+];
 
 export default new Router({
     // mode: 'history', //后端支持可开
