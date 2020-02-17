@@ -53,7 +53,34 @@
                         <div slot="header">
                             <span>已签约</span>
                         </div>
-
+                        <el-table
+                                :data="signedData"
+                                style="width: 100%">
+                            <el-table-column
+                                    prop="signToken"
+                                    label="签约编号">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="playerChname"
+                                    label="球员">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="source"
+                                    label="签约来源">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="type"
+                                    label="签约类型">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="status"
+                                    label="签约状态">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="signTime"
+                                    label="签约时间">
+                            </el-table-column>
+                        </el-table>
                     </el-card>
                 </el-main>
             </el-container>
@@ -69,11 +96,13 @@
         name: "sign",
         data(){
             return{
-                unSignedData:[]
+                unSignedData:[],
+                signedData:[]
             }
         },
         mounted(){
           this.getUnsignedContractList();
+          this.getSignedContractList();
         },
         methods:{
             getUnsignedContractList() {
@@ -89,7 +118,51 @@
                 }).then(function (response) {
                     const res = response.data;
                     if (res.code === 0) {
-                       me.unSignedData=res.data.recordList;
+                        let sd=res.data.recordList;
+                        sd.forEach(function (item) {
+                            if(item.source==1){
+                                item.source="自由市场";
+                            }
+                            if(item.type==1){
+                                item.type="签约";
+                            }
+                        });
+                       me.unSignedData=sd;
+                    } else {
+                        alert(res.message);
+                    }
+                });
+            },
+            getSignedContractList() {
+                const me = this;
+                this.axios.post("http://www.jrsports.com/api/sign/sign/getSignedContractList", {
+                    pageNo:1,
+                    pageSize:10
+                }, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const res = response.data;
+                    if (res.code === 0) {
+                        let sd=res.data.recordList;
+                        sd.forEach(function (item) {
+                            if(item.source==1){
+                                item.source="自由市场";
+                            }
+                            if(item.type==1){
+                                item.type="签约";
+                            }
+                            if(item.status==2){
+                                item.status="签约成功";
+                            }else if(item.status==3){
+                                item.status="已过期";
+                            }else if(item.status==4){
+                                item.status="拒绝签约";
+                            }
+                        });
+                        me.signedData=sd;
                     } else {
                         alert(res.message);
                     }
@@ -109,6 +182,7 @@
                             message: "签约成功",
                             type: "success"
                         });
+                        me.getUnsignedContractList();
                     } else {
                         alert(res.message);
                     }
@@ -128,6 +202,7 @@
                             message: "拒绝成功",
                             type: "success"
                         });
+                        me.getUnsignedContractList();
                     } else {
                         alert(res.message);
                     }

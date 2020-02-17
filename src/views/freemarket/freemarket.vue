@@ -122,7 +122,7 @@
                         </el-table>
                     </el-dialog>
                     <el-dialog title="签约流程" :visible.sync="signFlowDialogVisible">
-                        <el-steps :active="1" finish-status="success" align-center >
+                        <el-steps :active="offerFlow.status" finish-status="success" align-center >
                             <el-step title="签署流程发起" :description="offerFlow.flowStartTime"></el-step>
                             <el-step title="签署中" :description="offerFlow.currentProgress"></el-step>
                             <el-step title="签署完成" :description="offerFlow.flowFinishTime"></el-step>
@@ -132,7 +132,7 @@
                             <el-table-column property="teamName" label="候选球队"></el-table-column>
                             <el-table-column property="sendTime" label="发送时间"></el-table-column>
                             <el-table-column property="expireTime" label="过期时间"></el-table-column>
-                            <el-table-column property="signTime" label="（拒绝）签署时间"></el-table-column>
+                            <el-table-column property="finishTime" label="（拒绝）签署时间"></el-table-column>
                             <el-table-column property="status" label="签署状态"></el-table-column>
                         </el-table>
                     </el-dialog>
@@ -167,6 +167,7 @@
                 newPlayerColorDisplay:false,
                 addYearBtnVisible:true,
                 offerFlow:{
+                    status:1,
                     flowStartTime:"2020/2/16 11:46",
                     flowFinishTime:"2020/2/16 11:46",
                     currentProgress:"等待 ccTeam 同意签约"
@@ -201,21 +202,21 @@
                         teamName:"Koliday",
                         sendTime:"2020/2/16 12:12",
                         expireTime:"2020/2/16 14:12",
-                        signTime:"2020/2/16 13:27",
+                        finishTime:"2020/2/16 13:27",
                         status:"已拒绝"
                     },
                     {
                         teamName:"ccTeam",
                         sendTime:"2020/2/16 12:12",
                         expireTime:"2020/2/16 14:12",
-                        signTime:"",
+                        finishTime:"",
                         status:"待签署"
                     },
                     {
                         teamName:"kkTeam",
                         sendTime:"",
                         expireTime:"",
-                        signTime:"",
+                        finishTime:"",
                         status:"未发送"
                     }
                 ],
@@ -340,7 +341,17 @@
                 }).then(function (response) {
                     const freeResponse = response.data;
                     if (freeResponse.code === 0) {
-                        me.signHistoryData=freeResponse.data.recordList;
+                        let d=freeResponse.data.recordList;
+                        d.forEach(function (item) {
+                            if(item.status==2){
+                                item.status="等待签约";
+                            }else if(item.status==3){
+                                item.status="已签约";
+                            }else if(item.status==4){
+                                item.status="消失";
+                            }
+                        });
+                        me.signHistoryData=d;
                     } else {
                         me.$message({
                             message: freeResponse.msg,
@@ -359,7 +370,31 @@
                 }).then(function (response) {
                     const freeResponse = response.data;
                     if (freeResponse.code === 0) {
-                        me.signFlowData=freeResponse.data.teamCandidateList;
+                        let candidate=freeResponse.data.teamCandidateList;
+                        candidate.forEach(function (item) {
+                            if(item.status==0){
+                                item.status="未发送";
+                            }else if(item.status==1){
+                                item.status="已发送";
+                            }else if(item.status==2){
+                                item.status="拒绝签约";
+                            }else if(item.status==3){
+                                item.status="签约成功";
+                            }else if(item.status==4){
+                                item.status="签约过期";
+                            }
+                        });
+                        me.signFlowData=candidate;
+                        const of=freeResponse.data.offerFlow;
+                        me.offerFlow.status=of.status;
+                        me.offerFlow.flowStartTime=of.flowStartTime;
+                        if(of.status==1){
+                            me.offerFlow.currentProgress="等待"+of.currentSignTeam+"确认签约";
+                        }else{
+                            me.offerFlow.currentProgress=of.currentSignTeam+"签约成功";
+                        }
+
+                        me.offerFlow.flowFinishTime=of.flowFinishTime;
                     } else {
                         me.$message({
                             message: freeResponse.msg,
