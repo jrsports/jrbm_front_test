@@ -19,15 +19,27 @@
                 <i class="el-icon-document"></i>
                 <span slot="title" @click="getFreeMarketPage">自由市场</span>
             </el-menu-item>
-            <el-menu-item index="4">
-                <i class="el-icon-document"></i>
-                <span slot="title" @click="getMatchPage">比赛</span>
-            </el-menu-item>
+            <el-submenu index="4">
+                <template slot="title">
+                    <i class="el-icon-location"></i>
+                    <span>比赛中心</span>
+                </template>
+                <el-menu-item index="4-1">赛季</el-menu-item>
+                <el-menu-item index="4-2" @click="getMatchPage">排位</el-menu-item>
+                <el-menu-item index="4-3">杯赛</el-menu-item>
+            </el-submenu>
             <el-menu-item index="5">
                 <i class="el-icon-menu"></i>
                 <span slot="title" @click="getSignPage">签约中心</span>
             </el-menu-item>
-            <el-menu-item index="6">
+            <el-submenu index="6">
+                <template slot="title">
+                    <i class="el-icon-location"></i>
+                    <span>球员中心</span>
+                </template>
+                <el-menu-item index="6-1" @click="getCurrentAbilityPage">能力市价</el-menu-item>
+            </el-submenu>
+            <el-menu-item index="7">
                 <i class="el-icon-setting"></i>
                 <span slot="title" @click="getMyProfilePage">个人设置</span>
             </el-menu-item>
@@ -66,6 +78,9 @@
             getSignPage(){
                 this.$router.push('/sign')
             },
+            getCurrentAbilityPage(){
+                this.$router.push('/currentplayer')
+            }
         }
     }
 </script>

@@ -17,8 +17,13 @@
                                 :data="unSignedData"
                                 style="width: 100%">
                             <el-table-column
+                                    prop="contractNo"
+                                    label="合同编号">
+                            </el-table-column>
+                            <el-table-column
                                     prop="signToken"
-                                    label="签约编号">
+                                    label="签约令牌"
+                                    v-if="colShow">
                             </el-table-column>
                             <el-table-column
                                     prop="playerChname"
@@ -57,8 +62,8 @@
                                 :data="signedData"
                                 style="width: 100%">
                             <el-table-column
-                                    prop="signToken"
-                                    label="签约编号">
+                                    prop="contractNo"
+                                    label="合同编号">
                             </el-table-column>
                             <el-table-column
                                     prop="playerChname"
@@ -80,8 +85,26 @@
                                     prop="signTime"
                                     label="签约时间">
                             </el-table-column>
+                            <el-table-column
+                                    prop="contract"
+                                    label="合同">
+                            </el-table-column>
+                            <el-table-column label="合同详情">
+                                <template slot-scope="scope">
+                                    <el-button
+                                            size="mini"
+                                            @click="viewContractDetail(scope.row);contractDetailDialogVisible=true">详情</el-button>
+                                </template>
+                            </el-table-column>
                         </el-table>
                     </el-card>
+
+                    <el-dialog title="合同详情" :visible.sync="contractDetailDialogVisible">
+                        <el-table :data="contractDetailData">
+                            <el-table-column property="year" label="赛季"></el-table-column>
+                            <el-table-column property="salary" label="薪资"></el-table-column>
+                        </el-table>
+                    </el-dialog>
                 </el-main>
             </el-container>
         </el-container>
@@ -90,14 +113,34 @@
 
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
-    import NavBar from "@/views/layout/header/header"
+    import NavBar from "@/views/layout/header/header";
     export default {
         components: {Sidebar,NavBar},
         name: "sign",
         data(){
             return{
                 unSignedData:[],
-                signedData:[]
+                signedData:[],
+                colShow:false,
+                contractDetailDialogVisible:false,
+                contractDetailData:[
+                    {
+                        year:"第一赛季",
+                        salary:"500万"
+                    },
+                    {
+                        year:"第二赛季",
+                        salary:"600万"
+                    },
+                    {
+                        year:"第三赛季",
+                        salary:"700万"
+                    },
+                    {
+                        year:"第四赛季",
+                        salary:"800万"
+                    },
+                ]
             }
         },
         mounted(){
@@ -161,6 +204,7 @@
                             }else if(item.status==4){
                                 item.status="拒绝签约";
                             }
+                            item.contract=item.contractDetail.totalYear+"年"+item.contractDetail.totalSalary+"万"
                         });
                         me.signedData=sd;
                     } else {
@@ -170,7 +214,10 @@
             },
             signContract(row) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/sign/sign/signContract/"+row.signToken, null, {
+                this.axios.post("http://www.jrsports.com/api/sign/sign/signContract", {
+                    contractNo:row.contractNo,
+                    signToken:row.signToken
+                }, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -183,6 +230,7 @@
                             type: "success"
                         });
                         me.getUnsignedContractList();
+                        me.getSignedContractList();
                     } else {
                         alert(res.message);
                     }
@@ -190,7 +238,10 @@
             },
             refuseContract(row) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/sign/sign/refuseContract/"+row.signToken, null, {
+                this.axios.post("http://www.jrsports.com/api/sign/sign/refuseContract", {
+                    contractNo:row.contractNo,
+                    signToken:row.signToken
+                }, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -203,6 +254,31 @@
                             type: "success"
                         });
                         me.getUnsignedContractList();
+                        me.getSignedContractList();
+                    } else {
+                        alert(res.message);
+                    }
+                });
+            },
+            viewContractDetail(row){
+                const me = this;
+                this.axios.post("http://www.jrsports.com/api/sign/sign/signContract", {
+                    contractNo:row.contractNo,
+                    signToken:row.signToken
+                }, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const res = response.data;
+                    if (res.code === 0) {
+                        me.$message({
+                            message: "签约成功",
+                            type: "success"
+                        });
+                        me.getUnsignedContractList();
+                        me.getSignedContractList();
                     } else {
                         alert(res.message);
                     }

@@ -318,7 +318,7 @@
                     if (freeResponse.code === 0) {
                         me.offerData=freeResponse.data;
                         me.offerData.forEach(function(item){
-                            item.offer=item.contract.totalYear+"年"+item.contract.totalSalary+"万"
+                            item.offer=item.contractDetail.totalYear+"年"+item.contractDetail.totalSalary+"万"
                         });
                     } else {
                         me.$message({
@@ -390,8 +390,10 @@
                         me.offerFlow.flowStartTime=of.flowStartTime;
                         if(of.status==1){
                             me.offerFlow.currentProgress="等待"+of.currentSignTeam+"确认签约";
-                        }else{
+                        }else if(of.status==2){
                             me.offerFlow.currentProgress=of.currentSignTeam+"签约成功";
+                        }else if(of.status==3){
+                            me.offerFlow.currentProgress="无人签约";
                         }
 
                         me.offerFlow.flowFinishTime=of.flowFinishTime;

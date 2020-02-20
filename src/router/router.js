@@ -51,6 +51,13 @@ export const constantRouterMap = [
         meta:{
             needLogin:true
         }
+    },
+    {
+        path: "/currentplayer",
+        component: () => import('@/views/playercenter/currentplayer'),
+        meta:{
+            needLogin:true
+        }
     }
 ];
 
