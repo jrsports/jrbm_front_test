@@ -172,7 +172,10 @@
                         });
                        me.unSignedData=sd;
                     } else {
-                        alert(res.message);
+                        me.$message({
+                            message: res.msg,
+                            type: "warning"
+                        });
                     }
                 });
             },
@@ -208,7 +211,10 @@
                         });
                         me.signedData=sd;
                     } else {
-                        alert(res.message);
+                        me.$message({
+                            message: res.msg,
+                            type: "warning"
+                        });
                     }
                 });
             },
@@ -232,7 +238,10 @@
                         me.getUnsignedContractList();
                         me.getSignedContractList();
                     } else {
-                        alert(res.message);
+                        me.$message({
+                            message: res.msg,
+                            type: "warning"
+                        });
                     }
                 });
             },
@@ -256,7 +265,10 @@
                         me.getUnsignedContractList();
                         me.getSignedContractList();
                     } else {
-                        alert(res.message);
+                        me.$message({
+                            message: res.msg,
+                            type: "warning"
+                        });
                     }
                 });
             },
@@ -280,7 +292,10 @@
                         me.getUnsignedContractList();
                         me.getSignedContractList();
                     } else {
-                        alert(res.message);
+                        me.$message({
+                            message: res.msg,
+                            type: "warning"
+                        });
                     }
                 });
             }
