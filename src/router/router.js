@@ -58,7 +58,15 @@ export const constantRouterMap = [
         meta:{
             needLogin:true
         }
+    },
+    {
+        path: "/myplayerdetail",
+        component: () => import('@/views/team/myplayerdetail'),
+        meta:{
+            needLogin:true
+        }
     }
+
 ];
 
 export default new Router({

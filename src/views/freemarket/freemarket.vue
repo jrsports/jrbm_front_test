@@ -99,7 +99,7 @@
                                 </el-form>
                             </el-col>
                             <el-col span="6">
-                                <h3>总计：{{addOfferForm.totalYear}}年{{addOfferForm.totalSalary}}万</h3>
+                                <h3>总计：{{addOfferForm.totalSeason}}年{{addOfferForm.totalSalary}}万</h3>
                             </el-col>
                         </el-row>
 
@@ -232,14 +232,14 @@
                 ],
                 addOfferForm:{
                     fpId:-1,
-                    totalYear:1,
+                    totalSeason:1,
                     totalSalary:0,
                     addOfferData:[
                         {
-                            year:1,
+                            season:1,
                             salary:0
                         }
-                        ],
+                    ],
                 },
                 freePlayerListData:[]
             }
@@ -318,7 +318,7 @@
                     if (freeResponse.code === 0) {
                         me.offerData=freeResponse.data;
                         me.offerData.forEach(function(item){
-                            item.offer=item.contractDetail.totalYear+"年"+item.contractDetail.totalSalary+"万"
+                            item.offer=item.offerContractDetail.totalSeason+"年"+item.offerContractDetail.totalSalary+"万"
                         });
                     } else {
                         me.$message({
@@ -409,7 +409,7 @@
                 const me = this;
                 this.axios.post("http://www.jrsports.com/api/freemarket/offer/addOffer", {
                     fpId:this.addOfferForm.fpId,
-                    contractPerYearList:this.addOfferForm.addOfferData
+                    offerContractSalaryList:this.addOfferForm.addOfferData
                 }, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
@@ -485,17 +485,17 @@
             },
             removeOffer(item) {
                 const index = this.addOfferForm.addOfferData.indexOf(item);
-                this.addOfferForm.totalYear--;
+                this.addOfferForm.totalSeason--;
                 this.addOfferForm.addOfferData.splice(index, 1)
                 this.calculateTotalSalary();
                 this.addYearBtnVisible=true;
             },
             addOff(){
-                if(++this.addOfferForm.totalYear==5){
+                if(++this.addOfferForm.totalSeason==5){
                     this.addYearBtnVisible=false;
                 }
                 this.addOfferForm.addOfferData.push({
-                    year: this.addOfferForm.totalYear,
+                    season: this.addOfferForm.totalSeason,
                     salary:0
                 });
                 this.calculateTotalSalary()

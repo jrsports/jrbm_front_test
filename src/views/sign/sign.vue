@@ -101,7 +101,7 @@
 
                     <el-dialog title="合同详情" :visible.sync="contractDetailDialogVisible">
                         <el-table :data="contractDetailData">
-                            <el-table-column property="year" label="赛季"></el-table-column>
+                            <el-table-column property="season" label="赛季"></el-table-column>
                             <el-table-column property="salary" label="薪资"></el-table-column>
                         </el-table>
                     </el-dialog>
@@ -125,19 +125,19 @@
                 contractDetailDialogVisible:false,
                 contractDetailData:[
                     {
-                        year:"第一赛季",
+                        season:"第一赛季",
                         salary:"500万"
                     },
                     {
-                        year:"第二赛季",
+                        season:"第二赛季",
                         salary:"600万"
                     },
                     {
-                        year:"第三赛季",
+                        season:"第三赛季",
                         salary:"700万"
                     },
                     {
-                        year:"第四赛季",
+                        season:"第四赛季",
                         salary:"800万"
                     },
                 ]
@@ -207,7 +207,7 @@
                             }else if(item.status==4){
                                 item.status="拒绝签约";
                             }
-                            item.contract=item.contractDetail.totalYear+"年"+item.contractDetail.totalSalary+"万"
+                            item.contract=item.contractDetail.totalSeason+"年"+item.contractDetail.totalSalary+"万"
                         });
                         me.signedData=sd;
                     } else {
@@ -273,31 +273,13 @@
                 });
             },
             viewContractDetail(row){
-                const me = this;
-                this.axios.post("http://www.jrsports.com/api/sign/sign/signContract", {
-                    contractNo:row.contractNo,
-                    signToken:row.signToken
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
+                const me=this;
+                const d=me.signedData;
+                d.forEach(function (item) {
+                    if(item.contractNo==row.contractNo){
+                        me.contractDetailData=item.contractDetail.contractSalaryList;
                     }
-                }).then(function (response) {
-                    const res = response.data;
-                    if (res.code === 0) {
-                        me.$message({
-                            message: "签约成功",
-                            type: "success"
-                        });
-                        me.getUnsignedContractList();
-                        me.getSignedContractList();
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
-                    }
-                });
+                })
             }
         }
     }

@@ -7,10 +7,14 @@
                 @open="handleOpen"
                 @close="handleClose"
                 style="height: 800px">
-            <el-menu-item index="1">
-                <i class="el-icon-basketball"></i>
-                <span slot="title" @click="getMyTeamPage">我的球队</span>
-            </el-menu-item>
+            <el-submenu index="1">
+                <template slot="title">
+                    <i class="el-icon-location"></i>
+                    <span>我的球队</span>
+                </template>
+                <el-menu-item index="1-1" @click="getMyTeamPage">我的阵容</el-menu-item>
+                <el-menu-item index="1-2" @click="getMyPlayerDetailPage">球员数据</el-menu-item>
+            </el-submenu>
             <el-menu-item index="2">
                 <i class="el-icon-menu"></i>
                 <span slot="title" @click="getDraftPage">选秀大会</span>
@@ -80,6 +84,9 @@
             },
             getCurrentAbilityPage(){
                 this.$router.push('/currentplayer')
+            },
+            getMyPlayerDetailPage(){
+                this.$router.push('/myplayerdetail')
             }
         }
     }

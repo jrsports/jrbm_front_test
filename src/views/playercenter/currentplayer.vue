@@ -37,7 +37,7 @@
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header";
     export default {
-        name: "currentability",
+        name: "currentplayer",
         components: {Sidebar,NavBar},
         data(){
             return{
