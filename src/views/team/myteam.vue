@@ -19,11 +19,21 @@
                         </el-col>
                         <el-col :span="4" style="text-align: center" v-for="player in starting" :key="player">
                             <div class="block" @click="selectPlayer($event,player.upId)">
-                                <el-avatar shape="square" :size="100" :src="player.avatarUrl"></el-avatar>
+                                <el-popover
+                                        placement="top-start"
+                                        :title="player.chname"
+                                        width="200"
+                                        trigger="hover">
+                                    <p>攻：{{player.offensive}}，防：{{player.defensive}}</p>
+                                    <p>位置：{{player.position}}，工资：{{player.salary}}w</p>
+                                    <el-button type="primary" icon="el-icon-edit" circle
+                                               @click="getUserPlayerDetail(player.upId);userPlayerDetailDialogVisible=true"></el-button>
+                                    <el-avatar slot=reference shape="square" :size="100"
+                                               :src="player.avatarUrl"></el-avatar>
+                                </el-popover>
                                 <p>{{player.chname}}</p>
                                 <p>{{player.enname}}</p>
-                                <p>攻：{{player.offensive}}，防：{{player.defensive}}</p>
-                                <p>位置：{{player.position}}，工资：{{player.salary}}w</p>
+
                             </div>
                         </el-col>
                         <el-col :span="2">
@@ -52,6 +62,70 @@
                         </el-col>
                     </el-row>
 
+                    <el-dialog :title="球员详情" :visible.sync="userPlayerDetailDialogVisible">
+                        <el-row>
+                            <el-col span="6">
+                                <el-avatar shape="square" :size="100" :src="playerDetail.avatarUrl"></el-avatar>
+                            </el-col>
+                            <el-col span="6">
+                                <h3>{{playerDetail.chname}}</h3>
+                                <h5>{{playerDetail.enname}}</h5>
+                            </el-col>
+                            <el-col span="6">
+                                <h1>总评：{{playerDetail.overall}}</h1>
+                            </el-col>
+                            <el-col span="6">
+                                <h1>等级：{{playerDetail.grade}}</h1>
+                            </el-col>
+                            <el-card style="width: 100%">
+                                <div slot="header">
+                                    <span>能力值</span>
+                                    <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
+                                </div>
+                                <el-row>
+                                    <el-col span="4">突破：{{playerDetail.ability.breakthrough}}</el-col>
+                                    <el-col span="4">中距离：{{playerDetail.ability.midrange}}</el-col>
+                                    <el-col span="4">内线：{{playerDetail.ability.inside}}</el-col>
+                                    <el-col span="4">三分：{{playerDetail.ability.three}}</el-col>
+                                    <el-col span="4">罚球：{{playerDetail.ability.freethrow}}</el-col>
+                                    <el-col span="4">造犯规：{{playerDetail.ability.causefoul}}</el-col>
+                                </el-row>
+                                <el-row style="margin-top: 15px">
+                                    <el-col span="4">传球稳定：{{playerDetail.ability.passStability}}</el-col>
+                                    <el-col span="4">传球精确：{{playerDetail.ability.passAccuracy}}</el-col>
+                                    <el-col span="4">视野：{{playerDetail.ability.passVision}}</el-col>
+                                    <el-col span="4">抢断：{{playerDetail.ability.steal}}</el-col>
+                                    <el-col span="4">篮板：{{playerDetail.ability.rebound}}</el-col>
+                                    <el-col span="4">逼抢：{{playerDetail.ability.forcing}}</el-col>
+                                </el-row>
+                                <el-row style="margin-top: 15px">
+                                    <el-col span="4">防盖帽：{{playerDetail.ability.blocking}}</el-col>
+                                    <el-col span="4">防突破：{{playerDetail.ability.antiBreakthrough}}</el-col>
+                                    <el-col span="4">防中距离：{{playerDetail.ability.antiMidrange}}</el-col>
+                                    <el-col span="4">防三分：{{playerDetail.ability.antiThree}}</el-col>
+                                    <el-col span="4">防内线：{{playerDetail.ability.antiInside}}</el-col>
+                                    <el-col span="4">干净度：{{playerDetail.ability.clean}}</el-col>
+                                </el-row>
+                                <el-row style="margin-top: 15px">
+                                    <el-col span="4">运球：{{playerDetail.ability.dribble}}</el-col>
+                                    <el-col span="4">受助攻：{{playerDetail.ability.beAssisted}}</el-col>
+                                    <el-col span="4">投篮倾向：{{playerDetail.ability.shootIncline}}</el-col>
+                                    <el-col span="4">突破倾向：{{playerDetail.ability.breakthroughIncline}}</el-col>
+                                    <el-col span="4">中投倾向：{{playerDetail.ability.midrangeIncline}}</el-col>
+                                    <el-col span="4">三分倾向：{{playerDetail.ability.threeIncline}}</el-col>
+                                </el-row>
+                                <el-row style="margin-top: 15px">
+                                    <el-col span="4">内线倾向：{{playerDetail.ability.insideIncline}}</el-col>
+                                    <el-col span="4">传球倾向：{{playerDetail.ability.passIncline}}</el-col>
+                                    <el-col span="4">进攻综合：{{playerDetail.ability.offensiveOverall}}</el-col>
+                                    <el-col span="4">防守综合：{{playerDetail.ability.defensiveOverall}}</el-col>
+                                    <el-col span="4">球权：{{playerDetail.ability.ballWeight}}</el-col>
+                                    <el-col span="4"></el-col>
+                                </el-row>
+                            </el-card>
+
+                        </el-row>
+                    </el-dialog>
                 </el-main>
             </el-container>
         </el-container>
@@ -62,17 +136,17 @@
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header"
     // import Chat from "@/views/layout/chat/chat";
-    var ifSubstitute=false;
-    var substituteList=[];
+    var ifSubstitute = false;
+    var substituteList = [];
     export default {
         name: "gameindex",
-        components: {Sidebar,NavBar},
-        created(){
+        components: {Sidebar, NavBar},
+        created() {
             console.log("子组件created");
         },
         mounted() {
             console.log("子组件mounted");
-            this.teamName=sessionStorage.getItem("teamName");
+            this.teamName = sessionStorage.getItem("teamName");
             // this.globalws.mountedMethods=this.getTeamPlayerList;
             this.getTeamPlayerList();
         },
@@ -101,13 +175,19 @@
                     salary: 4800,
                     order: 1
                 }],
-                subs:"开启换人"
+                subs: "开启换人",
+                userPlayerDetailDialogVisible: false,
+                playerDetail: {
+                    avatarUrl: "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png",
+                    chname: "",
+                    ability: {}
+                }
             }
         },
         methods: {
 
 
-            getTeamPlayerList:function() {
+            getTeamPlayerList: function () {
                 console.log("执行getTeam");
                 const me = this;
                 //获取服务器列表和球队
@@ -121,32 +201,32 @@
                     me.playerList = serverResponse.data;
                 });
             },
-            selectPlayer(event,upId){
-                if(ifSubstitute){
+            selectPlayer(event, upId) {
+                if (ifSubstitute) {
                     substituteList.push(upId);
-                    if(substituteList.length==2){
-                        this.substitute(substituteList[0],substituteList[1]);
-                        console.log("换人："+substituteList[0]+"换"+substituteList[1]);
-                        substituteList=[];
+                    if (substituteList.length == 2) {
+                        this.substitute(substituteList[0], substituteList[1]);
+                        console.log("换人：" + substituteList[0] + "换" + substituteList[1]);
+                        substituteList = [];
 
                     }
                 }
             },
-            openSubstitute(){
-                if(!ifSubstitute){
-                    ifSubstitute=true;
-                    this.subs="关闭换人";
-                }else{
-                    ifSubstitute=false;
-                    this.subs="开启换人";
+            openSubstitute() {
+                if (!ifSubstitute) {
+                    ifSubstitute = true;
+                    this.subs = "关闭换人";
+                } else {
+                    ifSubstitute = false;
+                    this.subs = "开启换人";
                 }
             },
-            substitute(fromUpId,toUpId){
+            substitute(fromUpId, toUpId) {
                 const me = this;
                 //获取服务器列表和球队
                 this.axios.post("http://www.jrsports.com/api/user/team/substitutePlayer", {
-                    fromUpId:fromUpId,
-                    toUpId:toUpId
+                    fromUpId: fromUpId,
+                    toUpId: toUpId
                 }, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
@@ -154,18 +234,99 @@
                     }
                 }).then(function (response) {
                     const serverResponse = response.data;
-                    if(serverResponse.code==0){
+                    if (serverResponse.code == 0) {
                         me.$message({
-                            message:"换人成功",
-                            type:"success"
+                            message: "换人成功",
+                            type: "success"
                         });
                         me.playerList = serverResponse.data;
-                    }else{
+                    } else {
                         alert(serverResponse.msg);
                     }
 
                 });
             },
+            getUserPlayerDetail(upId) {
+                const me = this;
+                this.axios.post("http://www.jrsports.com/api/player/userPlayer/getUserPlayerDetail/" + upId, null, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const res = response.data;
+                    if (res.code === 0) {
+                        let item = res.data;
+                        if (item.order == 1) {
+                            item.order = "首发PG"
+                        } else if (item.order == 2) {
+                            item.order = "首发SG"
+                        } else if (item.order == 3) {
+                            item.order = "首发SF"
+                        } else if (item.order == 4) {
+                            item.order = "首发PF"
+                        } else if (item.order == 5) {
+                            item.order = "首发C"
+                        }
+                        if (item.position == 1) {
+                            item.position = "PG"
+                        } else if (item.position == 2) {
+                            item.position = "SG"
+                        } else if (item.position == 3) {
+                            item.position = "SF"
+                        } else if (item.position == 4) {
+                            item.position = "PF"
+                        } else if (item.position == 5) {
+                            item.position = "C"
+                        }
+
+                        if (item.grade == 1) {
+                            item.grade = "S+"
+                        } else if (item.grade == 2) {
+                            item.grade = "S"
+                        } else if (item.grade == 3) {
+                            item.grade = "S-"
+                        } else if (item.grade == 4) {
+                            item.grade = "A+"
+                        } else if (item.grade == 5) {
+                            item.grade = "A"
+                        } else if (item.grade == 6) {
+                            item.grade = "A-"
+                        } else if (item.grade == 7) {
+                            item.grade = "B+"
+                        } else if (item.grade == 8) {
+                            item.grade = "B"
+                        } else if (item.grade == 9) {
+                            item.grade = "B-"
+                        } else if (item.grade == 10) {
+                            item.grade = "C+"
+                        } else if (item.grade == 11) {
+                            item.grade = "C"
+                        } else if (item.grade == 12) {
+                            item.grade = "C-"
+                        } else if (item.grade == 13) {
+                            item.grade = "D+"
+                        } else if (item.grade == 14) {
+                            item.grade = "D"
+                        } else if (item.grade == 15) {
+                            item.grade = "D-"
+                        }
+
+
+                        if (item.type == 0) {
+                            item.type = "现役";
+                        } else {
+                            item.type = "历史";
+                        }
+
+
+                        me.playerDetail = item;
+                    } else {
+                        alert(res.message);
+                    }
+                });
+
+            }
         }
     }
 </script>

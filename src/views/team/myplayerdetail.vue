@@ -12,6 +12,7 @@
                     <el-row>
                         <el-col :span="12">
                             <span>本赛季工资：{{totalSalary}}万/{{totalSalaryLimit}}万</span>
+                            <span>下赛季工资：{{nextTotalSalary}}万/{{nextTotalSalaryLimit}}万</span>
                         </el-col>
                     </el-row>
                     <el-table :data="myPlayerDetailData">
@@ -27,6 +28,7 @@
                         <el-table-column property="grade" label="等级"></el-table-column>
                         <el-table-column property="type" label="类型"></el-table-column>
                         <el-table-column property="currentSeasonSalary" label="本赛季工资"></el-table-column>
+                        <el-table-column property="nextSeasonSalary" label="下赛季工资"></el-table-column>
                     </el-table>
 <!--                    <el-pagination-->
 <!--                            background-->
@@ -60,7 +62,9 @@
                     pageSize:10
                 },
                 totalSalary:0,
-                totalSalaryLimit:7800
+                totalSalaryLimit:7800,
+                nextTotalSalary:0,
+                nextTotalSalaryLimit:7900
             }
         },
         mounted(){
@@ -83,6 +87,7 @@
                     const res = response.data;
                     if (res.code === 0) {
                         let rec=res.data;
+                        let nextTotalSalary=0;
                         rec.forEach(function (item) {
                             if(item.order==1){
                                 item.order="首发PG"
@@ -147,8 +152,11 @@
                                 item.type="历史";
                             }
 
+                            nextTotalSalary+=item.nextSeasonSalary;
+
                         });
                         me.myPlayerDetailData=rec;
+                        me.nextTotalSalary=nextTotalSalary;
                         // me.currentPlayerData.totalRecordCount=res.data.totalRecordCount;
                         // me.currentPlayerData.totalPageCount=res.data.totalPageCount;
                         // me.currentPlayerData.pageNo=res.data.pageNo;
