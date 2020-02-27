@@ -17,7 +17,7 @@
             <el-container>
                 <el-main>
                     <el-row>
-                        <el-col :span="20">
+                        <el-col :span="18">
                             <div>
                                 <el-select v-model="positionFilterData" multiple placeholder="位置筛选">
                                     <el-option
@@ -32,13 +32,16 @@
                         <el-col :span="4">
                             <h4 style="text-align:right" :class="{'newColor':newPlayerColorDisplay}">当前自由球员人数：{{freePlayerCount}}</h4>
                         </el-col>
+                        <el-col span="2">
+                            <el-button type="primary" icon="el-icon-refresh" circle @click="refreshFreePlayer(-1,9,false)"></el-button>
+                        </el-col>
                     </el-row>
                     <el-row>
-                        <el-button type="info" plain @click="signHistoryDialogVisible=true;getHistoryOfferList()">查看签约历史</el-button>
+                        <el-button type="info" plain @click="signHistoryDialogVisible=true;getHistoryOfferList()">签约记录</el-button>
                     </el-row>
-                    <el-row :gutter="20">
+                    <el-row :gutter="20" style="margin-top: 10px">
                         <el-col :span="8" v-for="fp in freePlayerListData" :key="fp">
-                            <div class="freePlayer">
+                            <div class="freePlayer" style="margin-top: 10px">
                                 <el-row>
                                     <el-col :span="8">
                                         <div class="block"><el-avatar class="playerAvatar" shape="square"  :src="squareUrl"></el-avatar></div>
@@ -53,7 +56,7 @@
                                 </el-row>
                                 <el-row :gutter="10">
                                     <el-col :span="12" style="text-align: center">
-                                        <el-button plain type="info">球员详情</el-button>
+                                        <el-button plain type="info" @click="viewPlayerDetail(fp.fpId);userPlayerDetailDialogVisible=true">球员详情</el-button>
                                     </el-col>
                                     <el-col :span="12" style="text-align: center">
                                         <el-button plain type="success" @click="addOfferDialogVisible=true;addOfferForm.fpId=fp.fpId">谈判报价</el-button>
@@ -71,6 +74,7 @@
                             </div>
                         </el-col>
                     </el-row>
+                    <el-button icon="el-icon-caret-bottom" v-if="freePlayerCount>9" @click="refreshFreePlayer(lastFpId,3,true)" style="width:100%"></el-button>
 
                     <el-dialog title="报价列表" :visible.sync="offerDialogVisible">
                         <el-table :data="offerData">
@@ -105,7 +109,7 @@
 
                     </el-dialog>
                     <el-dialog title="签约历史" :visible.sync="signHistoryDialogVisible">
-                        <el-table :data="signHistoryData">
+                        <el-table :data="signHistoryData" v-loading="loading">
                             <el-table-column property="playerName" label="球员"></el-table-column>
                             <el-table-column property="offerCount" label="报价人数"></el-table-column>
                             <el-table-column property="intendedOfferCount" label="球员心仪报价"></el-table-column>
@@ -115,6 +119,7 @@
                             <el-table-column label="签约流程">
                                 <template slot-scope="scope">
                                     <el-button
+                                            v-if="scope.row.offerFlowId!=null"
                                             size="mini"
                                             @click="signFlowDialogVisible=true;viewSignFlow(scope.row)">查看</el-button>
                                 </template>
@@ -135,6 +140,70 @@
                             <el-table-column property="finishTime" label="（拒绝）签署时间"></el-table-column>
                             <el-table-column property="status" label="签署状态"></el-table-column>
                         </el-table>
+                    </el-dialog>
+                    <el-dialog :title="球员详情" :visible.sync="userPlayerDetailDialogVisible">
+                        <el-row>
+                            <el-col span="6">
+                                <el-avatar shape="square" :size="100" :src="playerDetail.avatarUrl"></el-avatar>
+                            </el-col>
+                            <el-col span="6">
+                                <h3>{{playerDetail.chname}}</h3>
+                                <h5>{{playerDetail.enname}}</h5>
+                            </el-col>
+                            <el-col span="6">
+                                <h1>总评：{{playerDetail.overall}}</h1>
+                            </el-col>
+                            <el-col span="6">
+                                <h1>等级：{{playerDetail.grade}}</h1>
+                            </el-col>
+                            <el-card style="width: 100%">
+                                <div slot="header">
+                                    <span>能力值</span>
+                                    <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
+                                </div>
+                                <el-row>
+                                    <el-col span="4">突破：{{playerDetail.ability.breakthrough}}</el-col>
+                                    <el-col span="4">中距离：{{playerDetail.ability.midrange}}</el-col>
+                                    <el-col span="4">内线：{{playerDetail.ability.inside}}</el-col>
+                                    <el-col span="4">三分：{{playerDetail.ability.three}}</el-col>
+                                    <el-col span="4">罚球：{{playerDetail.ability.freethrow}}</el-col>
+                                    <el-col span="4">造犯规：{{playerDetail.ability.causefoul}}</el-col>
+                                </el-row>
+                                <el-row style="margin-top: 15px">
+                                    <el-col span="4">传球稳定：{{playerDetail.ability.passStability}}</el-col>
+                                    <el-col span="4">传球精确：{{playerDetail.ability.passAccuracy}}</el-col>
+                                    <el-col span="4">视野：{{playerDetail.ability.passVision}}</el-col>
+                                    <el-col span="4">抢断：{{playerDetail.ability.steal}}</el-col>
+                                    <el-col span="4">篮板：{{playerDetail.ability.rebound}}</el-col>
+                                    <el-col span="4">逼抢：{{playerDetail.ability.forcing}}</el-col>
+                                </el-row>
+                                <el-row style="margin-top: 15px">
+                                    <el-col span="4">防盖帽：{{playerDetail.ability.blocking}}</el-col>
+                                    <el-col span="4">防突破：{{playerDetail.ability.antiBreakthrough}}</el-col>
+                                    <el-col span="4">防中距离：{{playerDetail.ability.antiMidrange}}</el-col>
+                                    <el-col span="4">防三分：{{playerDetail.ability.antiThree}}</el-col>
+                                    <el-col span="4">防内线：{{playerDetail.ability.antiInside}}</el-col>
+                                    <el-col span="4">干净度：{{playerDetail.ability.clean}}</el-col>
+                                </el-row>
+                                <el-row style="margin-top: 15px">
+                                    <el-col span="4">运球：{{playerDetail.ability.dribble}}</el-col>
+                                    <el-col span="4">受助攻：{{playerDetail.ability.beAssisted}}</el-col>
+                                    <el-col span="4">投篮倾向：{{playerDetail.ability.shootIncline}}</el-col>
+                                    <el-col span="4">突破倾向：{{playerDetail.ability.breakthroughIncline}}</el-col>
+                                    <el-col span="4">中投倾向：{{playerDetail.ability.midrangeIncline}}</el-col>
+                                    <el-col span="4">三分倾向：{{playerDetail.ability.threeIncline}}</el-col>
+                                </el-row>
+                                <el-row style="margin-top: 15px">
+                                    <el-col span="4">内线倾向：{{playerDetail.ability.insideIncline}}</el-col>
+                                    <el-col span="4">传球倾向：{{playerDetail.ability.passIncline}}</el-col>
+                                    <el-col span="4">进攻综合：{{playerDetail.ability.offensiveOverall}}</el-col>
+                                    <el-col span="4">防守综合：{{playerDetail.ability.defensiveOverall}}</el-col>
+                                    <el-col span="4">球权：{{playerDetail.ability.ballWeight}}</el-col>
+                                    <el-col span="4"></el-col>
+                                </el-row>
+                            </el-card>
+
+                        </el-row>
                     </el-dialog>
                 </el-main>
             </el-container>
@@ -163,7 +232,9 @@
                 addOfferDialogVisible:false,
                 signHistoryDialogVisible:false,
                 signFlowDialogVisible:false,
+                userPlayerDetailDialogVisible:false,
                 lastFpId:-1,
+                loading:true,
                 newPlayerColorDisplay:false,
                 addYearBtnVisible:true,
                 offerFlow:{
@@ -171,6 +242,11 @@
                     flowStartTime:"2020/2/16 11:46",
                     flowFinishTime:"2020/2/16 11:46",
                     currentProgress:"等待 ccTeam 同意签约"
+                },
+                playerDetail:{
+                    ability:{
+
+                    }
                 },
                 positionFilterOptions: [{
                     value: '1',
@@ -190,12 +266,7 @@
                 }],
                 positionFilterData:[],
                 offerData:[
-                    // {
-                    //     teamName:"koliday",
-                    //     offer:"3年2500万",
-                    //     offerTime:"2020/2/3 16:14:18",
-                    //     intention:"97%"
-                    // }
+
                 ],
                 signFlowData:[
                     {
@@ -221,14 +292,6 @@
                     }
                 ],
                 signHistoryData:[
-                    {
-                        playerName:"朱-霍勒迪",
-                        offerCount:5,
-                        intendedOfferCount:3,
-                        expireTime:"2020/2/16 17:09",
-                        status:"签约中",
-                        offerFlowId:1
-                    }
                 ],
                 addOfferForm:{
                     fpId:-1,
@@ -247,16 +310,16 @@
         },
         mounted(){
             this.teamName=sessionStorage.getItem("teamName");
-            this.refreshFreePlayer();
+            this.refreshFreePlayer(-1,9,false);
             this.iniFreemarketWebsocket();
             setInterval(this.startTimer,1000);
         },
         methods:{
-            getMoreFreePlayer(){
+            refreshFreePlayer(fpIdOffset,count,more){
                 const me = this;
                 this.axios.post("http://www.jrsports.com/api/freemarket/free/getFreePlayerList", {
-                    fpIdOffset:this.lastFpId,
-                    count:9
+                    fpIdOffset:fpIdOffset,
+                    count:count
                 }, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
@@ -265,38 +328,15 @@
                 }).then(function (response) {
                     const freeResponse = response.data;
                     if (freeResponse.code === 0) {
-                        const newFreePlayerList=freeResponse.data;
-                        newFreePlayerList.forEach(function (item) {
-                            item.timeLeft=me.secondsToTime((item.expireTimeStamp-new Date().getTime())/1000)
-                            me.freePlayerListData.push(item)
-                        });
-                    } else {
-                        me.$message({
-                            message: freeResponse.msg,
-                            type: "warning"
-                        });
-                    }
-                });
-            },
-            refreshFreePlayer(){
-                const me = this;
-                this.axios.post("http://www.jrsports.com/api/freemarket/free/getFreePlayerList", {
-                    fpIdOffset:this.lastFpId,
-                    count:9
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const freeResponse = response.data;
-                    if (freeResponse.code === 0) {
-                        const newFreePlayerList=freeResponse.data;
-                        me.freePlayerCount=newFreePlayerList.length;
-                        me.freePlayerListData=[];
+                        const newFreePlayerList=freeResponse.data.freePlayerList;
+                        me.freePlayerCount=freeResponse.data.count;
+                        if(more==false){
+                            me.freePlayerListData=[];
+                        }
                         newFreePlayerList.forEach(function (item) {
                             item.timeLeft=me.secondsToTime(parseInt((item.expireTimeStamp-new Date().getTime())/1000));
                             me.freePlayerListData.push(item)
+                            me.lastFpId=item.fpId;
                         });
                     } else {
                         me.$message({
@@ -352,6 +392,7 @@
                             }
                         });
                         me.signHistoryData=d;
+                        me.loading=false;
                     } else {
                         me.$message({
                             message: freeResponse.msg,
@@ -402,6 +443,50 @@
                             message: freeResponse.msg,
                             type: "warning"
                         });
+                    }
+                });
+            },
+            viewPlayerDetail(fpId){
+                const me=this;
+                me.freePlayerListData.forEach(function (item) {
+                    if(item.fpId==fpId){
+                        me.playerDetail.ability=item.player;
+                        me.playerDetail.chname=item.player.chname;
+                        me.playerDetail.enname=item.player.enname;
+                        if(item.player.grade==1){
+                            item.player.grade="S+"
+                        }else if(item.player.grade==2){
+                            item.player.grade="S"
+                        }else if(item.player.grade==3){
+                            item.player.grade="S-"
+                        }else if(item.player.grade==4){
+                            item.player.grade="A+"
+                        }else if(item.player.grade==5){
+                            item.player.grade="A"
+                        }else if(item.player.grade==6){
+                            item.player.grade="A-"
+                        }else if(item.player.grade==7){
+                            item.player.grade="B+"
+                        }else if(item.player.grade==8){
+                            item.player.grade="B"
+                        }else if(item.player.grade==9){
+                            item.player.grade="B-"
+                        }else if(item.player.grade==10){
+                            item.player.grade="C+"
+                        }else if(item.player.grade==11){
+                            item.player.grade="C"
+                        }else if(item.player.grade==12){
+                            item.player.grade="C-"
+                        }else if(item.player.grade==13){
+                            item.player.grade="D+"
+                        }else if(item.player.grade==14){
+                            item.player.grade="D"
+                        }else if(item.player.grade==15){
+                            item.player.grade="D-"
+                        }
+                        
+                        me.playerDetail.grade=item.player.grade;
+                        me.playerDetail.overall=item.player.overall;
                     }
                 });
             },
@@ -461,6 +546,8 @@
                         message: '有新的球员流入自由市场',
                         type: 'success'
                     });
+                }else if(response.type==3){
+                    this.freePlayerCount=response.freePlayerCount;
                 }
 
             },

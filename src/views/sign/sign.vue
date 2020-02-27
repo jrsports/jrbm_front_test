@@ -59,6 +59,7 @@
                             <span>已签约</span>
                         </div>
                         <el-table
+                                v-loading="loading"
                                 :data="signedData"
                                 style="width: 100%">
                             <el-table-column
@@ -140,7 +141,8 @@
                         season:"第四赛季",
                         salary:"800万"
                     },
-                ]
+                ],
+                loading:true
             }
         },
         mounted(){
@@ -210,6 +212,7 @@
                             item.contract=item.contractDetail.totalSeason+"年"+item.contractDetail.totalSalary+"万"
                         });
                         me.signedData=sd;
+                        me.loading=false;
                     } else {
                         me.$message({
                             message: res.msg,

@@ -15,7 +15,7 @@
                             <span>下赛季工资：{{nextTotalSalary}}万/{{nextTotalSalaryLimit}}万</span>
                         </el-col>
                     </el-row>
-                    <el-table :data="myPlayerDetailData">
+                    <el-table :data="myPlayerDetailData" v-loading="loading">
 
                         <el-table-column property="order" label="位置"></el-table-column>
                         <el-table-column property="position" label="擅长"></el-table-column>
@@ -64,7 +64,8 @@
                 totalSalary:0,
                 totalSalaryLimit:7800,
                 nextTotalSalary:0,
-                nextTotalSalaryLimit:7900
+                nextTotalSalaryLimit:7900,
+                loading:true
             }
         },
         mounted(){
@@ -153,7 +154,7 @@
                             }
 
                             nextTotalSalary+=item.nextSeasonSalary;
-
+                            me.loading=false;
                         });
                         me.myPlayerDetailData=rec;
                         me.nextTotalSalary=nextTotalSalary;
