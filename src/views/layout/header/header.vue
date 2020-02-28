@@ -4,6 +4,14 @@
     <div>
         <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect">
             <el-menu-item index="1" @click="drawerVisible=true;getNotice()">通知中心</el-menu-item>
+            <el-submenu index="2" style="float:right">
+                <template slot="title">{{teamName}}</template>
+                <el-menu-item index="3-1" @click="chatVisible=true;getFriendList()">好友</el-menu-item>
+                <el-menu-item index="3-2">选项2</el-menu-item>
+                <el-menu-item index="3-3">退出球队</el-menu-item>
+            </el-submenu>
+            <el-menu-item index="3" style="float:right">{{currentSeason}}</el-menu-item>
+            <el-menu-item index="4" style="float:right">资金：{{jrFund}}JR币：{{jrCoin}}</el-menu-item>
         </el-menu>
         <el-drawer
                 title="我是标题"
@@ -23,8 +31,43 @@
                     </el-collapse-item>
                 </el-collapse>
             </div>
-
         </el-drawer>
+
+        <el-drawer
+                title="我是标题"
+                :visible.sync="chatVisible"
+                :with-header="false">
+            <div style="margin: 20px">
+                <h3>好友列表</h3>
+<!--                <el-divider content-position="center">在线好友</el-divider>-->
+                <div>
+                    <el-row type="flex" align="middle" v-for="friend in friendList" :key="friend">
+                        <el-col :span="6">
+                            <a @click="chatDialogVisible=true;openChat()" style="cursor: pointer">
+                                <el-avatar :size="80" shape="square"
+                                            src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png">
+                                </el-avatar>
+                            </a>
+
+                        </el-col>
+                        <el-col :span="14">
+                            <el-row>
+                                <h3>{{friend.friendTeamName}}</h3>
+                            </el-row>
+                            <el-row>
+                                <span>霍勒迪1500w卖不卖？</span>
+                            </el-row>
+                        </el-col>
+                        <el-col :span="4">
+                            <el-button>详情</el-button>
+                        </el-col>
+                    </el-row>
+
+                </div>
+<!--                <el-divider content-position="center">离线好友</el-divider>-->
+            </div>
+        </el-drawer>
+        <el-dialog :title="Koliday" :visible.sync="chatDialogVisible"></el-dialog>
     </div>
 
 </template>
@@ -46,8 +89,19 @@
                         read:0,
                         notifyTime:"今天22:02"
                     }
-                ]
+                ],
+                friendList:[],
+                currentSeason:"休赛期",
+                teamName:"",
+                jrFund:"$22,456,152,000  ",
+                jrCoin:152,
+                chatVisible:false,
+                count:5,
+                chatDialogVisible:false
             };
+        },
+        mounted(){
+            this.teamName=sessionStorage.getItem("teamName")
         },
         methods: {
             readNotice(noteId){
@@ -90,11 +144,39 @@
                         alert(res.msg);
                     }
                 });
+            },
+            exitTeam(){
+                sessionStorage.removeItem("teamToken");
+                sessionStorage.removeItem("teamName");
+                this.$router.push('/');
+            },
+            openChat(){
+
+            },
+            getFriendList(){
+                const me=this;
+                this.axios.post("http://www.jrsports.com/api/user/friend/getFriendList", null, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const res = response.data;
+                    if(res.code==0){
+                        me.friendList=res.data;
+                    }else{
+                        alert(res.msg);
+                    }
+                });
             }
         }
     }
 </script>
 
 <style scoped>
-
+    .friend{
+        height: 50px;
+        width: 100%;
+        margin-top: 10px;
+    }
 </style>

@@ -1,14 +1,7 @@
 <template>
     <el-container>
         <el-header>
-            <el-menu mode="horizontal" style="text-align: right">
-                <el-submenu index="1">
-                    <template slot="title">欢迎{{teamName}}</template>
-                    <el-menu-item index="2-1">我的账户</el-menu-item>
-                    <el-menu-item index="2-2">充值</el-menu-item>
-                    <el-menu-item index="2-3">设置</el-menu-item>
-                </el-submenu>
-            </el-menu>
+            <nav-bar></nav-bar>
         </el-header>
         <el-container>
             <el-aside width="200px">
@@ -54,21 +47,24 @@
                                         </div>
                                     </el-col>
                                 </el-row>
-                                <el-row :gutter="10">
+                                <el-row :gutter="10" >
                                     <el-col :span="12" style="text-align: center">
                                         <el-button plain type="info" @click="viewPlayerDetail(fp.fpId);userPlayerDetailDialogVisible=true">球员详情</el-button>
                                     </el-col>
-                                    <el-col :span="12" style="text-align: center">
+                                    <el-col :span="12" style="text-align: center" v-if="fp.timeValLeft>=0">
                                         <el-button plain type="success" @click="addOfferDialogVisible=true;addOfferForm.fpId=fp.fpId">谈判报价</el-button>
                                     </el-col>
                                 </el-row>
-                                <el-row style="margin-top: 30px">
+                                <el-row style="margin-top: 30px" v-if="fp.timeValLeft>=0">
                                     <el-col :span="12" style="text-align: center">
                                         <span>剩余时间：{{fp.timeLeft}}</span>
                                     </el-col>
                                     <el-col :span="12" style="text-align: center">
                                         <el-button type="text" @click="getOfferList(fp.fpId);offerDialogVisible = true">报价情况</el-button>
                                     </el-col>
+                                </el-row>
+                                <el-row v-if="fp.timeValLeft<0">
+                                    <h1>球员已过期</h1>
                                 </el-row>
 
                             </div>
@@ -214,11 +210,12 @@
 
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
+    import NavBar from "@/views/layout/header/header";
 
 
     export default {
         name: "freemarket",
-        components: {Sidebar},
+        components: {Sidebar,NavBar},
         data(){
             return{
                 teamName:"",
@@ -567,7 +564,11 @@
             startTimer(){
                 const me=this;
                 this.freePlayerListData.forEach(function (item) {
-                    item.timeLeft=me.secondsToTime(parseInt((item.expireTimeStamp-new Date().getTime())/1000));
+                    var t=parseInt((item.expireTimeStamp-new Date().getTime())/1000);
+                    if(t>0){
+                        item.timeValLeft=t;
+                        item.timeLeft=me.secondsToTime(t);
+                    }
                 });
             },
             removeOffer(item) {
