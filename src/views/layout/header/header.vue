@@ -38,33 +38,95 @@
                 :visible.sync="chatVisible"
                 :with-header="false">
             <div style="margin: 20px">
-                <h3>好友列表</h3>
-<!--                <el-divider content-position="center">在线好友</el-divider>-->
-                <div>
-                    <el-row type="flex" align="middle" v-for="friend in friendList" :key="friend">
-                        <el-col :span="6">
-                            <a @click="chatDialogVisible=true;openChat()" style="cursor: pointer">
-                                <el-avatar :size="80" shape="square"
-                                            src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png">
-                                </el-avatar>
-                            </a>
+                <el-row align="middle">
+                    <h3>好友</h3>
+                </el-row>
 
-                        </el-col>
-                        <el-col :span="14">
-                            <el-row>
-                                <h3>{{friend.friendTeamName}}</h3>
-                            </el-row>
-                            <el-row>
-                                <span>霍勒迪1500w卖不卖？</span>
-                            </el-row>
-                        </el-col>
-                        <el-col :span="4">
-                            <el-button>详情</el-button>
-                        </el-col>
-                    </el-row>
+                <el-tabs v-model="activeName" @tab-click="handleTabClick">
+                    <el-tab-pane label="我的好友" name="myFriendListPane">
+                        <div>
+                            <el-row type="flex" align="middle" v-for="friend in friendList" :key="friend">
+                                <el-col :span="6">
+                                    <a @click="chatDialogVisible=true;openChat()" style="cursor: pointer">
+                                        <el-avatar :size="80" shape="square"
+                                                   src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png">
+                                        </el-avatar>
+                                    </a>
 
-                </div>
-<!--                <el-divider content-position="center">离线好友</el-divider>-->
+                                </el-col>
+                                <el-col :span="10">
+                                    <el-row>
+                                        <h3>{{friend.friendTeamName}}</h3>
+                                    </el-row>
+                                    <el-row>
+                                        <span>霍勒迪1500w卖不卖？</span>
+                                    </el-row>
+                                </el-col>
+                                <el-col :span="4">
+                                    <el-button>详情</el-button>
+                                </el-col>
+                                <el-col :span="4">
+                                    <el-button @click="removeFriend(friend.friendId)">删除</el-button>
+                                </el-col>
+                            </el-row>
+
+                        </div>
+                    </el-tab-pane>
+                    <el-tab-pane label="好友请求" name="friendRequestPane">
+                        <el-scrollbar style="height: 100%">
+                            <div style="height:700px;margin-top: 20px;">
+                                <div v-for="friend in friendRequestList" :key="friend">
+                                    <el-card shadow="hover">
+                                        <el-row type="flex" align="middle">
+                                            <el-col :span="14">
+                                                <h3>{{friend.friendTeamName}}</h3>
+                                            </el-col>
+                                            <el-col :span="5">
+                                                <el-button type="success" @click="acceptFriendRequest(friend.friendId)">同意</el-button>
+                                            </el-col>
+                                            <el-col :span="5">
+                                                <el-button type="warning" @click="refuseFriendRequest(friend.friendId)">拒绝</el-button>
+                                            </el-col>
+                                        </el-row>
+
+                                    </el-card>
+                                    <el-divider></el-divider>
+                                </div>
+                            </div>
+                        </el-scrollbar>
+                    </el-tab-pane>
+                    <el-tab-pane label="添加好友" name="addFriendPane">
+                        <el-input placeholder="请输入球队名" v-model="friendSearchName" clearable>
+                            <el-button slot="append" icon="el-icon-search" @click="searchFriend(friendSearchName)"></el-button>
+                        </el-input>
+                        <p style="margin-top: 20px;">搜索到{{searchFriendCount}}支球队</p>
+                            <el-scrollbar style="height: 100%">
+                                <div style="height:700px;margin-top: 20px;">
+                                    <div v-for="friend in searchFriendList" :key="friend">
+                                        <el-card shadow="hover">
+                                            <el-row type="flex" align="middle">
+                                                <el-col :span="14">
+                                                    <h3>{{friend.teamName}}</h3>
+                                                </el-col>
+                                                <el-col :span="5">
+                                                    <el-button icon="el-icon-warning-outline">查看</el-button>
+                                                </el-col>
+                                                <el-col :span="5">
+                                                    <el-button type="info" v-if="friend.friendStatus==0" icon="el-icon-circle-plus-outline" @click="sendFriendRequest(friend.teamId);friend.friendStatus=1;">添加</el-button>
+                                                    <el-button type="info" v-if="friend.friendStatus==1" disabled>已发送</el-button>
+                                                    <el-button type="info" v-if="friend.friendStatus==2" icon="el-icon-chat-round">聊天</el-button>
+                                                </el-col>
+                                            </el-row>
+
+                                        </el-card>
+                                        <el-divider></el-divider>
+                                    </div>
+                                </div>
+                            </el-scrollbar>
+                    </el-tab-pane>
+                </el-tabs>
+
+
             </div>
         </el-drawer>
         <el-dialog :title="Koliday" :visible.sync="chatDialogVisible"></el-dialog>
@@ -91,13 +153,20 @@
                     }
                 ],
                 friendList:[],
+                searchFriendList:[],
+                friendRequestList:[],
+                activeName:"myFriendListPane",
+                friendSearchName:"",
                 currentSeason:"休赛期",
+                searchFriendCount:0,
                 teamName:"",
                 jrFund:"$22,456,152,000  ",
                 jrCoin:152,
                 chatVisible:false,
                 count:5,
-                chatDialogVisible:false
+                chatDialogVisible:false,
+                searchDialogVisible:false,
+                searchLoading:false
             };
         },
         mounted(){
@@ -164,6 +233,132 @@
                     const res = response.data;
                     if(res.code==0){
                         me.friendList=res.data;
+                    }else{
+                        alert(res.msg);
+                    }
+                });
+            },
+            handleTabClick(tab){
+                if(tab.name=="friendRequestPane"){
+                    this.getFriendRequestList();
+                }else if(tab.name=="myFriendListPane"){
+                    this.getFriendList();
+                }
+            },
+            getFriendRequestList(){
+                const me=this;
+                this.axios.post("http://www.jrsports.com/api/user/friend/getFriendRequestList", null, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const res = response.data;
+                    if(res.code==0){
+                        me.friendRequestList=res.data;
+                    }else{
+                        alert(res.msg);
+                    }
+                });
+            },
+            acceptFriendRequest(friendId){
+                const me=this;
+                this.axios.post("http://www.jrsports.com/api/user/friend/acceptFriendRequest/"+friendId, null, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const res = response.data;
+                    if(res.code==0){
+                        me.$message({
+                            message: "同意成功",
+                            type: "success"
+                        });
+                        me.getFriendRequestList();
+                    }else{
+                        alert(res.msg);
+                    }
+                });
+            },
+            refuseFriendRequest(friendId){
+                const me=this;
+                this.axios.post("http://www.jrsports.com/api/user/friend/refuseFriendRequest/"+friendId, null, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const res = response.data;
+                    if(res.code==0){
+                        me.$message({
+                            message: "拒绝成功",
+                            type: "success"
+                        });
+                        me.getFriendRequestList();
+                    }else{
+                        alert(res.msg);
+                    }
+                });
+            },
+            removeFriend(friendId){
+                const me=this;
+                this.axios.post("http://www.jrsports.com/api/user/friend/removeFriend/"+friendId, null, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const res = response.data;
+                    if(res.code==0){
+                        me.$message({
+                            message: "删除成功",
+                            type: "success"
+                        });
+                        me.getFriendList();
+                    }else{
+                        alert(res.msg);
+                    }
+                });
+            },
+            searchFriend(name){
+                if(name=="" || name==null){
+                    this.searchFriendList=[];
+                    this.searchFriendCount=0;
+                    return;
+                }
+                const me=this;
+                this.axios.post("http://www.jrsports.com/api/user/friend/searchFriend", {
+                    name:name
+                }, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const res = response.data;
+                    if(res.code==0){
+                        me.searchFriendList=res.data;
+                        me.searchFriendCount=res.data.length;
+                    }else{
+                        alert(res.msg);
+                    }
+                });
+            },
+            sendFriendRequest(teamId){
+                const me=this;
+                this.axios.post("http://www.jrsports.com/api/user/friend/sendFriendRequest/"+teamId, null, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const res = response.data;
+                    if(res.code==0){
+                        me.$message({
+                            message: "好友请求发送成功",
+                            type: "success"
+                        });
                     }else{
                         alert(res.msg);
                     }
