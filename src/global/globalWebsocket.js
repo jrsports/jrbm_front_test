@@ -2,6 +2,7 @@ import Vue from 'vue'
 export default {
     ws: {},
     drawerVisible: false,
+    chatMsgRecord:[],
     mountedMethods:function () {
         console.log("mountedMethods");
     },
@@ -45,6 +46,7 @@ export default {
     },
     handleGlobalWs() {
         const me = Vue.prototype;
+        const that=this;
         this.ws.onmessage = function (msg) {
             const response = JSON.parse(msg.data);
             if(response.type==22){
@@ -55,7 +57,10 @@ export default {
                     title: message.title,
                     message: message.content
                 });
-            }else{
+            }else if(response.type==100){
+                that.chatMsgRecord.push(response);
+                console.log(that.chatMsgRecord);
+            } else{
                 me.$message({
                     message: response.message,
                     type: "success"
