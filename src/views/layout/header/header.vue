@@ -46,23 +46,26 @@
 
                 <el-tabs v-model="activeName" @tab-click="handleTabClick">
                     <el-tab-pane label="我的好友" name="myFriendListPane">
-                        <div>
+                        <div style="margin-top: 20px">
                             <el-row type="flex" align="middle" v-for="friend in friendList" :key="friend">
-                                <el-col :span="6">
+                                <el-col :span="4">
                                     <a @click="chatDialogVisible=true;openChat(friend.friendTeamId,friend.friendTeamName)"
-                                       style="cursor: pointer">
-                                        <el-avatar :size="80" shape="square"
-                                                   src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png">
-                                        </el-avatar>
+                                       style="cursor: pointer;">
+                                        <el-badge :value="12" class="item">
+                                            <el-avatar :size="60" shape="square"
+                                                       src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"
+                                                        :class="friend.online?'onlineBorder':'offlineBorder'">
+                                            </el-avatar>
+                                        </el-badge>
                                     </a>
 
                                 </el-col>
-                                <el-col :span="10">
-                                    <el-row>
-                                        <h3>{{friend.friendTeamName}}</h3>
+                                <el-col :span="12">
+                                    <el-row >
+                                        <h3 style="margin-top: 0px">{{friend.friendTeamName}}</h3>
                                     </el-row>
                                     <el-row>
-                                        <span>霍勒迪1500w卖不卖？</span>
+                                        <span style="font-size: smaller;color: gray;">霍勒迪1500w卖不卖？</span>
                                     </el-row>
                                 </el-col>
                                 <el-col :span="4">
@@ -71,6 +74,11 @@
                                 <el-col :span="4">
                                     <el-button @click="removeFriend(friend.friendId)">删除</el-button>
                                 </el-col>
+<!--                                <el-col :span="4">-->
+<!--                                    <el-badge :value="12" class="item">-->
+<!--                                        <el-button icon="el-icon-chat-line-round"></el-button>-->
+<!--                                    </el-badge>-->
+<!--                                </el-col>-->
                             </el-row>
 
                         </div>
@@ -220,6 +228,7 @@
 </template>
 
 <script>
+    import Friend from '../../../global/globalWebsocket'
     export default {
         name: "header",
         data() {
@@ -257,13 +266,14 @@
                 chat: {
                     currentChatDialogTeamId: -1,
                     currentChatDialogTeamName: "",
-                    chatRecordList: []
+                    chatRecordList: Friend.chatMsgRecord()
                 }
             };
         },
         mounted() {
             this.teamName = sessionStorage.getItem("teamName");
-            this.chat.chatRecordList = this.globalws.chatMsgRecord;
+            // this.chat.chatRecordList = this.globalws.chatMsgRecord;
+            // this.friendList=this.globalws.friendList;
         },
         methods: {
             readNotice(noteId) {
@@ -326,7 +336,11 @@
                 }).then(function (response) {
                     const res = response.data;
                     if (res.code == 0) {
-                        me.friendList = res.data;
+                        Friend.setFriendList(res.data);
+                        me.friendList=res.data;
+                        setInterval(function () {
+                            me.friendList=Friend.friendList();
+                        }, 1000);
                     } else {
                         alert(res.msg);
                     }
@@ -506,13 +520,11 @@
                 }
                 const toTeamId = this.chat.currentChatDialogTeamId;
                 this.msgSendContent = "";
-                this.globalws.chatMsgRecord.push({
+                Friend.pushMsgRecord({
                     message: msgContent,
                     belong: "me",
                     toTeamId: toTeamId
                 });
-
-                console.log(this.globalws.chatMsgRecord);
                 this.globalws.ws.send(JSON.stringify({
                     type: 100,
                     time: new Date().getTime(),
@@ -533,5 +545,11 @@
         height: 50px;
         width: 100%;
         margin-top: 10px;
+    }
+    .offlineBorder{
+        border: 2px solid gray;
+    }
+    .onlineBorder{
+        border: 2px solid greenyellow;
     }
 </style>

@@ -1,11 +1,23 @@
 import Vue from 'vue'
+
+var friendList = [];
+var chatMsgRecord = [];
 export default {
     ws: {},
     drawerVisible: false,
-    chatMsgRecord:[],
-    mountedMethods:function () {
-        console.log("mountedMethods");
+    friendList: function () {
+        return friendList;
     },
+    setFriendList:function(list){
+      friendList=list;
+    },
+    chatMsgRecord: function () {
+        return chatMsgRecord;
+    },
+    pushMsgRecord:function (j) {
+        chatMsgRecord.push(j);
+    },
+
     async connectToGlobalServer() {
         const me = this;
         await this.applyWsToken();
@@ -39,28 +51,52 @@ export default {
         });
     },
     startHeartBeat() {
-        const me=this;
+        const me = this;
         setInterval(function () {
             me.ws.send(JSON.stringify({type: -100, time: new Date().getTime()}))
         }, 3000);
     },
     handleGlobalWs() {
         const me = Vue.prototype;
-        const that=this;
+        const that = this;
         this.ws.onmessage = function (msg) {
             const response = JSON.parse(msg.data);
-            if(response.type==22){
-                const message=JSON.parse(response.message);
+            if (response.type == 22) {
+                //直接展示通知即可
+                const message = JSON.parse(response.message);
                 console.log(message.title);
                 console.log(message.content);
                 me.$notify.info({
                     title: message.title,
                     message: message.content
                 });
-            }else if(response.type==100){
+            } else if (response.type == 23) {
+                //球队下线
+                const message = JSON.parse(response.message);
+                const offlineTeamId = message.data;
+                console.log("您的好友已下线" + offlineTeamId);
+                friendList.forEach(function (item) {
+                    if (item.friendTeamId == offlineTeamId) {
+                        item.online = false;
+                    }
+                });
+
+            } else if (response.type == 24) {
+                //球队上线
+                const message = JSON.parse(response.message);
+                const offlineTeamId = message.data;
+                console.log("您的好友已上线" + offlineTeamId);
+                friendList.forEach(function (item) {
+                    if (item.friendTeamId == offlineTeamId) {
+                        item.online = true;
+                    }
+                });
+
+            } else if (response.type == 100) {
+                //好友聊天消息
                 that.chatMsgRecord.push(response);
                 console.log(that.chatMsgRecord);
-            } else{
+            } else {
                 me.$message({
                     message: response.message,
                     type: "success"
@@ -70,19 +106,19 @@ export default {
         };
     },
     async refreshTeamToken() {
-        const me=this;
+        const me = this;
         await Vue.prototype.axios.post("http://www.jrsports.com/api/user/team/refreshTeamToken", null, {
             headers: {
                 "userToken": localStorage.getItem("userToken"),
                 "teamToken": sessionStorage.getItem("teamToken"),
-                "refresh":true
+                "refresh": true
             }
         }).then(function (response) {
-            const loginResponse=response.data;
-            if(loginResponse.code===0){
+            const loginResponse = response.data;
+            if (loginResponse.code === 0) {
                 console.log("更新teamToken");
-                sessionStorage.setItem("teamToken",loginResponse.teamToken);
-            }else{
+                sessionStorage.setItem("teamToken", loginResponse.teamToken);
+            } else {
                 me.$message({
                     message: loginResponse.msg,
                     type: "error"

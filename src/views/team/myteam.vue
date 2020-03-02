@@ -141,13 +141,7 @@
     export default {
         name: "gameindex",
         components: {Sidebar, NavBar},
-        created() {
-            console.log("子组件created");
-        },
         mounted() {
-            console.log("子组件mounted");
-            this.teamName = sessionStorage.getItem("teamName");
-            // this.globalws.mountedMethods=this.getTeamPlayerList;
             this.getTeamPlayerList();
         },
         computed: {
