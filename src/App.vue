@@ -33,11 +33,11 @@
             //     });
             // },
         },
-        async created(){
+        created(){
             //刷新所有页面时，判断球队是否已经登录，如果登录了，需要重新连接websocket
             if(sessionStorage.getItem("teamToken")){
                 //重连
-                await this.globalws.connectToGlobalServer();
+                this.globalws.connectToGlobalServer();
             }
         },
         mounted(){

@@ -22,6 +22,9 @@ Vue.prototype.globalws = globalws;
 router.beforeEach(function(to, from, next) {
   //对于需要球队登录的界面，对userToken和teamToken进行检查
   if (to.meta.needLogin) {
+    //禁止后退
+    // Vue.prototype.allowBack=false;
+    // history.pushState(null, null, location.href);
     if (localStorage.getItem("userToken") && sessionStorage.getItem("teamToken")) {
       next(); //表示已经登录
     } else {

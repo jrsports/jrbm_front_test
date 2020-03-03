@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import router from '../router/router'
 
 var friendList = [];
 var chatMsgRecord = [];
@@ -89,6 +90,17 @@ export default {
                 friendList.forEach(function (item) {
                     if (item.friendTeamId == offlineTeamId) {
                         item.online = true;
+                    }
+                });
+
+            } else if(response.type==25){
+                //异常掉线
+                // const message = JSON.parse(response.message);
+                me.$alert('您的球队被强制下线，请注意账号安全', '强制下线', {
+                    confirmButtonText: '确定',
+                    // eslint-disable-next-line no-unused-vars
+                    callback: action => {
+                        router.push('/');
                     }
                 });
 

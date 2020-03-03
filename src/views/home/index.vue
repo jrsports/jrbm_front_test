@@ -24,7 +24,7 @@
             </el-row>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="loginDialogVisible = false">取 消</el-button>
-                <el-button type="primary" @click="onLogin">登 录</el-button>
+                <el-button type="primary" @click="onLogin(false)">登 录</el-button>
             </span>
         </el-dialog>
         <div v-if="ifLogin">
@@ -152,13 +152,14 @@
         },
         methods: {
             async getGamePage(){
-                await this.teamLogin();
+                await this.teamLogin(false);
             },
-            async teamLogin(){
+            async teamLogin(ifForceKick){
                 const me=this;
                 //球队登录
                 await this.axios.post("http://www.jrsports.com/api/user/team/teamLogin",{
-                    teamId:teamId
+                    teamId:teamId,
+                    ifForceKick:ifForceKick
                 },{
                     headers:{
                         "userToken":localStorage.getItem("userToken")
@@ -171,9 +172,14 @@
                         me.loadTeamInfo();
                         me.$router.push('/myteam');
                     }else{
-                        me.$message({
-                            message: loginResponse.msg,
-                            type: "error"
+                        me.$confirm(loginResponse.msg, '账号异常', {
+                            confirmButtonText: '强制下线',
+                            cancelButtonText: '取消登录',
+                            type: 'warning'
+                        }).then(() => {
+                            me.teamLogin(true);
+                        }).catch(() => {
+
                         });
                     }
                 });
@@ -225,7 +231,7 @@
                 this.axios.post("http://www.jrsports.com/api/user/user/userLogin",{
                     username:this.form.username,
                     password:this.form.password,
-                    freeLoginType:this.freeLoginType?1:0
+                    freeLoginType:this.freeLoginType?1:0,
                 }).then(function (response) {
                     const loginResponse=response.data;
                     if(loginResponse.code===0) {

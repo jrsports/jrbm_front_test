@@ -26,6 +26,7 @@
                         <el-button @click="startMatchMaking" v-if="startBtnVisible" style="width:80%;margin-left: 10%;">
                             开始匹配
                         </el-button>
+                        <el-button @click="testEnterGame">进入比赛</el-button>
                         <el-button @click="cancelMatchMaking" v-if="cancelBtnVisible" plain type="danger" style="width:80%;margin-left: 10%;">取消匹配</el-button>
                         <div style="text-align:center" v-if="ongoingmatchVisible">
                             主队-{{homeTeamName}} vs 客队-{{awayTeamName}}
@@ -203,6 +204,13 @@
             }
         },
         methods: {
+            testEnterGame(){
+                let routeUrl = this.$router.resolve({
+                    path: "/matchLive",
+                    query: {ticket:"12awef8a3f1waw3e5"}
+                });
+                window.open(routeUrl .href, '_blank');
+            },
             tableRowClassName({row}) {
                 if ((row.homeTeamName == this.teamName && row.homeScore > row.awayScore) || (row.awayTeamName == this.teamName && row.homeScore < row.awayScore)) {
                     return 'success-row';

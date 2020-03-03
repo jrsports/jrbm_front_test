@@ -39,6 +39,13 @@ export const constantRouterMap = [
         }
     },
     {
+        path: "/matchLive",
+        component: () => import('@/views/match/matchlive'),
+        meta:{
+            needLogin:true
+        }
+    },
+    {
         path: "/freemarket",
         component: () => import('@/views/freemarket/freemarket'),
         meta:{
