@@ -6,6 +6,7 @@ var chatMsgRecord = [];
 export default {
     ws: {},
     drawerVisible: false,
+    heartBeatTimer:{},
     friendList: function () {
         return friendList;
     },
@@ -18,7 +19,22 @@ export default {
     pushMsgRecord:function (j) {
         chatMsgRecord.push(j);
     },
+    increaseUnRead(friendTeamId){
+        friendList.forEach(function (item) {
+            if(item.friendTeamId==friendTeamId){
+                item.unRead++;
+            }
 
+        });
+    },
+    resetUnRead(friendTeamId){
+        friendList.forEach(function (item) {
+            if(item.friendTeamId==friendTeamId){
+                item.unRead=0;
+            }
+
+        });
+    },
     async connectToGlobalServer() {
         const me = this;
         await this.applyWsToken();
@@ -53,9 +69,12 @@ export default {
     },
     startHeartBeat() {
         const me = this;
-        setInterval(function () {
+        this.heartBeatTimer=setInterval(function () {
             me.ws.send(JSON.stringify({type: -100, time: new Date().getTime()}))
         }, 3000);
+    },
+    stopHeartBeat(){
+
     },
     handleGlobalWs() {
         const me = Vue.prototype;
@@ -65,8 +84,6 @@ export default {
             if (response.type == 22) {
                 //直接展示通知即可
                 const message = JSON.parse(response.message);
-                console.log(message.title);
-                console.log(message.content);
                 me.$notify.info({
                     title: message.title,
                     message: message.content
@@ -81,7 +98,6 @@ export default {
                         item.online = false;
                     }
                 });
-
             } else if (response.type == 24) {
                 //球队上线
                 const message = JSON.parse(response.message);
@@ -106,7 +122,8 @@ export default {
 
             } else if (response.type == 100) {
                 //好友聊天消息
-                that.chatMsgRecord.push(response);
+                that.pushMsgRecord(response);
+                that.increaseUnRead(response.fromTeamId);
                 console.log(that.chatMsgRecord);
             } else {
                 me.$message({

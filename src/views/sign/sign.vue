@@ -17,7 +17,7 @@
                                 :data="unSignedData"
                                 style="width: 100%">
                             <el-table-column
-                                    prop="contractNo"
+                                    prop="contractId"
                                     label="合同编号">
                             </el-table-column>
                             <el-table-column

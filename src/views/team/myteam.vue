@@ -17,7 +17,7 @@
                                 首发阵容
                             </h3>
                         </el-col>
-                        <el-col :span="4" style="text-align: center" v-for="player in starting" :key="player">
+                        <el-col :span="4" style="text-align: center" v-for="player in starting" :key="player.upId">
                             <div class="block" @click="selectPlayer($event,player.upId)">
                                 <el-popover
                                         placement="top-start"
@@ -62,7 +62,7 @@
                         </el-col>
                     </el-row>
 
-                    <el-dialog :title="球员详情" :visible.sync="userPlayerDetailDialogVisible">
+                    <el-dialog title="球员详情" :visible.sync="userPlayerDetailDialogVisible">
                         <el-row>
                             <el-col span="6">
                                 <el-avatar shape="square" :size="100" :src="playerDetail.avatarUrl"></el-avatar>
@@ -142,7 +142,7 @@
         name: "gameindex",
         components: {Sidebar, NavBar},
         mounted() {
-            this.getTeamPlayerList();
+            this.getUserPlayerList();
         },
         computed: {
             starting: function () {
@@ -181,18 +181,94 @@
         methods: {
 
 
-            getTeamPlayerList: function () {
-                console.log("执行getTeam");
+            getUserPlayerList() {
                 const me = this;
-                //获取服务器列表和球队
-                this.axios.post("http://www.jrsports.com/api/user/team/getTeamPlayerList", null, {
+                this.axios.post("http://www.jrsports.com/api/player/userPlayer/getUserPlayerDetailList", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
                     }
                 }).then(function (response) {
-                    const serverResponse = response.data;
-                    me.playerList = serverResponse.data;
+                    const res = response.data;
+                    if (res.code === 0) {
+                        let rec=res.data;
+                        let nextTotalSalary=0;
+                        rec.forEach(function (item) {
+                            if(item.order==1){
+                                item.order="首发PG"
+                            }else if(item.order==2){
+                                item.order="首发SG"
+                            }else if(item.order==3){
+                                item.order="首发SF"
+                            }else if(item.order==4){
+                                item.order="首发PF"
+                            }else if(item.order==5){
+                                item.order="首发C"
+                            }
+                            if(item.position==1){
+                                item.position="PG"
+                            }else if(item.position==2){
+                                item.position="SG"
+                            }else if(item.position==3){
+                                item.position="SF"
+                            }else if(item.position==4){
+                                item.position="PF"
+                            }else if(item.position==5){
+                                item.position="C"
+                            }
+
+                            if(item.grade==1){
+                                item.grade="S+"
+                            }else if(item.grade==2){
+                                item.grade="S"
+                            }else if(item.grade==3){
+                                item.grade="S-"
+                            }else if(item.grade==4){
+                                item.grade="A+"
+                            }else if(item.grade==5){
+                                item.grade="A"
+                            }else if(item.grade==6){
+                                item.grade="A-"
+                            }else if(item.grade==7){
+                                item.grade="B+"
+                            }else if(item.grade==8){
+                                item.grade="B"
+                            }else if(item.grade==9){
+                                item.grade="B-"
+                            }else if(item.grade==10){
+                                item.grade="C+"
+                            }else if(item.grade==11){
+                                item.grade="C"
+                            }else if(item.grade==12){
+                                item.grade="C-"
+                            }else if(item.grade==13){
+                                item.grade="D+"
+                            }else if(item.grade==14){
+                                item.grade="D"
+                            }else if(item.grade==15){
+                                item.grade="D-"
+                            }
+
+
+
+                            if(item.type==0){
+                                item.type="现役";
+                            }else{
+                                item.type="历史";
+                            }
+
+                            nextTotalSalary+=item.nextSeasonSalary;
+                            me.loading=false;
+                        });
+                        me.playerList=rec;
+                        me.nextTotalSalary=nextTotalSalary;
+                        // me.currentPlayerData.totalRecordCount=res.data.totalRecordCount;
+                        // me.currentPlayerData.totalPageCount=res.data.totalPageCount;
+                        // me.currentPlayerData.pageNo=res.data.pageNo;
+                        // me.currentPlayerData. pageSize=res.data. pageSize;
+                    } else {
+                        alert(res.message);
+                    }
                 });
             },
             selectPlayer(event, upId) {

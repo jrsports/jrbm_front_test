@@ -50,8 +50,7 @@
                         <el-form-item>
                             <el-image
                                     style="width: 130px; height: 48px"
-                                    :src="captchaUrl"
-                                    :fit="fit"></el-image>
+                                    :src="captchaUrl"></el-image>
                             <el-input v-model="regform.captcha"></el-input>
                         </el-form-item>
 
@@ -66,7 +65,7 @@
         </el-dialog>
 
         <el-dialog title="服务器和球队" :visible.sync="serverDialogVisible">
-            <el-table ref="teamTable" :data="teamList" highlight-current-row @current-change="selectTeam">
+            <el-table ref="teamTable" :data="teamList" highlight-current-row @current-change="selectTeam" v-loading="loading">
                 <el-table-column property="serverId" label="服务器ID"></el-table-column>
                 <el-table-column property="teamId" label="球队ID" ></el-table-column>
                 <el-table-column property="teamName" label="你的球队" ></el-table-column>
@@ -78,8 +77,8 @@
 <!--                </el-table-column>-->
             </el-table>
             <div style="text-align: right">
-                <el-button @click="createTeamDialogVisible=true" :disabled="ifTeamSelected==false || ifServerHasTeam==true" style="margin-top: 30px">创建球队</el-button>
-                <el-button @click="getGamePage" :disabled="ifTeamSelected==false || ifServerHasTeam==false" style="margin-top: 30px">进入游戏</el-button>
+                <el-button @click="createTeamDialogVisible=true" :disabled="teamList.length>=3" style="margin-top: 30px">创建球队</el-button>
+                <el-button @click="getGamePage" :disabled="ifTeamSelected==false " style="margin-top: 30px">进入游戏</el-button>
             </div>
         </el-dialog>
 
@@ -120,6 +119,7 @@
                 createTeamDialogVisible:false,
                 ifLogin:false,
                 captchaUrl:"",
+                loading:false,
                 form:{
                     username:"",
                     password:"",
@@ -132,7 +132,7 @@
                     captcha:""
                 },
                 createform:{
-                  serverId:"",
+                  serverId:"默认",
                   teamName:""
                 },
                 teamList:[{
@@ -167,9 +167,9 @@
                 }).then(function (response) {
                     const loginResponse=response.data;
                     if(loginResponse.code===0){
-                        sessionStorage.setItem("teamToken",loginResponse.teamToken);
+                        sessionStorage.setItem("teamToken",loginResponse.data.teamToken);
+                        sessionStorage.setItem("teamName",loginResponse.data.teamName);
                         me.globalws.connectToGlobalServer();
-                        me.loadTeamInfo();
                         me.$router.push('/myteam');
                     }else{
                         me.$confirm(loginResponse.msg, '账号异常', {
@@ -184,33 +184,19 @@
                     }
                 });
             },
-            async loadTeamInfo(){
-                //初始化时加载球队信息
-                await this.axios.post("http://www.jrsports.com/api/user/team/getTeamInfo", null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const teamInfoResponse = response.data;
-                    if (teamInfoResponse.code === 0) {
-                        sessionStorage.setItem("teamName",teamInfoResponse.data.teamName);
-                    } else {
-                        alert(teamInfoResponse.message);
-                    }
-                });
-            },
             getTeamList(){
                 const me = this;
                 this.ifTeamSelected=false;
-                //获取服务器列表和球队
-                this.axios.post("http://www.jrsports.com/api/user/user/getServerTeamList",null,{
+                this.loading=true;
+                //获取球队列表
+                this.axios.post("http://www.jrsports.com/api/user/user/getTeamList",null,{
                     headers:{
                         "userToken":localStorage.getItem("userToken")
                     }
                 }).then(function (response) {
                     const serverResponse = response.data;
                     me.teamList=serverResponse.data;
+                    me.loading=false;
                 });
                 this.serverDialogVisible=true
             },
@@ -227,18 +213,18 @@
                 this.currentRow = val;
             },
             onLogin() {
-                var me=this;
+                const me=this;
                 this.axios.post("http://www.jrsports.com/api/user/user/userLogin",{
-                    username:this.form.username,
+                    userName:this.form.username,
                     password:this.form.password,
                     freeLoginType:this.freeLoginType?1:0,
                 }).then(function (response) {
                     const loginResponse=response.data;
                     if(loginResponse.code===0) {
-                        localStorage.setItem("userToken", loginResponse.userToken);
+                        localStorage.setItem("userToken", loginResponse.data.userToken);
+                        localStorage.setItem("userName", loginResponse.data.userName);
                         me.loginDialogVisible = false;
                         me.ifLogin = true;
-                        me.welcome = "欢迎" + loginResponse.username;
                         me.$message({
                             message: loginResponse.msg,
                             type: "success"
@@ -262,31 +248,32 @@
                 });
             },
             onRegister() {
-                var me=this;
+                const me=this;
                 this.axios.post("http://www.jrsports.com/api/user/user/userRegister",{
-                    username:this.regform.username,
+                    userName:this.regform.username,
                     password:this.regform.password,
                     rePassword:this.regform.repassword,
                     captchaToken:captchaToken,
                     captcha:this.regform.captcha,
-                    registerType:0
                 }).then(function (response) {
                     const registerResponse=response.data;
                     if(registerResponse.code==0){
-                        localStorage.setItem("userToken",registerResponse.userToken);
-                        me.regDialogVisible=false;
+                        localStorage.setItem("userToken",registerResponse.data.userToken);
+                        localStorage.setItem("userName", registerResponse.data.userName);
+                        me.registerDialogVisible=false;
                         me.ifLogin=true;
-                        me.welcome="欢迎"+registerResponse.username;
                     }else{
                         me.getCaptcha();
-                        alert(registerResponse.message);
+                        me.$message({
+                            message: registerResponse.msg,
+                            type: "warning"
+                        });
                     }
                 });
             },
             createTeam(){
                 const me=this;
                 this.axios.post("http://www.jrsports.com/api/user/team/createTeam",{
-                    serverId:me.createform.serverId,
                     teamName:me.createform.teamName
                 },{
                     headers:{
@@ -297,14 +284,24 @@
                     if(createResponse.code==0){
                         me.getTeamList();
                         me.createTeamDialogVisible=false;
+                        me.$message({
+                            message: createResponse.msg,
+                            type: "success"
+                        });
                     }else{
-                        alert(createResponse.msg);
+                        me.getCaptcha();
+                        me.$message({
+                            message: createResponse.msg,
+                            type: "warning"
+                        });
                     }
                 });
             },
             logout(){
                 localStorage.removeItem("userToken");
+                localStorage.removeItem("userName");
                 sessionStorage.removeItem("teamToken");
+                sessionStorage.removeItem("teamName");
                 location.reload();
             }
         }

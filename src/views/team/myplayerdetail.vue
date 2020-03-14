@@ -65,7 +65,7 @@
                 totalSalaryLimit:7800,
                 nextTotalSalary:0,
                 nextTotalSalaryLimit:7900,
-                loading:true
+                loading:false
             }
         },
         mounted(){
@@ -79,6 +79,7 @@
             },
             getUserPlayerDetailList() {
                 const me = this;
+                this.loading=true;
                 this.axios.post("http://www.jrsports.com/api/player/userPlayer/getUserPlayerDetailList", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
@@ -154,8 +155,8 @@
                             }
 
                             nextTotalSalary+=item.nextSeasonSalary;
-                            me.loading=false;
                         });
+                        me.loading=false;
                         me.myPlayerDetailData=rec;
                         me.nextTotalSalary=nextTotalSalary;
                         // me.currentPlayerData.totalRecordCount=res.data.totalRecordCount;

@@ -4,8 +4,6 @@
         <el-menu
                 default-active="1"
                 class="el-menu-vertical-demo"
-                @open="handleOpen"
-                @close="handleClose"
                 style="height: 800px">
             <el-submenu index="1">
                 <template slot="title">

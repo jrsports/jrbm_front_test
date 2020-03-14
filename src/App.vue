@@ -40,9 +40,6 @@
                 this.globalws.connectToGlobalServer();
             }
         },
-        mounted(){
-
-        },
 
 
     }

@@ -2,13 +2,13 @@
 
 
     <div>
-        <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect">
+        <el-menu :default-active="activeIndex" mode="horizontal">
             <el-menu-item index="1" @click="drawerVisible=true;getNotice()">通知中心</el-menu-item>
             <el-submenu index="2" style="float:right">
                 <template slot="title">{{teamName}}</template>
                 <el-menu-item index="3-1" @click="chatVisible=true;getFriendList()">好友</el-menu-item>
                 <el-menu-item index="3-2">选项2</el-menu-item>
-                <el-menu-item index="3-3">退出球队</el-menu-item>
+                <el-menu-item index="3-3" @click="exitTeam()">退出球队</el-menu-item>
             </el-submenu>
             <el-menu-item index="3" style="float:right">{{currentSeason}}</el-menu-item>
             <el-menu-item index="4" style="float:right">资金：{{jrFund}}JR币：{{jrCoin}}</el-menu-item>
@@ -47,11 +47,11 @@
                 <el-tabs v-model="activeName" @tab-click="handleTabClick">
                     <el-tab-pane label="我的好友" name="myFriendListPane">
                         <div style="margin-top: 20px">
-                            <el-row type="flex" align="middle" v-for="friend in friendList" :key="friend">
+                            <el-row type="flex" align="middle" v-for="friend in friendList" :key="friend.friendId" style="margin-top: 10px">
                                 <el-col :span="4">
                                     <a @click="chatDialogVisible=true;openChat(friend.friendTeamId,friend.friendTeamName)"
                                        style="cursor: pointer;">
-                                        <el-badge :value="12" class="item">
+                                        <el-badge :value="friend.unRead" class="item">
                                             <el-avatar :size="60" shape="square"
                                                        src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"
                                                         :class="friend.online?'onlineBorder':'offlineBorder'">
@@ -230,7 +230,7 @@
 <script>
     import Friend from '../../../global/globalWebsocket'
     export default {
-        name: "header",
+        name: "navHeader",
         data() {
             return {
                 activeIndex: '1',
@@ -325,6 +325,7 @@
             openChat(friendTeamId, friendTeamName) {
                 this.chat.currentChatDialogTeamId = friendTeamId;
                 this.chat.currentChatDialogTeamName = friendTeamName;
+                Friend.resetUnRead(friendTeamId);
             },
             getFriendList() {
                 const me = this;
@@ -336,7 +337,11 @@
                 }).then(function (response) {
                     const res = response.data;
                     if (res.code == 0) {
-                        Friend.setFriendList(res.data);
+                        let fl=res.data;
+                        fl.forEach(function (item) {
+                            item.unRead=0;
+                        });
+                        Friend.setFriendList(fl);
                         me.friendList=res.data;
                         setInterval(function () {
                             me.friendList=Friend.friendList();
