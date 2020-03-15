@@ -63,7 +63,7 @@
                                 :data="signedData"
                                 style="width: 100%">
                             <el-table-column
-                                    prop="contractNo"
+                                    prop="contractId"
                                     label="合同编号">
                             </el-table-column>
                             <el-table-column
@@ -205,11 +205,11 @@
                             if(item.status==2){
                                 item.status="签约成功";
                             }else if(item.status==3){
-                                item.status="已过期";
-                            }else if(item.status==4){
                                 item.status="拒绝签约";
+                            }else if(item.status==4){
+                                item.status="已过期";
                             }
-                            item.contract=item.contractDetail.totalSeason+"年"+item.contractDetail.totalSalary+"万"
+                            item.contract=item.contractDetailDto.totalSeason+"年"+item.contractDetailDto.totalSalary+"万"
                         });
                         me.signedData=sd;
                         me.loading=false;
@@ -224,7 +224,7 @@
             signContract(row) {
                 const me = this;
                 this.axios.post("http://www.jrsports.com/api/sign/sign/signContract", {
-                    contractNo:row.contractNo,
+                    contractId:row.contractId,
                     signToken:row.signToken
                 }, {
                     headers: {
@@ -251,7 +251,7 @@
             refuseContract(row) {
                 const me = this;
                 this.axios.post("http://www.jrsports.com/api/sign/sign/refuseContract", {
-                    contractNo:row.contractNo,
+                    contractId:row.contractId,
                     signToken:row.signToken
                 }, {
                     headers: {
@@ -279,8 +279,8 @@
                 const me=this;
                 const d=me.signedData;
                 d.forEach(function (item) {
-                    if(item.contractNo==row.contractNo){
-                        me.contractDetailData=item.contractDetail.contractSalaryList;
+                    if(item.contractId==row.contractId){
+                        me.contractDetailData=item.contractDetailDto.contractSalaryEntityList;
                     }
                 })
             }

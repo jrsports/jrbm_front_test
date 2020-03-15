@@ -51,11 +51,11 @@
                                     <el-col :span="12" style="text-align: center">
                                         <el-button plain type="info" @click="viewPlayerDetail(fp.fpId);userPlayerDetailDialogVisible=true">球员详情</el-button>
                                     </el-col>
-                                    <el-col :span="12" style="text-align: center" v-if="fp.timeValLeft>=0">
+                                    <el-col :span="12" style="text-align: center" v-if="fp.timeValLeft>0">
                                         <el-button plain type="success" @click="addOfferDialogVisible=true;addOfferForm.fpId=fp.fpId">谈判报价</el-button>
                                     </el-col>
                                 </el-row>
-                                <el-row style="margin-top: 30px" v-if="fp.timeValLeft>=0">
+                                <el-row style="margin-top: 30px" v-if="fp.timeValLeft>0">
                                     <el-col :span="12" style="text-align: center">
                                         <span>剩余时间：{{fp.timeLeft}}</span>
                                     </el-col>
@@ -63,7 +63,7 @@
                                         <el-button type="text" @click="getOfferList(fp.fpId);offerDialogVisible = true">报价情况</el-button>
                                     </el-col>
                                 </el-row>
-                                <el-row v-if="fp.timeValLeft<0">
+                                <el-row v-if="fp.timeValLeft<=0">
                                     <h1>球员已过期</h1>
                                 </el-row>
 
@@ -93,7 +93,7 @@
                                         <el-input-number v-model="offer.salary" @change="calculateTotalSalary" :min="0" :max="5000" label="当年薪资" style="width: 200px;margin-right:10px"></el-input-number><el-button v-if="index>0" @click.prevent="removeOffer(offer)">删除</el-button>
                                     </el-form-item>
                                     <el-form-item>
-                                        <el-button type="primary" @click="addOffer()">报价</el-button>
+                                        <el-button type="primary" @click="addOffer()" :loading="addOfferLoading">报价</el-button>
                                         <el-button v-if="addYearBtnVisible" @click="addOff">新增一年</el-button>
                                     </el-form-item>
                                 </el-form>
@@ -130,7 +130,7 @@
                         </el-steps>
                         <el-table :data="signFlowData">
                             <el-table-column type="index" label="意向排名"></el-table-column>
-                            <el-table-column property="teamName" label="候选球队"></el-table-column>
+                            <el-table-column property="offerRecordDto.teamName" label="候选球队"></el-table-column>
                             <el-table-column property="sendTime" label="发送时间"></el-table-column>
                             <el-table-column property="expireTime" label="过期时间"></el-table-column>
                             <el-table-column property="finishTime" label="（拒绝）签署时间"></el-table-column>
@@ -233,6 +233,7 @@
                 lastFpId:-1,
                 loading:true,
                 newPlayerColorDisplay:false,
+                addOfferLoading:false,
                 addYearBtnVisible:true,
                 offerFlow:{
                     status:1,
@@ -411,7 +412,7 @@
             },
             viewSignFlow(row){
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/freemarket/offer/getSignFlow/"+row.offerFlowId, null, {
+                this.axios.post("http://www.jrsports.com/api/sign/offerFlow/getOfferFlow/"+row.offerFlowId, null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -419,7 +420,7 @@
                 }).then(function (response) {
                     const freeResponse = response.data;
                     if (freeResponse.code === 0) {
-                        let candidate=freeResponse.data.teamCandidateList;
+                        let candidate=freeResponse.data.flowOfferList;
                         candidate.forEach(function (item) {
                             if(item.status==0){
                                 item.status="未发送";
@@ -434,7 +435,7 @@
                             }
                         });
                         me.signFlowData=candidate;
-                        const of=freeResponse.data.offerFlow;
+                        const of=freeResponse.data;
                         me.offerFlow.status=of.status;
                         me.offerFlow.flowStartTime=of.flowStartTime;
                         if(of.status==1){
@@ -499,6 +500,7 @@
                 });
             },
             addOffer(){
+                this.addOfferLoading=true;
                 const me = this;
                 this.axios.post("http://www.jrsports.com/api/freemarket/offer/addOffer", {
                     fpId:this.addOfferForm.fpId,
@@ -516,6 +518,7 @@
                             message: "报价成功",
                             type: "success"
                         });
+                        me.addOfferLoading=false;
                         me.addOfferDialogVisible=false;
                     } else {
                         me.$message({
@@ -576,7 +579,7 @@
                 const me=this;
                 this.freePlayerListData.forEach(function (item) {
                     var t=parseInt((item.expireTime-new Date().getTime())/1000);
-                    if(t>0){
+                    if(t>=0){
                         item.timeValLeft=t;
                         // console.log(item.timeValLeft);
                         item.timeLeft=me.secondsToTime(t);

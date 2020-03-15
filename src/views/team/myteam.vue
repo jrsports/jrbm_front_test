@@ -11,6 +11,21 @@
             </el-aside>
             <el-container>
                 <el-main>
+                    <el-row type="flex" align="middle">
+                        <el-col :span="10"></el-col>
+                        <el-col :span="4">
+                            <h3>总进攻：156</h3>
+                        </el-col>
+                        <el-col :span="4">
+                            <h3>总防守：122</h3>
+                        </el-col>
+                        <el-col :span="6">
+                            <div>
+                                <el-button icon="el-icon-sort" @click="openSubstitute">换人</el-button>
+                            </div>
+                        </el-col>
+
+                    </el-row>
                     <el-row :gutter="20">
                         <el-col :span="2">
                             <h3>
@@ -37,9 +52,7 @@
                             </div>
                         </el-col>
                         <el-col :span="2">
-                            <div>
-                                <el-button @click="openSubstitute">{{subs}}</el-button>
-                            </div>
+
                         </el-col>
                     </el-row>
                     <el-row :gutter="20">
@@ -169,7 +182,6 @@
                     salary: 4800,
                     order: 1
                 }],
-                subs: "开启换人",
                 userPlayerDetailDialogVisible: false,
                 playerDetail: {
                     avatarUrl: "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png",
@@ -195,15 +207,15 @@
                         let nextTotalSalary=0;
                         rec.forEach(function (item) {
                             if(item.order==1){
-                                item.order="首发PG"
+                                item.orderStr="首发PG"
                             }else if(item.order==2){
-                                item.order="首发SG"
+                                item.orderStr="首发SG"
                             }else if(item.order==3){
-                                item.order="首发SF"
+                                item.orderStr="首发SF"
                             }else if(item.order==4){
-                                item.order="首发PF"
+                                item.orderStr="首发PF"
                             }else if(item.order==5){
-                                item.order="首发C"
+                                item.orderStr="首发C"
                             }
                             if(item.position==1){
                                 item.position="PG"
@@ -276,7 +288,6 @@
                     substituteList.push(upId);
                     if (substituteList.length == 2) {
                         this.substitute(substituteList[0], substituteList[1]);
-                        console.log("换人：" + substituteList[0] + "换" + substituteList[1]);
                         substituteList = [];
 
                     }
