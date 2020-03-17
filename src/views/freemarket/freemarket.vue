@@ -52,7 +52,7 @@
                                         <el-button plain type="info" @click="viewPlayerDetail(fp.fpId);userPlayerDetailDialogVisible=true">球员详情</el-button>
                                     </el-col>
                                     <el-col :span="12" style="text-align: center" v-if="fp.timeValLeft>0">
-                                        <el-button plain type="success" @click="addOfferDialogVisible=true;addOfferForm.fpId=fp.fpId">谈判报价</el-button>
+                                        <el-button plain type="success" @click="addOfferDialogVisible=true;addOfferForm.fpId=fp.fpId;getTeamOfferHistory();">谈判报价</el-button>
                                     </el-col>
                                 </el-row>
                                 <el-row style="margin-top: 30px" v-if="fp.timeValLeft>0">
@@ -101,6 +101,28 @@
                             <el-col :span="6">
                                 <h3>总计：{{addOfferForm.totalSeason}}年{{addOfferForm.totalSalary}}万</h3>
                             </el-col>
+                        </el-row>
+                        <el-row>
+<!--                            :span-method="objectSpanMethod"-->
+                            <el-table
+                                    :data="teamOfferHistoryData"
+
+                                    border
+                                    style="width: 100%; margin-top: 20px">
+<!--                                <el-table-column-->
+<!--                                        prop="offerContractSalaryList.times"-->
+<!--                                        label="报价次序"-->
+<!--                                        width="180">-->
+<!--                                </el-table-column>-->
+                                <el-table-column
+                                        prop="offerContractSalaryList.season"
+                                        label="赛季">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="offerContractSalaryList.salary"
+                                        label="薪资">
+                                </el-table-column>
+                            </el-table>
                         </el-row>
 
                     </el-dialog>
@@ -223,6 +245,7 @@
                 freePlayerCount:0,
                 offensive:200,
                 defensive:200,
+                teamOfferHistoryData:[],
                 originalTeam:"originalTeam",
                 position:"PG",
                 offerDialogVisible:false,
@@ -520,6 +543,25 @@
                         });
                         me.addOfferLoading=false;
                         me.addOfferDialogVisible=false;
+                    } else {
+                        me.$message({
+                            message: freeResponse.msg,
+                            type: "warning"
+                        });
+                    }
+                });
+            },
+            getTeamOfferHistory(){
+                const me = this;
+                this.axios.post("http://www.jrsports.com/api/freemarket/offer//getTeamOfferRecordHistory/"+me.addOfferForm.fpId, null, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const freeResponse = response.data;
+                    if (freeResponse.code === 0) {
+                        me.teamOfferHistoryData=freeResponse.data;
                     } else {
                         me.$message({
                             message: freeResponse.msg,

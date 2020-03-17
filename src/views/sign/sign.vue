@@ -38,11 +38,11 @@
                                     label="签约类型">
                             </el-table-column>
                             <el-table-column
-                                    prop="expireTime"
+                                    prop="timeLeft"
                                     label="截止时间">
                             </el-table-column>
                             <el-table-column label="签约">
-                                <template slot-scope="scope">
+                                <template slot-scope="scope" v-if="scope.row.timeLeft!='已过期'">
                                     <el-button
                                             size="mini"
                                             @click="signContract(scope.row)">接受</el-button>
@@ -56,7 +56,7 @@
                     <el-divider></el-divider>
                     <el-card class="box-card">
                         <div slot="header">
-                            <span>已签约</span>
+                            <span>签约记录</span>
                         </div>
                         <el-table
                                 v-loading="loading"
@@ -172,6 +172,7 @@
                                 item.type="签约";
                             }
                         });
+                        setInterval(me.startTimer,1000);
                        me.unSignedData=sd;
                     } else {
                         me.$message({
@@ -283,7 +284,33 @@
                         me.contractDetailData=item.contractDetailDto.contractSalaryEntityList;
                     }
                 })
-            }
+            },
+            startTimer(){
+                const me=this;
+                let temp=[];
+                this.unSignedData.forEach(function (item) {
+                    var t=parseInt((item.expireTime-new Date().getTime())/1000);
+                    if(t>0){
+                        item.timeValLeft=t;
+                        // console.log(item.timeValLeft);
+                        item.timeLeft=me.secondsToTime(t);
+                    }else{
+                        item.timeLeft="已过期";
+                    }
+                    temp.push(item);
+                });
+                this.unSignedData=temp;
+            },
+            secondsToTime(s) {
+                let h;
+                h = Math.floor(s / 60);
+                s = s % 60;
+                h += '';
+                s += '';
+                h = (h.length == 1) ? '0' + h : h;
+                s = (s.length == 1) ? '0' + s : s;
+                return h + ':' + s;
+            },
         }
     }
 </script>
