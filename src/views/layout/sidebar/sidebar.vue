@@ -26,7 +26,7 @@
                     <i class="el-icon-location"></i>
                     <span>比赛中心</span>
                 </template>
-                <el-menu-item index="4-1">赛季</el-menu-item>
+                <el-menu-item index="4-1" @click="getSeasonPage">赛季</el-menu-item>
                 <el-menu-item index="4-2" @click="getMatchPage">排位</el-menu-item>
                 <el-menu-item index="4-3">杯赛</el-menu-item>
             </el-submenu>
@@ -73,6 +73,9 @@
             },
             getMatchPage(){
                 this.$router.push('/match')
+            },
+            getSeasonPage(){
+                this.$router.push('/season')
             },
             getFreeMarketPage(){
                 this.$router.push('/freemarket')

@@ -104,6 +104,7 @@
                         </el-row>
                         <el-row>
 <!--                            :span-method="objectSpanMethod"-->
+                            <h3>报价历史</h3>
                             <el-table
                                     :data="teamOfferHistoryData"
 
@@ -115,11 +116,11 @@
 <!--                                        width="180">-->
 <!--                                </el-table-column>-->
                                 <el-table-column
-                                        prop="offerContractSalaryList.season"
+                                        prop="season"
                                         label="赛季">
                                 </el-table-column>
                                 <el-table-column
-                                        prop="offerContractSalaryList.salary"
+                                        prop="salary"
                                         label="薪资">
                                 </el-table-column>
                             </el-table>
@@ -561,7 +562,7 @@
                 }).then(function (response) {
                     const freeResponse = response.data;
                     if (freeResponse.code === 0) {
-                        me.teamOfferHistoryData=freeResponse.data;
+                        me.teamOfferHistoryData=freeResponse.data[0].offerContractSalaryList;
                     } else {
                         me.$message({
                             message: freeResponse.msg,

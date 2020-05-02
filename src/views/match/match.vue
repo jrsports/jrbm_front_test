@@ -26,7 +26,7 @@
                         <el-button @click="startMatchMaking" v-if="startBtnVisible" style="width:80%;margin-left: 10%;">
                             开始匹配
                         </el-button>
-                        <el-button @click="testEnterGame">进入比赛</el-button>
+<!--                        <el-button @click="testEnterGame">进入比赛</el-button>-->
                         <el-button @click="cancelMatchMaking" v-if="cancelBtnVisible" plain type="danger" style="width:80%;margin-left: 10%;">取消匹配</el-button>
                         <div style="text-align:center" v-if="ongoingmatchVisible">
                             主队-{{homeTeamName}} vs 客队-{{awayTeamName}}
