@@ -246,7 +246,7 @@
             },
             getFinishedMatch() {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/matchserver/match/getFinishedMatch", null, {
+                this.axios.post("http://www.jrsports.com/api/matchserver/match/getFinishedMatch/2", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
