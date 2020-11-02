@@ -9,9 +9,9 @@
             </el-aside>
             <el-container>
                 <el-main>
-                    <div v-if="signUpStatus==2">
+                    <div v-if="seasonStatus.signUpStatus==2">
                         <el-tabs v-model="activeName" type="card" @tab-click="tabSwitch">
-                            <el-tab-pane label="赛季首页" name="main">
+                            <el-tab-pane label="主页" name="main">
                                 <el-row>
                                     <el-col :span="14">
                                         <el-row>
@@ -86,13 +86,19 @@
                                     </el-col>
                                 </el-row>
                             </el-tab-pane>
-                            <el-tab-pane label="赛程管理" name="schedule">
+                            <el-tab-pane label="赛程" name="schedule">
                                 <el-switch
                                         v-model="scheduleSwitch"
                                         active-text="我的赛程"
                                         inactive-text="全部赛程"
                                         @change="switchSchedule">
                                 </el-switch>
+                                <el-date-picker
+                                        v-model="scheduleDate"
+                                        type="date"
+                                        placeholder="选择日期">
+                                </el-date-picker>
+                                <el-button @click="getPlayOffView">季后赛视图</el-button>
                                 <el-table :data="myScheduleData" height="750">
                                     <el-table-column type="index" label="场次"></el-table-column>
                                     <el-table-column property="matchTime" label="比赛时间"></el-table-column>
@@ -119,7 +125,7 @@
                                     </el-table-column>
                                 </el-table>
                             </el-tab-pane>
-                            <el-tab-pane label="数据统计" name="stats">
+                            <el-tab-pane label="数据" name="stats">
                                 <el-tabs v-model="statsTab" @tab-click="handleStatsTabSwitch">
                                     <el-tab-pane label="球队数据" name="teamStats">
                                         <el-tabs v-model="teamStatsTab" tab-position="left" @tab-click="handleTeamStatsSwitch">
@@ -150,7 +156,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="得分榜" name="score">
-                                                <el-table :data="teamAvgScoreRankData" >
+                                                <el-table :data="teamStatsRankData" >
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="teamName"
                                                                      label="球队"></el-table-column>
@@ -163,7 +169,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="失分榜" name="loss">
-                                                <el-table :data="teamAvgLossRankData" >
+                                                <el-table :data="teamStatsRankData" >
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="teamName"
                                                                      label="球队"></el-table-column>
@@ -176,7 +182,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="篮板榜" name="reb">
-                                                <el-table :data="teamAvgRebRankData" >
+                                                <el-table :data="teamStatsRankData" >
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="teamName"
                                                                      label="球队"></el-table-column>
@@ -188,14 +194,161 @@
                                                                      label="场均篮板"></el-table-column>
                                                 </el-table>
                                             </el-tab-pane>
+                                            <el-tab-pane label="助攻榜" name="assist">
+                                                <el-table :data="teamStatsRankData" >
+                                                    <el-table-column type="index" label="排名"></el-table-column>
+                                                    <el-table-column property="teamName"
+                                                                     label="球队"></el-table-column>
+                                                    <el-table-column property="matchCount"
+                                                                     label="比赛场数"></el-table-column>
+                                                    <el-table-column property="total"
+                                                                     label="总助攻"></el-table-column>
+                                                    <el-table-column property="avg"
+                                                                     label="场均助攻"></el-table-column>
+                                                </el-table>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="抢断榜" name="steal">
+                                                <el-table :data="teamStatsRankData" >
+                                                    <el-table-column type="index" label="排名"></el-table-column>
+                                                    <el-table-column property="teamName"
+                                                                     label="球队"></el-table-column>
+                                                    <el-table-column property="matchCount"
+                                                                     label="比赛场数"></el-table-column>
+                                                    <el-table-column property="total"
+                                                                     label="总抢断"></el-table-column>
+                                                    <el-table-column property="avg"
+                                                                     label="场均抢断"></el-table-column>
+                                                </el-table>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="失误榜" name="turnover">
+                                                <el-table :data="teamStatsRankData" >
+                                                    <el-table-column type="index" label="排名"></el-table-column>
+                                                    <el-table-column property="teamName"
+                                                                     label="球队"></el-table-column>
+                                                    <el-table-column property="matchCount"
+                                                                     label="比赛场数"></el-table-column>
+                                                    <el-table-column property="total"
+                                                                     label="总失误"></el-table-column>
+                                                    <el-table-column property="avg"
+                                                                     label="场均失误"></el-table-column>
+                                                </el-table>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="盖帽榜" name="block">
+                                                <el-table :data="teamStatsRankData" >
+                                                    <el-table-column type="index" label="排名"></el-table-column>
+                                                    <el-table-column property="teamName"
+                                                                     label="球队"></el-table-column>
+                                                    <el-table-column property="matchCount"
+                                                                     label="比赛场数"></el-table-column>
+                                                    <el-table-column property="total"
+                                                                     label="总盖帽"></el-table-column>
+                                                    <el-table-column property="avg"
+                                                                     label="场均盖帽"></el-table-column>
+                                                </el-table>
+                                            </el-tab-pane>
                                         </el-tabs>
                                     </el-tab-pane>
-                                    <el-tab-pane label="球员数据" name="playerStats">配置管理</el-tab-pane>
+                                    <el-tab-pane label="球员数据" name="playerStats">
+                                        <el-tabs v-model="playerStatsTab" tab-position="left" @tab-click="handlePlayerStatsSwitch">
+                                            <el-tab-pane label="得分榜" name="score">
+                                                <el-table :data="playerStatsRankData" >
+                                                    <el-table-column type="index" label="排名"></el-table-column>
+                                                    <el-table-column property="playerName"
+                                                                     label="球员"></el-table-column>
+                                                    <el-table-column property="teamName"
+                                                                     label="球队"></el-table-column>
+                                                    <el-table-column property="matchCount"
+                                                                     label="比赛场数"></el-table-column>
+                                                    <el-table-column property="total"
+                                                                     label="总得分"></el-table-column>
+                                                    <el-table-column property="avg"
+                                                                     label="场均得分"></el-table-column>
+                                                </el-table>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="篮板榜" name="reb">
+                                                <el-table :data="playerStatsRankData" >
+                                                    <el-table-column type="index" label="排名"></el-table-column>
+                                                    <el-table-column property="playerName"
+                                                                     label="球员"></el-table-column>
+                                                    <el-table-column property="teamName"
+                                                                     label="球队"></el-table-column>
+                                                    <el-table-column property="matchCount"
+                                                                     label="比赛场数"></el-table-column>
+                                                    <el-table-column property="total"
+                                                                     label="总篮板"></el-table-column>
+                                                    <el-table-column property="avg"
+                                                                     label="场均篮板"></el-table-column>
+                                                </el-table>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="助攻榜" name="assist">
+                                                <el-table :data="playerStatsRankData" >
+                                                    <el-table-column type="index" label="排名"></el-table-column>
+                                                    <el-table-column property="playerName"
+                                                                     label="球员"></el-table-column>
+                                                    <el-table-column property="teamName"
+                                                                     label="球队"></el-table-column>
+                                                    <el-table-column property="matchCount"
+                                                                     label="比赛场数"></el-table-column>
+                                                    <el-table-column property="total"
+                                                                     label="总助攻"></el-table-column>
+                                                    <el-table-column property="avg"
+                                                                     label="场均助攻"></el-table-column>
+                                                </el-table>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="抢断榜" name="steal">
+                                                <el-table :data="playerStatsRankData" >
+                                                    <el-table-column type="index" label="排名"></el-table-column>
+                                                    <el-table-column property="playerName"
+                                                                     label="球员"></el-table-column>
+                                                    <el-table-column property="teamName"
+                                                                     label="球队"></el-table-column>
+                                                    <el-table-column property="matchCount"
+                                                                     label="比赛场数"></el-table-column>
+                                                    <el-table-column property="total"
+                                                                     label="总抢断"></el-table-column>
+                                                    <el-table-column property="avg"
+                                                                     label="场均抢断"></el-table-column>
+                                                </el-table>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="失误榜" name="turnover">
+                                                <el-table :data="playerStatsRankData" >
+                                                    <el-table-column type="index" label="排名"></el-table-column>
+                                                    <el-table-column property="playerName"
+                                                                     label="球员"></el-table-column>
+                                                    <el-table-column property="teamName"
+                                                                     label="球队"></el-table-column>
+                                                    <el-table-column property="matchCount"
+                                                                     label="比赛场数"></el-table-column>
+                                                    <el-table-column property="total"
+                                                                     label="总失误"></el-table-column>
+                                                    <el-table-column property="avg"
+                                                                     label="场均失误"></el-table-column>
+                                                </el-table>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="盖帽榜" name="block">
+                                                <el-table :data="playerStatsRankData" >
+                                                    <el-table-column type="index" label="排名"></el-table-column>
+                                                    <el-table-column property="playerName"
+                                                                     label="球员"></el-table-column>
+                                                    <el-table-column property="teamName"
+                                                                     label="球队"></el-table-column>
+                                                    <el-table-column property="matchCount"
+                                                                     label="比赛场数"></el-table-column>
+                                                    <el-table-column property="total"
+                                                                     label="总盖帽"></el-table-column>
+                                                    <el-table-column property="avg"
+                                                                     label="场均盖帽"></el-table-column>
+                                                </el-table>
+                                            </el-tab-pane>
+                                        </el-tabs>
+                                    </el-tab-pane>
                                 </el-tabs>
                             </el-tab-pane>
+                            <el-tab-pane label="执教" name="coach"></el-tab-pane>
+                            <el-tab-pane label="联盟" name="league"></el-tab-pane>
                         </el-tabs>
                     </div>
-                    <div v-if="signUpStatus!=2">
+                    <div v-if="seasonStatus.signUpStatus!=2">
                         <el-row>
                             <h1 style="font-size: 5em;text-align: center">休赛期还剩15天</h1>
                         </el-row>
@@ -207,9 +360,9 @@
                         </el-row>
                         <el-row type="flex" justify="center">
                             <el-button type="success" plain style="font-size: 2em"
-                                       v-if="signUpStatus==0" @click="applySeasonDialogVisible=true">报名
+                                       v-if="seasonStatus.signUpStatus==0" @click="applySeasonDialogVisible=true">报名
                             </el-button>
-                            <h3 v-if="signUpStatus==1">已报名，请等待分配结果</h3>
+                            <h3 v-if="seasonStatus.signUpStatus==1">已报名，请等待分配结果</h3>
                         </el-row>
                     </div>
 
@@ -236,9 +389,7 @@
                         </el-form>
                     </el-dialog>
 
-                    <el-dialog title="我的赛程" :visible.sync="scheduleDialogVisible" width="80%">
 
-                    </el-dialog>
 
                     <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" close-on-click-modal=false width="100%"
                                @close="quitLive">
@@ -335,13 +486,20 @@
         data() {
             return {
                 scheduleSwitch:true,
+                scheduleDate:new Date(),
                 teamAvgLossRankData:[],
                 teamAvgRebRankData:[],
                 awayStatsData:[],
                 homeStatsData:[],
+                teamStatsRankData:[],
+                playerStatsRankData:[],
                 teamStatsTab:"west",
+                playerStatsTab:"score",
                 statsTab:"teamStats",
-                signUpStatus:0,
+                seasonStatus:{
+                    signUpStatus:0,
+                    phase:0
+                },
                 rankActiveName: "west",
                 vsTeam: "Koliday   VS    ccTeam",
                 applySeasonDialogVisible: false,
@@ -378,7 +536,7 @@
         async mounted() {
             await this.getSignUpStatus();
             console.log(this.signUpStatus);
-            if (this.signUpStatus==2) {
+            if (this.seasonStatus.signUpStatus==2) {
                 this.getMyTodaySchedule();
                 this.getTeamRank(1);
             }
@@ -387,7 +545,7 @@
 
             signUp() {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/season/signUp/", {
+                this.axiosPost.post("http://www.jrsports.com/api/season/signUp/", {
                     conference: me.signUpForm.conference == "西部" ? 1 : 2
                 }, {
                     headers: {
@@ -412,7 +570,7 @@
             },
             async getSignUpStatus() {
                 const me = this;
-                await this.axios.post("http://www.jrsports.com/api/season/signUp/getSignUpStatus", null, {
+                await this.axiosPost.post("http://www.jrsports.com/api/season/signUp/getSeasonStatus", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -420,7 +578,7 @@
                 }).then(function (response) {
                     const res = response.data;
                     if (res.code === 0) {
-                        me.signUpStatus = res.data;
+                        me.seasonStatus = res.data;
                     } else {
                         me.$message({
                             message: res.msg,
@@ -438,7 +596,9 @@
             },
             getMySchedule() {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/season/schedule/getMySchedule", null, {
+                this.axiosPost.post("http://www.jrsports.com/api/season/schedule/getMySchedule", {
+                    date:me.scheduleDate
+                }, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -473,7 +633,10 @@
             },
             getAllSchedule() {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/season/schedule/getAllSchedule", null, {
+                this.axiosPost.post("http://www.jrsports.com/api/season/schedule/getSchedule", {
+                    teamId:null,
+                    date:me.scheduleDate
+                }, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -509,7 +672,9 @@
             },
             getMyTodaySchedule() {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/season/schedule/getMyTodaySchedule", null, {
+                this.axiosPost.post("http://www.jrsports.com/api/season/schedule/getMyTodaySchedule", {
+                    date:me.scheduleDate
+                }, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -545,9 +710,29 @@
                     }
                 });
             },
+            getPlayOffView() {
+                const me = this;
+                this.axiosPost.post("http://www.jrsports.com/api/season/schedule/getPlayOffView", null, {
+                    headers: {
+                        "userToken": localStorage.getItem("userToken"),
+                        "teamToken": sessionStorage.getItem("teamToken")
+                    }
+                }).then(function (response) {
+                    const res = response.data;
+                    if (res.code === 0) {
+                        let d = res.data;
+                        console.log(d);
+                    } else {
+                        me.$message({
+                            message: res.msg,
+                            type: "warning"
+                        });
+                    }
+                });
+            },
             getTeamRank(conference) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/season/stats/getTeamRank/" + conference, null, {
+                this.axiosPost.post("http://www.jrsports.com/api/season/stats/getTeamRank/" + conference, null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -578,9 +763,13 @@
                 });
             },
 
-            getSeasonAvgScoreRank() {
+            getSeasonStatsRank(type,phase,target) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/season/stats/getTeamAvgScoreRank", null, {
+                this.axiosPost.post("http://www.jrsports.com/api/season/stats/getTeamStatsRank", {
+                    type:type,
+                    phase:phase,
+                    target:target
+                }, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -589,7 +778,7 @@
                     const res = response.data;
                     if (res.code === 0) {
                         let d = res.data;
-                        me.teamAvgScoreRankData = d;
+                        me.teamStatsRankData = d;
                     } else {
                         me.$message({
                             message: res.msg,
@@ -598,9 +787,12 @@
                     }
                 });
             },
-            getSeasonAvgLossRank() {
+            getSeasonPlayerStatsRank(type,phase) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/season/stats/getTeamAvgLossRank", null, {
+                this.axiosPost.post("http://www.jrsports.com/api/season/stats/getPlayerStatsRank", {
+                    type:type,
+                    phase:phase
+                }, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -609,27 +801,7 @@
                     const res = response.data;
                     if (res.code === 0) {
                         let d = res.data;
-                        me.teamAvgLossRankData = d;
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
-                    }
-                });
-            },
-            getSeasonAvgRebRank() {
-                const me = this;
-                this.axios.post("http://www.jrsports.com/api/season/stats/getTeamAvgRebRank", null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
-                    if (res.code === 0) {
-                        let d = res.data;
-                        me.teamAvgRebRankData = d;
+                        me.playerStatsRankData = d;
                     } else {
                         me.$message({
                             message: res.msg,
@@ -643,7 +815,6 @@
                 this.matchLive(row.matchId);
             },
             async matchLive(matchId) { //连接websocket
-                console.log("!!!");
                 await this.applyWsToken();
                 await this.applyTicket(matchId);
                 const wsToken = sessionStorage.getItem("wsToken");
@@ -655,7 +826,7 @@
                 this.websock.onclose = this.websocketclose;
             },
             async applyWsToken() {
-                await this.axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
+                await this.axiosPost.post("http://www.jrsports.com/api/user/websocket/apply", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -672,7 +843,7 @@
             },
             async applyTicket(matchId) {
                 const me = this;
-                await this.axios.post("http://www.jrsports.com/api/matchserver/ticket/apply/" + matchId, null,{
+                await this.axiosPost.post("http://www.jrsports.com/api/matchserver/ticket/apply/" + matchId, null,{
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -811,16 +982,44 @@
                 } else if (tab.name == "east") {
                     this.getTeamRank(2);
                 } else if (tab.name == "score") {
-                    this.getSeasonAvgScoreRank();
+                    this.getSeasonStatsRank("score",0,0);
                 } else if(tab.name=="loss"){
-                    this.getSeasonAvgLossRank();
+                    this.getSeasonStatsRank("score",0,1);
                 } else if(tab.name=="reb"){
-                    this.getSeasonAvgRebRank();
+                    this.getSeasonStatsRank("rebound",0,0);
+                }else if(tab.name=="assist"){
+                    this.getSeasonStatsRank("assist",0,0);
+                }else if(tab.name=="steal"){
+                    this.getSeasonStatsRank("steal",0,0);
+                }else if(tab.name=="turnover"){
+                    this.getSeasonStatsRank("turnover",0,0);
+                }else if(tab.name=="block"){
+                    this.getSeasonStatsRank("block",0,0);
                 }
+            },
+            handlePlayerStatsSwitch(tab){
+                if (tab.name == "score") {
+                    this.getSeasonPlayerStatsRank("score",0);
+                } else if(tab.name=="reb"){
+                    this.getSeasonPlayerStatsRank("rebound",0);
+                }else if(tab.name=="assist"){
+                    this.getSeasonPlayerStatsRank("assist",0);
+                }else if(tab.name=="steal"){
+                    this.getSeasonPlayerStatsRank("steal",0);
+                }else if(tab.name=="turnover"){
+                    this.getSeasonPlayerStatsRank("turnover",0);
+                }else if(tab.name=="block"){
+                    this.getSeasonPlayerStatsRank("block",0);
+                }
+            },
+            handleStatsTabSwitch(tab){
+              if(tab.name=="playerStats" && this.playerStatsRankData.length==0){
+                  this.getSeasonPlayerStatsRank("score",0);
+              }
             },
             viewStats(row) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/matchserver/match/getMatchDetailInfo/"+row.matchId,null, {
+                this.axiosPost.post("http://www.jrsports.com/api/matchserver/match/getMatchDetailInfo/"+row.matchId,null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")

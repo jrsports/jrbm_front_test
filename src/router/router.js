@@ -82,52 +82,11 @@ export const constantRouterMap = [
     },
 
     {
-        path: "/accessor",
-        component: () => import('@/views/esign/accessor'),
-    },
-    {
-        path: "/accessordetail",
-        component: () => import('@/views/esign/accessordetail'),
-    },
-    {
-        path: "/line",
-        component: () => import('@/views/esign/line'),
-    },
-    {
-        path: "/linedetail",
-        component: () => import('@/views/esign/linedetail'),
-    },
-    {
-        path: "/flow",
-        component: () => import('@/views/esign/flow'),
-    },
-    {
-        path: "/flowdetail",
-        component: () => import('@/views/esign/flowdetail'),
-    },
-    {
-        path: "/signrecord",
-        component: () => import('@/views/esign/signrecord'),
-    },
-    {
-        path: "/signrecorddetail",
-        component: () => import('@/views/esign/signrecorddetail'),
-    },
-    {
-        path: "/signer",
-        component: () => import('@/views/esign/signer'),
-    },
-    {
-        path: "/signerdetail",
-        component: () => import('@/views/esign/signerdetail'),
-    },
-    {
-        path: "/archieve",
-        component: () => import('@/views/esign/archieve'),
-    },
-    {
-        path: "/archievedetail",
-        component: () => import('@/views/esign/archievedetail'),
+        path: "/trade",
+        component: () => import('@/views/trade/trade'),
+        meta:{
+            needLogin:true
+        }
     }
 
 ];

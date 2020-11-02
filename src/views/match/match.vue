@@ -220,7 +220,7 @@
             },
             getOngoingMatch() {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/matchserver/match/getOngoingMatch", null, {
+                this.axiosPost.post("http://www.jrsports.com/api/matchserver/match/getOngoingMatch/2", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -246,7 +246,7 @@
             },
             getFinishedMatch() {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/matchserver/match/getFinishedMatch/2", null, {
+                this.axiosPost.post("http://www.jrsports.com/api/matchserver/match/getFinishedMatch/2", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -263,7 +263,7 @@
             },
             viewStats(row) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/matchserver/match/getMatchStats/"+row.matchId,null, {
+                this.axiosPost.post("http://www.jrsports.com/api/matchserver/match/getMatchStats/"+row.matchId,null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -286,7 +286,7 @@
             substituteOnCourt() {
                 console.log("发送换人请求"+this.playerIn+" "+this.playerOut);
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/matchserver/match/substitute", {
+                this.axiosPost.post("http://www.jrsports.com/api/matchserver/match/substitute", {
                     ticket:me.ticket,
                     substituteRequestDetailList:[{
                         playerIn:me.playerIn,
@@ -361,7 +361,7 @@
                 this.websock.onclose = this.websocketclose;
             },
             async applyWsToken() {
-                await this.axios.post("http://www.jrsports.com/api/user/websocket/apply", null, {
+                await this.axiosPost.post("http://www.jrsports.com/api/user/websocket/apply", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -378,7 +378,7 @@
             },
             async applyTicket(matchId) {
                 const me = this;
-                await this.axios.post("http://www.jrsports.com/api/matchserver/ticket/apply/" + matchId, null,{
+                await this.axiosPost.post("http://www.jrsports.com/api/matchserver/ticket/apply/" + matchId, null,{
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")

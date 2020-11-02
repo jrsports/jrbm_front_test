@@ -11,69 +11,136 @@
             </el-aside>
             <el-container>
                 <el-main>
-                    <el-row type="flex" align="middle">
-                        <el-col :span="10"></el-col>
-                        <el-col :span="4">
-                            <h3>总进攻：156</h3>
-                        </el-col>
-                        <el-col :span="4">
-                            <h3>总防守：122</h3>
-                        </el-col>
-                        <el-col :span="6">
-                            <div>
-                                <el-button icon="el-icon-sort" @click="openSubstitute">换人</el-button>
-                            </div>
-                        </el-col>
+                    <el-tabs tab-position="left" style="height: 900px;">
+                        <el-tab-pane label="大名单">
+                            <el-row>
+                                <el-col span="12">
+                                    <div>
+                                        dd
+                                    </div>
+                                </el-col>
+                                <el-col span="10">
+                                    <span>总工资/工资帽:{{lineUpData.totalSalary}}/{{lineUpData.salaryCap}}</span>
+                                </el-col>
+                                <el-button :icon="substituteLocked?'el-icon-lock':'el-icon-unlock'"
+                                           @click="handleSubstituteLock" circle style="float: right"></el-button>
+                            </el-row>
+                            <el-table
+                                    ref="rosterTable"
+                                    v-loading="rosterTableLoading"
+                                    :data="lineUpData.rosterList"
+                                    highlight-current-row
+                                    @current-change="handlePlayerSelect"
+                                    style="width: 100%">
+                                <el-table-column
+                                        prop="order"
+                                        label="序号"
+                                        width="100">
+                                </el-table-column>
+                                <el-table-column
+                                        label="球员"
+                                        width="100">
+                                    <template slot-scope="scope">
+                                        <div class="block">
+                                            <el-avatar shape="square" :size="50" :src="scope.row.avatarUrl"></el-avatar>
+                                        </div>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column
+                                        prop="chname"
+                                        label="中文名"
+                                        width="180">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="enname"
+                                        label="英文名"
+                                        width="180">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="position"
+                                        label="位置">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="type"
+                                        label="类型">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="price"
+                                        label="身价">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="currentSeasonSalary"
+                                        label="本赛季工资">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="overall"
+                                        label="总评">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="grade"
+                                        label="等级">
+                                </el-table-column>
+                                <el-table-column
+                                        fixed="right"
+                                        label="操作"
+                                        width="100">
+                                    <template slot-scope="scope">
+                                        <el-button @click="handlePlayerDetail(scope.row.upId)" type="text" size="small">
+                                            详细
+                                        </el-button>
+                                        <el-button type="text" size="small">编辑</el-button>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </el-tab-pane>
+                        <el-tab-pane label="备选名单">
+                            <el-table
+                                    :data="lineUpData.reserveList"
+                                    style="width: 100%">
+                                <el-table-column
+                                        label="球员"
+                                        width="100">
+                                    <template slot-scope="scope">
+                                        <div class="block">
+                                            <el-avatar shape="square" :size="50" :src="scope.row.avatarUrl"></el-avatar>
+                                        </div>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column
+                                        prop="chname"
+                                        label="中文名"
+                                        width="180">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="enname"
+                                        label="英文名"
+                                        width="180">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="position"
+                                        label="位置">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="type"
+                                        label="类型">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="price"
+                                        label="身价">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="overall"
+                                        label="总评">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="grade"
+                                        label="等级">
+                                </el-table-column>
+                            </el-table>
+                        </el-tab-pane>
+                        <el-tab-pane label="球员蛋"></el-tab-pane>
+                    </el-tabs>
 
-                    </el-row>
-                    <el-row :gutter="20">
-                        <el-col :span="2">
-                            <h3>
-                                首发阵容
-                            </h3>
-                        </el-col>
-                        <el-col :span="4" style="text-align: center" v-for="player in starting" :key="player.upId">
-                            <div class="block" @click="selectPlayer($event,player.upId)">
-                                <el-popover
-                                        placement="top-start"
-                                        :title="player.chname"
-                                        width="200"
-                                        trigger="hover">
-                                    <p>攻：{{player.offensive}}，防：{{player.defensive}}</p>
-                                    <p>位置：{{player.position}}，工资：{{player.salary}}w</p>
-                                    <el-button type="primary" icon="el-icon-edit" circle
-                                               @click="getUserPlayerDetail(player.upId);userPlayerDetailDialogVisible=true"></el-button>
-                                    <el-avatar slot=reference shape="square" :size="100"
-                                               :src="player.avatarUrl"></el-avatar>
-                                </el-popover>
-                                <p>{{player.chname}}</p>
-                                <p>{{player.enname}}</p>
-
-                            </div>
-                        </el-col>
-                        <el-col :span="2">
-
-                        </el-col>
-                    </el-row>
-                    <el-row :gutter="20">
-                        <el-col :span="2">
-                            <h3>
-                                替补阵容
-                            </h3>
-                        </el-col>
-                        <el-col :span="4" style="text-align: center" v-for="player in sub" :key="player">
-                            <div class="block" @click="selectPlayer($event,player.upId)">
-                                <el-avatar shape="square" :size="100" :src="player.avatarUrl"></el-avatar>
-                                <p>{{player.chname}}</p>
-                                <p>{{player.enname}}</p>
-                                <p>攻：{{player.offensive}}，防：{{player.defensive}}</p>
-                                <p>位置：{{player.position}}，工资：{{player.salary}}w</p>
-                            </div>
-                        </el-col>
-                        <el-col :span="2">
-
-                        </el-col>
-                    </el-row>
 
                     <el-dialog title="球员详情" :visible.sync="userPlayerDetailDialogVisible">
                         <el-row>
@@ -149,263 +216,121 @@
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header"
     // import Chat from "@/views/layout/chat/chat";
-    var ifSubstitute = false;
-    var substituteList = [];
+    import {getLineUp, getPlayerDetail, substitute} from "@/api/team";
+    import {convertPlayerInfo} from "@/utils/PlayerInfoUtil";
+
     export default {
         name: "gameindex",
         components: {Sidebar, NavBar},
         mounted() {
             this.getUserPlayerList();
         },
-        computed: {
-            starting: function () {
-                return this.playerList.filter(function (player) {
-                    return player.order <= 5
-                })
-            },
-            sub: function () {
-                return this.playerList.filter(function (player) {
-                    return player.order > 5
-                })
-            }
-        },
         data() {
             return {
                 teamName: "null",
-                playerList: [{
-                    avatarUrl: "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png",
-                    chname: "默认",
-                    enname: "default",
-                    offensive: 126,
-                    defensive: 110,
-                    position: "PG/SG",
-                    salary: 4800,
-                    order: 1
-                }],
+                lineUpData:{
+                    totalSalary:0,
+                    salaryCap:0,
+                    rosterList: [{
+                        avatarUrl: "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png",
+                        chname: "勒布朗-詹姆斯",
+                        enname: "Lebron James",
+                        offensive: 126,
+                        defensive: 110,
+                        position: "PG/SG",
+                        salary: 4800,
+                        overall: 97,
+                        type: "现役",
+                        price: "2390",
+                        grade: "S+",
+                        order: "1"
+                    }],
+                    reserveList: [{
+                        avatarUrl: "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png",
+                        chname: "勒布朗-詹姆斯",
+                        enname: "Lebron James",
+                        offensive: 126,
+                        defensive: 110,
+                        position: "PG/SG",
+                        salary: 4800,
+                        overall: 97,
+                        type: "现役",
+                        price: "2390",
+                        grade: "S+",
+                        order: 1
+                    }],
+                },
                 userPlayerDetailDialogVisible: false,
+                substituteLocked: true,
                 playerDetail: {
                     avatarUrl: "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png",
                     chname: "",
                     ability: {}
-                }
+                },
+                selectedUpId: -1,
+                rosterTableLoading: false
             }
         },
         methods: {
-
-
             getUserPlayerList() {
-                const me = this;
-                this.axios.post("http://www.jrsports.com/api/player/userPlayer/getUserPlayerDetailList", null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+                this.rosterTableLoading = true;
+                getLineUp().then(res => {
                     if (res.code === 0) {
-                        let rec=res.data;
-                        let nextTotalSalary=0;
-                        rec.forEach(function (item) {
-                            if(item.order==1){
-                                item.orderStr="首发PG"
-                            }else if(item.order==2){
-                                item.orderStr="首发SG"
-                            }else if(item.order==3){
-                                item.orderStr="首发SF"
-                            }else if(item.order==4){
-                                item.orderStr="首发PF"
-                            }else if(item.order==5){
-                                item.orderStr="首发C"
-                            }
-                            if(item.position==1){
-                                item.position="PG"
-                            }else if(item.position==2){
-                                item.position="SG"
-                            }else if(item.position==3){
-                                item.position="SF"
-                            }else if(item.position==4){
-                                item.position="PF"
-                            }else if(item.position==5){
-                                item.position="C"
-                            }
-
-                            if(item.grade==1){
-                                item.grade="S+"
-                            }else if(item.grade==2){
-                                item.grade="S"
-                            }else if(item.grade==3){
-                                item.grade="S-"
-                            }else if(item.grade==4){
-                                item.grade="A+"
-                            }else if(item.grade==5){
-                                item.grade="A"
-                            }else if(item.grade==6){
-                                item.grade="A-"
-                            }else if(item.grade==7){
-                                item.grade="B+"
-                            }else if(item.grade==8){
-                                item.grade="B"
-                            }else if(item.grade==9){
-                                item.grade="B-"
-                            }else if(item.grade==10){
-                                item.grade="C+"
-                            }else if(item.grade==11){
-                                item.grade="C"
-                            }else if(item.grade==12){
-                                item.grade="C-"
-                            }else if(item.grade==13){
-                                item.grade="D+"
-                            }else if(item.grade==14){
-                                item.grade="D"
-                            }else if(item.grade==15){
-                                item.grade="D-"
-                            }
-
-
-
-                            if(item.type==0){
-                                item.type="现役";
-                            }else{
-                                item.type="历史";
-                            }
-
-                            nextTotalSalary+=item.nextSeasonSalary;
-                            me.loading=false;
-                        });
-                        me.playerList=rec;
-                        me.nextTotalSalary=nextTotalSalary;
-                        // me.currentPlayerData.totalRecordCount=res.data.totalRecordCount;
-                        // me.currentPlayerData.totalPageCount=res.data.totalPageCount;
-                        // me.currentPlayerData.pageNo=res.data.pageNo;
-                        // me.currentPlayerData. pageSize=res.data. pageSize;
+                        this.lineUpData=res.data;
+                        this.lineUpData.rosterList.forEach(function (item) {
+                            convertPlayerInfo(item)
+                        })
+                        console.log(this.lineUpData);
+                        this.rosterTableLoading = false;
+                    }
+                })
+            },
+            handlePlayerSelect(row) {
+                if (this.substituteLocked) {
+                    this.$refs.rosterTable.setCurrentRow();
+                    return;
+                }
+                if (this.selectedUpId > 0) {
+                    // 取消选择
+                    if (this.selectedUpId === row.upId) {
+                        console.log(this.$refs.rosterTable);
+                        this.$refs.rosterTable.setCurrentRow();
                     } else {
-                        alert(res.message);
+                        this.substitute(this.selectedUpId, row.upId);
+                        this.selectedUpId = -1;
                     }
-                });
-            },
-            selectPlayer(event, upId) {
-                if (ifSubstitute) {
-                    substituteList.push(upId);
-                    if (substituteList.length == 2) {
-                        this.substitute(substituteList[0], substituteList[1]);
-                        substituteList = [];
 
-                    }
+                } else {
+                    this.selectedUpId = row.upId;
                 }
             },
-            openSubstitute() {
-                if (!ifSubstitute) {
-                    ifSubstitute = true;
-                    this.subs = "关闭换人";
-                } else {
-                    ifSubstitute = false;
-                    this.subs = "开启换人";
-                }
+            handleSubstituteLock() {
+                this.substituteLocked = !this.substituteLocked;
             },
             substitute(fromUpId, toUpId) {
-                const me = this;
-                //获取服务器列表和球队
-                this.axios.post("http://www.jrsports.com/api/user/team/substitutePlayer", {
-                    fromUpId: fromUpId,
-                    toUpId: toUpId
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
+                substitute({
+                        fromUpId: fromUpId,
+                        toUpId: toUpId
                     }
-                }).then(function (response) {
-                    const serverResponse = response.data;
-                    if (serverResponse.code == 0) {
-                        me.$message({
+                ).then(res => {
+                    if (res.code == 0) {
+                        this.$message({
                             message: "换人成功",
                             type: "success"
                         });
-                        me.playerList = serverResponse.data;
-                    } else {
-                        alert(serverResponse.msg);
+                        this.getUserPlayerList();
                     }
-
-                });
+                })
             },
-            getUserPlayerDetail(upId) {
-                const me = this;
-                this.axios.post("http://www.jrsports.com/api/player/userPlayer/getUserPlayerDetail/" + upId, null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+            handlePlayerDetail(upId) {
+                getPlayerDetail(upId).then(res => {
                     if (res.code === 0) {
                         let item = res.data;
-                        if (item.order == 1) {
-                            item.order = "首发PG"
-                        } else if (item.order == 2) {
-                            item.order = "首发SG"
-                        } else if (item.order == 3) {
-                            item.order = "首发SF"
-                        } else if (item.order == 4) {
-                            item.order = "首发PF"
-                        } else if (item.order == 5) {
-                            item.order = "首发C"
-                        }
-                        if (item.position == 1) {
-                            item.position = "PG"
-                        } else if (item.position == 2) {
-                            item.position = "SG"
-                        } else if (item.position == 3) {
-                            item.position = "SF"
-                        } else if (item.position == 4) {
-                            item.position = "PF"
-                        } else if (item.position == 5) {
-                            item.position = "C"
-                        }
-
-                        if (item.grade == 1) {
-                            item.grade = "S+"
-                        } else if (item.grade == 2) {
-                            item.grade = "S"
-                        } else if (item.grade == 3) {
-                            item.grade = "S-"
-                        } else if (item.grade == 4) {
-                            item.grade = "A+"
-                        } else if (item.grade == 5) {
-                            item.grade = "A"
-                        } else if (item.grade == 6) {
-                            item.grade = "A-"
-                        } else if (item.grade == 7) {
-                            item.grade = "B+"
-                        } else if (item.grade == 8) {
-                            item.grade = "B"
-                        } else if (item.grade == 9) {
-                            item.grade = "B-"
-                        } else if (item.grade == 10) {
-                            item.grade = "C+"
-                        } else if (item.grade == 11) {
-                            item.grade = "C"
-                        } else if (item.grade == 12) {
-                            item.grade = "C-"
-                        } else if (item.grade == 13) {
-                            item.grade = "D+"
-                        } else if (item.grade == 14) {
-                            item.grade = "D"
-                        } else if (item.grade == 15) {
-                            item.grade = "D-"
-                        }
-
-
-                        if (item.type == 0) {
-                            item.type = "现役";
-                        } else {
-                            item.type = "历史";
-                        }
-
-
-                        me.playerDetail = item;
-                    } else {
-                        alert(res.message);
+                        convertPlayerInfo(item);
+                        this.playerDetail = item;
+                        this.userPlayerDetailDialogVisible = true;
                     }
-                });
+                })
 
             }
         }

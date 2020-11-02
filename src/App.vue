@@ -13,7 +13,7 @@
             // async refreshTeamToken() {
             //     console.log("refresh");
             //     const me=this;
-            //     await this.axios.post("http://www.jrsports.com/api/user/team/refreshTeamToken", null, {
+            //     await this.axiosPost.post("http://www.jrsports.com/api/user/team/refreshTeamToken", null, {
             //         headers: {
             //             "userToken": localStorage.getItem("userToken"),
             //             "teamToken": sessionStorage.getItem("teamToken"),
@@ -35,10 +35,10 @@
         },
         created(){
             //刷新所有页面时，判断球队是否已经登录，如果登录了，需要重新连接websocket
-            if(sessionStorage.getItem("teamToken")){
-                //重连
-                this.globalws.connectToGlobalServer();
-            }
+            // if(sessionStorage.getItem("teamToken")){
+            //     //重连
+            //     this.globalws.connectToGlobalServer();
+            // }
         },
 
 

@@ -80,7 +80,7 @@
             getUserPlayerDetailList() {
                 const me = this;
                 this.loading=true;
-                this.axios.post("http://www.jrsports.com/api/player/userPlayer/getUserPlayerDetailList", null, {
+                this.axiosPost.post("http://www.jrsports.com/api/player/userPlayer/getUserPlayerDetailList", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")

@@ -152,7 +152,7 @@
         methods:{
             getUnsignedContractList() {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/sign/sign/getUnsignedContractList", {
+                this.axiosPost.post("http://www.jrsports.com/api/sign/sign/getUnsignedContractList", {
                     pageNo:1,
                     pageSize:10
                 }, {
@@ -184,7 +184,7 @@
             },
             getSignedContractList() {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/sign/sign/getSignedContractList", {
+                this.axiosPost.post("http://www.jrsports.com/api/sign/sign/getSignedContractList", {
                     pageNo:1,
                     pageSize:10
                 }, {
@@ -224,7 +224,7 @@
             },
             signContract(row) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/sign/sign/signContract", {
+                this.axiosPost.post("http://www.jrsports.com/api/sign/sign/signContract", {
                     contractId:row.contractId,
                     signToken:row.signToken
                 }, {
@@ -251,7 +251,7 @@
             },
             refuseContract(row) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/sign/sign/refuseContract", {
+                this.axiosPost.post("http://www.jrsports.com/api/sign/sign/refuseContract", {
                     contractId:row.contractId,
                     signToken:row.signToken
                 }, {

@@ -4,8 +4,9 @@
     <div>
         <el-menu :default-active="activeIndex" mode="horizontal">
             <el-menu-item index="1" @click="drawerVisible=true;getNotice()">通知中心</el-menu-item>
+            <el-avatar style="float:right" :src="getTeamAvatar"></el-avatar>
             <el-submenu index="2" style="float:right">
-                <template slot="title">{{teamName}}</template>
+                <template slot="title">{{getTeamName}}</template>
                 <el-menu-item index="3-1" @click="chatVisible=true;getFriendList()">好友</el-menu-item>
                 <el-menu-item index="3-2">选项2</el-menu-item>
                 <el-menu-item index="3-3" @click="exitTeam()">退出球队</el-menu-item>
@@ -231,6 +232,14 @@
     import Friend from '../../../global/globalWebsocket'
     export default {
         name: "navHeader",
+        computed:{
+            getTeamName(){
+                return this.$store.getters.teamName
+            },
+            getTeamAvatar(){
+                return this.$store.getters.teamAvatar
+            }
+        },
         data() {
             return {
                 activeIndex: '1',
@@ -255,7 +264,6 @@
                 friendSearchName: "",
                 currentSeason: "休赛期",
                 searchFriendCount: 0,
-                teamName: "",
                 jrFund: "$22,456,152,000  ",
                 jrCoin: 152,
                 chatVisible: false,
@@ -284,7 +292,7 @@
                 if (note[0].read == 1) {
                     return;
                 }
-                this.axios.post("http://www.jrsports.com/api/user/notice/read/" + noteId, null, {
+                this.axiosPost.post("http://www.jrsports.com/api/user/notice/read/" + noteId, null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -300,7 +308,7 @@
             },
             getNotice() {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/user/notice/getNotificationList", {
+                this.axiosPost.post("http://www.jrsports.com/api/user/notice/getNotificationList", {
                     pageNo: 1,
                     pageSize: 10
                 }, {
@@ -329,7 +337,7 @@
             },
             getFriendList() {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/user/friend/getFriendList", null, {
+                this.axiosPost.post("http://www.jrsports.com/api/user/friend/getFriendList", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -361,7 +369,7 @@
             },
             getFriendRequestList() {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/user/friend/getOtherFriendRequestList", null, {
+                this.axiosPost.post("http://www.jrsports.com/api/user/friend/getOtherFriendRequestList", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -377,7 +385,7 @@
             },
             getMyFriendRequestList() {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/user/friend/getMyFriendRequestList", null, {
+                this.axiosPost.post("http://www.jrsports.com/api/user/friend/getMyFriendRequestList", null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -393,7 +401,7 @@
             },
             acceptFriendRequest(friendId) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/user/friend/acceptFriendRequest/" + friendId, null, {
+                this.axiosPost.post("http://www.jrsports.com/api/user/friend/acceptFriendRequest/" + friendId, null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -414,7 +422,7 @@
             },
             refuseFriendRequest(friendId) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/user/friend/refuseFriendRequest/" + friendId, null, {
+                this.axiosPost.post("http://www.jrsports.com/api/user/friend/refuseFriendRequest/" + friendId, null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -435,7 +443,7 @@
             },
             cancelFriendRequest(friendId) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/user/friend/cancelFriendRequest/" + friendId, null, {
+                this.axiosPost.post("http://www.jrsports.com/api/user/friend/cancelFriendRequest/" + friendId, null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -456,7 +464,7 @@
             },
             removeFriend(friendId) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/user/friend/removeFriend/" + friendId, null, {
+                this.axiosPost.post("http://www.jrsports.com/api/user/friend/removeFriend/" + friendId, null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -481,7 +489,7 @@
                     return;
                 }
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/user/friend/searchFriend", {
+                this.axiosPost.post("http://www.jrsports.com/api/user/friend/searchFriend", {
                     name: name
                 }, {
                     headers: {
@@ -500,7 +508,7 @@
             },
             sendFriendRequest(teamId) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/user/friend/sendFriendRequest/" + teamId, null, {
+                this.axiosPost.post("http://www.jrsports.com/api/user/friend/sendFriendRequest/" + teamId, null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")

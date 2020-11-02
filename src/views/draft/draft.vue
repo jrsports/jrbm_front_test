@@ -68,7 +68,7 @@
         mounted(){
             const me = this;
             //初始化时加载球队信息
-            this.axios.post("http://www.jrsports.com/api/user/team/getTeamInfo",null,{
+            this.axiosPost.post("http://www.jrsports.com/api/user/team/getTeamInfo",null,{
                 headers:{
                     "userToken":localStorage.getItem("userToken"),
                     "teamToken":sessionStorage.getItem("teamToken")

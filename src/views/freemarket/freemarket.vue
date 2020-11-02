@@ -41,8 +41,8 @@
                                     </el-col>
                                     <el-col :span="16">
                                         <div>
-                                            <h3>{{fp.playerDetail.chname}}<span>{{fp.playerDetail.enname}}</span></h3>
-                                            <h3>{{fp.position}}|<span>进攻：{{fp.playerDetail.offensiveOverall}}防守：{{fp.playerDetail.defensiveOverall}}</span></h3>
+                                            <h3>{{fp.userPlayerBriefDto.chname}}<span>{{fp.userPlayerBriefDto.enname}}</span></h3>
+                                            <h3>{{fp.position}}|<span>进攻：{{fp.userPlayerBriefDto.offensiveOverall}}防守：{{fp.userPlayerBriefDto.defensiveOverall}}</span></h3>
                                             <h4>原属球队：{{fp.source}}</h4>
                                         </div>
                                     </el-col>
@@ -339,7 +339,7 @@
         methods:{
             refreshFreePlayer(fpIdOffset,count,more){
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/freemarket/free/getFreePlayerList", {
+                this.axiosPost.post("http://www.jrsports.com/api/freemarket/free/getFreePlayerList", {
                     fpIdOffset:fpIdOffset,
                     count:count
                 }, {
@@ -375,7 +375,7 @@
             },
             getOfferList(fpId){
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/freemarket/offer/getOfferRecordList/"+fpId, null, {
+                this.axiosPost.post("http://www.jrsports.com/api/freemarket/offer/getOfferRecordList/"+fpId, null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -403,7 +403,7 @@
             },
             getHistoryOfferList(){
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/freemarket/free/getHistory", {
+                this.axiosPost.post("http://www.jrsports.com/api/freemarket/free/getHistory", {
                     pageNo:1,
                     pageSize:10
                 }, {
@@ -436,7 +436,7 @@
             },
             viewSignFlow(row){
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/sign/offerFlow/getOfferFlow/"+row.offerFlowId, null, {
+                this.axiosPost.post("http://www.jrsports.com/api/sign/offerFlow/getOfferFlow/"+row.offerFlowId, null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -526,7 +526,7 @@
             addOffer(){
                 this.addOfferLoading=true;
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/freemarket/offer/addOffer", {
+                this.axiosPost.post("http://www.jrsports.com/api/freemarket/offer/addOffer", {
                     fpId:this.addOfferForm.fpId,
                     offerContractSalaryList:this.addOfferForm.addOfferData
                 }, {
@@ -554,7 +554,7 @@
             },
             getTeamOfferHistory(){
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/freemarket/offer//getTeamOfferRecordHistory/"+me.addOfferForm.fpId, null, {
+                this.axiosPost.post("http://www.jrsports.com/api/freemarket/offer//getTeamOfferRecordHistory/"+me.addOfferForm.fpId, null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")

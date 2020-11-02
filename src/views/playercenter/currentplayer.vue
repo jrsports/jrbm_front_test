@@ -61,7 +61,7 @@
             },
             getCurrentPlayerList(pageNo,pageSize) {
                 const me = this;
-                this.axios.post("http://www.jrsports.com/api/player/basic/getCurrentPlayerList", {
+                this.axiosPost.post("http://www.jrsports.com/api/player/basic/getCurrentPlayerList", {
                     pageNo:pageNo,
                     pageSize:pageSize
                 }, {
