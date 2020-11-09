@@ -1,15 +1,49 @@
 <template>
-    <div>
-        <el-button @click="createTrade">发起交易请求</el-button>
-        <el-button @click="acceptTrade" v-if="tradeReceived">接受交易请求</el-button>
-        <el-button @click="refuseTrade" v-if="tradeReceived">拒绝交易请求</el-button>
-    </div>
+    <el-container>
+        <el-header>
+            <nav-bar></nav-bar>
+        </el-header>
+        <el-container>
+            <el-aside width="200px">
+                <sidebar></sidebar>
+            </el-aside>
+            <el-main>
+                <el-row>
+                    <el-col span="16">
+                        <el-row>
+                            <h2>交易搜索器</h2>
+                            <el-input placeholder="输入球员名或球队名"  v-model="input3" class="input-with-select" style="margin-top: 15px;">
+                                <el-select v-model="select" slot="prepend" placeholder="过滤项" style="width:130px;background-color:#fff">
+                                    <el-option label="餐厅名" value="1"></el-option>
+                                    <el-option label="订单号" value="2"></el-option>
+                                    <el-option label="用户电话" value="3"></el-option>
+                                </el-select>
+                                <el-button slot="append" icon="el-icon-search"></el-button>
+                            </el-input>
+                        </el-row>
+                        <el-row>
+                            <h2>交易推荐</h2>
+                        </el-row>
+                    </el-col>
+                    <el-col span=8>
+                        <h2>交易动态</h2>
+                    </el-col>
+                </el-row>
+                <el-button @click="createTrade">发起交易请求</el-button>
+                <el-button @click="acceptTrade" v-if="tradeReceived">接受交易请求</el-button>
+                <el-button @click="refuseTrade" v-if="tradeReceived">拒绝交易请求</el-button>
+            </el-main>
+        </el-container>
+    </el-container>
 </template>
 
 <script>
     import Trade from '../../global/wsConnection'
+    import Sidebar from "@/views/layout/sidebar/sidebar";
+    import NavBar from "@/views/layout/header/header"
     export default {
         name: "Trade",
+        components: {Sidebar, NavBar},
         data(){
             return{
                 tradeReceived:Trade.getTradeReceived(),

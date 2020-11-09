@@ -307,6 +307,7 @@
     // import SockJS from "sockjs-client";
     import Stomp from "stompjs";
     import {getTeamList} from "@/api/user"
+    import GlobalWebsocket from "@/websocket/GlobalWebsocket";
     var teamId=-1;
     var serverId=-1;
     var captchaToken=-1;
@@ -378,8 +379,7 @@
                     forceKick:ifForceKick
                 }).then((response)=>{
                     if(response.code===0){
-                        // me.testWs();
-                        // me.globalws.connect();
+                        GlobalWebsocket.connect();
                         me.serverDialogVisible=false;
                         me.$router.push('/myteam');
                     }else{
@@ -447,6 +447,7 @@
                     password:this.form.password,
                     freeLoginType:this.freeLoginType?1:0
                 }).then(()=>{
+                    console.log("!!")
                     this.loginDialogVisible = false;
                     this.ifLogin = true;
                 }).catch(()=>{

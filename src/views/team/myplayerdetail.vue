@@ -10,7 +10,7 @@
             <el-container>
                 <el-main>
                     <el-row>
-                        <el-col :span="12">
+                        <el-col span=12>
                             <span>本赛季工资：{{totalSalary}}万/{{totalSalaryLimit}}万</span>
                             <span>下赛季工资：{{nextTotalSalary}}万/{{nextTotalSalaryLimit}}万</span>
                         </el-col>

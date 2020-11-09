@@ -21,7 +21,7 @@
                     <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
                         <el-tab-pane label="正在进行" name="ongoing">
                             <el-row :gutter="20">
-                                <el-col :span="8">
+                                <el-col span=8>
                                     <el-card style="height: 300px">
                                         <div slot="header">
                                             <span>选秀编号：DR00001</span>
@@ -33,7 +33,7 @@
                                         </div>
                                     </el-card>
                                 </el-col>
-                                <el-col :span="8">
+                                <el-col span=8>
                                     <el-card>
                                         <div slot="header">
                                             <span>卡片名称</span>
@@ -41,7 +41,7 @@
                                         </div>
                                     </el-card>
                                 </el-col>
-                                <el-col :span="8">
+                                <el-col span=8>
                                     <el-card>
                                         <div slot="header">
                                             <span>卡片名称</span>

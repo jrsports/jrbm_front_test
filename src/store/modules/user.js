@@ -23,7 +23,7 @@ const actions = {
   userLogin({ commit }, req) {
     return new Promise((resolve, reject) => {
       userLogin(req).then(response => {
-        const { data } = response.data
+        let data = response.data
         commit('SET_USER_TOKEN', data.userToken)
         commit('SET_USER_NAME',data.userName)
         setUserToken(data.userToken)

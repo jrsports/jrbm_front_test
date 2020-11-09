@@ -12,7 +12,10 @@
                 <el-menu-item index="3-3" @click="exitTeam()">退出球队</el-menu-item>
             </el-submenu>
             <el-menu-item index="3" style="float:right">{{currentSeason}}</el-menu-item>
-            <el-menu-item index="4" style="float:right">资金：{{jrFund}}JR币：{{jrCoin}}</el-menu-item>
+            <el-menu-item index="4" style="float:right">
+                <i class="el-icon-money"></i>${{getTeamFund}}
+                <i class="el-icon-coin"></i>{{getTeamCoin}}
+            </el-menu-item>
         </el-menu>
         <el-drawer
                 title="我是标题"
@@ -48,8 +51,8 @@
                 <el-tabs v-model="activeName" @tab-click="handleTabClick">
                     <el-tab-pane label="我的好友" name="myFriendListPane">
                         <div style="margin-top: 20px">
-                            <el-row type="flex" align="middle" v-for="friend in friendList" :key="friend.friendId" style="margin-top: 10px">
-                                <el-col :span="4">
+                            <el-row type="flex" align="middle" v-for="friend in getFriendList" :key="friend.friendId" style="margin-top: 10px">
+                                <el-col span=4>
                                     <a @click="chatDialogVisible=true;openChat(friend.friendTeamId,friend.friendTeamName)"
                                        style="cursor: pointer;">
                                         <el-badge :value="friend.unRead" class="item">
@@ -61,7 +64,7 @@
                                     </a>
 
                                 </el-col>
-                                <el-col :span="12">
+                                <el-col span=12>
                                     <el-row >
                                         <h3 style="margin-top: 0px">{{friend.friendTeamName}}</h3>
                                     </el-row>
@@ -69,13 +72,13 @@
                                         <span style="font-size: smaller;color: gray;">霍勒迪1500w卖不卖？</span>
                                     </el-row>
                                 </el-col>
-                                <el-col :span="4">
-                                    <el-button>详情</el-button>
+                                <el-col span=4>
+                                    <el-button @click="getFriendDetail(friend.friendTeamId)">详情</el-button>
                                 </el-col>
-                                <el-col :span="4">
+                                <el-col span=4>
                                     <el-button @click="removeFriend(friend.friendId)">删除</el-button>
                                 </el-col>
-<!--                                <el-col :span="4">-->
+<!--                                <el-col span=4>-->
 <!--                                    <el-badge :value="12" class="item">-->
 <!--                                        <el-button icon="el-icon-chat-line-round"></el-button>-->
 <!--                                    </el-badge>-->
@@ -91,15 +94,15 @@
                                 <div v-for="friend in friendRequestList" :key="friend">
                                     <el-card shadow="hover">
                                         <el-row type="flex" align="middle">
-                                            <el-col :span="14">
+                                            <el-col span="14">
                                                 <h3>{{friend.friendTeamName}}</h3>
                                             </el-col>
-                                            <el-col :span="5">
+                                            <el-col span="5">
                                                 <el-button type="success" @click="acceptFriendRequest(friend.friendId)">
                                                     同意
                                                 </el-button>
                                             </el-col>
-                                            <el-col :span="5">
+                                            <el-col span="5">
                                                 <el-button type="warning" @click="refuseFriendRequest(friend.friendId)">
                                                     拒绝
                                                 </el-button>
@@ -113,10 +116,10 @@
                                 <div v-for="friend in myFriendRequestList" :key="friend">
                                     <el-card shadow="hover">
                                         <el-row type="flex" align="middle">
-                                            <el-col :span="20">
+                                            <el-col span="20">
                                                 <h3>{{friend.friendTeamName}}</h3>
                                             </el-col>
-                                            <el-col :span="4">
+                                            <el-col span=4>
                                                 <el-button type="success" @click="cancelFriendRequest(friend.friendId)">
                                                     撤销
                                                 </el-button>
@@ -140,13 +143,13 @@
                                 <div v-for="friend in searchFriendList" :key="friend">
                                     <el-card shadow="hover">
                                         <el-row type="flex" align="middle">
-                                            <el-col :span="14">
+                                            <el-col span="14">
                                                 <h3>{{friend.teamName}}</h3>
                                             </el-col>
-                                            <el-col :span="5">
+                                            <el-col span="5">
                                                 <el-button icon="el-icon-warning-outline">查看</el-button>
                                             </el-col>
-                                            <el-col :span="5">
+                                            <el-col span="5">
                                                 <el-button type="info" v-if="friend.friendStatus==0"
                                                            icon="el-icon-circle-plus-outline"
                                                            @click="sendFriendRequest(friend.teamId);friend.friendStatus=1;">
@@ -177,12 +180,12 @@
                     <div v-for="msg in chat.chatRecordList" :key="msg.msgId">
                         <el-row type="flex" align="middle"
                                 v-if="msg.belong=='friend' && msg.fromTeamId==chat.currentChatDialogTeamId">
-                            <el-col :span="2">
+                            <el-col span="2">
                                 <el-avatar :size="40" shape="square"
                                            src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png">
                                 </el-avatar>
                             </el-col>
-                            <el-col :span="22">
+                            <el-col span="22">
                                 <div>
                                     <h3>{{msg.message}}</h3>
                                 </div>
@@ -190,12 +193,12 @@
                         </el-row>
                         <el-row type="flex" justify="end" :gutter="20" align="middle"
                                 v-if="msg.belong=='me' && msg.toTeamId==chat.currentChatDialogTeamId  ">
-                            <el-col :span="22">
+                            <el-col span="22">
                                 <div style="text-align: right">
                                     <h3>{{msg.message}}</h3>
                                 </div>
                             </el-col>
-                            <el-col :span="2">
+                            <el-col span="2">
                                 <el-avatar :size="40" shape="square"
                                            src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png">
                                 </el-avatar>
@@ -205,7 +208,7 @@
                 </div>
             </el-scrollbar>
             <el-row type="flex" align="middle">
-                <el-col :span="22">
+                <el-col span="22">
                     <el-input
                             type="textarea"
                             :rows="1"
@@ -217,32 +220,52 @@
                             @keyup.enter.native="sendMsg()">
                     </el-input>
                 </el-col>
-                <el-col :span="2">
+                <el-col span="2">
                     <el-button style="float: right" @click="sendMsg">发送</el-button>
                 </el-col>
             </el-row>
 
 
         </el-dialog>
+
+        <TeamInfoDialog ref="teamInfoDialogRef"></TeamInfoDialog>
     </div>
 
 </template>
 
 <script>
     import Friend from '../../../global/globalWebsocket'
+
+    import TeamInfoDialog from "@/components/TeamInfoDialog";
+
     export default {
         name: "navHeader",
+        components: {TeamInfoDialog},
         computed:{
             getTeamName(){
                 return this.$store.getters.teamName
             },
             getTeamAvatar(){
                 return this.$store.getters.teamAvatar
+            },
+            getTeamFund(){
+                return this.$store.getters.fund
+            },
+            getTeamCoin(){
+                return this.$store.getters.coin
+            },
+            getFriendList(){
+                return this.$store.getters.friendList
             }
+        },
+        mounted() {
+            this.getMyTeamInfo();
+            this.initFriendList();
         },
         data() {
             return {
                 activeIndex: '1',
+
                 drawerVisible: false,
                 msgSendContent: "",
                 notificationList: [
@@ -264,12 +287,12 @@
                 friendSearchName: "",
                 currentSeason: "休赛期",
                 searchFriendCount: 0,
-                jrFund: "$22,456,152,000  ",
-                jrCoin: 152,
                 chatVisible: false,
                 count: 5,
                 chatDialogVisible: false,
                 searchDialogVisible: false,
+                teamDetailDialogVisible:true,
+
                 searchLoading: false,
                 chat: {
                     currentChatDialogTeamId: -1,
@@ -278,12 +301,14 @@
                 }
             };
         },
-        mounted() {
-            this.teamName = sessionStorage.getItem("teamName");
-            // this.chat.chatRecordList = this.globalws.chatMsgRecord;
-            // this.friendList=this.globalws.friendList;
-        },
         methods: {
+            getMyTeamInfo(){
+                this.$store.dispatch('team/getMyTeamInfo').then(()=>{
+
+                }).catch(()=>{
+
+                })
+            },
             readNotice(noteId) {
                 var note = this.notificationList.filter((n) => {
                     return n.noteId == noteId;
@@ -335,29 +360,33 @@
                 this.chat.currentChatDialogTeamName = friendTeamName;
                 Friend.resetUnRead(friendTeamId);
             },
-            getFriendList() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/user/friend/getFriendList", null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
-                    if (res.code == 0) {
-                        let fl=res.data;
-                        fl.forEach(function (item) {
-                            item.unRead=0;
-                        });
-                        Friend.setFriendList(fl);
-                        me.friendList=res.data;
-                        setInterval(function () {
-                            me.friendList=Friend.friendList();
-                        }, 1000);
-                    } else {
-                        alert(res.msg);
-                    }
-                });
+            initFriendList() {
+                this.$store.dispatch('team/getFriendList').then(()=>{
+
+                }).catch(()=>{
+
+                })
+                // this.axiosPost.post("http://www.jrsports.com/api/user/friend/getFriendList", null, {
+                //     headers: {
+                //         "userToken": localStorage.getItem("userToken"),
+                //         "teamToken": sessionStorage.getItem("teamToken")
+                //     }
+                // }).then(function (response) {
+                //     const res = response.data;
+                //     if (res.code == 0) {
+                //         let fl=res.data;
+                //         fl.forEach(function (item) {
+                //             item.unRead=0;
+                //         });
+                //         Friend.setFriendList(fl);
+                //         me.friendList=res.data;
+                //         setInterval(function () {
+                //             me.friendList=Friend.friendList();
+                //         }, 1000);
+                //     } else {
+                //         alert(res.msg);
+                //     }
+                // });
             },
             handleTabClick(tab) {
                 if (tab.name == "friendRequestPane") {
@@ -461,6 +490,9 @@
                         alert(res.msg);
                     }
                 });
+            },
+            getFriendDetail(teamId){
+                this.$refs.teamInfoDialogRef.show(teamId)
             },
             removeFriend(friendId) {
                 const me = this;

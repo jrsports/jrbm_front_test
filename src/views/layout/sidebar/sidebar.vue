@@ -31,17 +31,21 @@
                 <el-menu-item index="4-3">杯赛</el-menu-item>
             </el-submenu>
             <el-menu-item index="5">
+                <i class="el-icon-document"></i>
+                <span slot="title" @click="getTradePage">交易中心</span>
+            </el-menu-item>
+            <el-menu-item index="6">
                 <i class="el-icon-menu"></i>
                 <span slot="title" @click="getSignPage">签约中心</span>
             </el-menu-item>
-            <el-submenu index="6">
+            <el-submenu index="7">
                 <template slot="title">
                     <i class="el-icon-location"></i>
                     <span>球员中心</span>
                 </template>
                 <el-menu-item index="6-1" @click="getCurrentAbilityPage">能力市价</el-menu-item>
             </el-submenu>
-            <el-menu-item index="7">
+            <el-menu-item index="8">
                 <i class="el-icon-setting"></i>
                 <span slot="title" @click="getMyProfilePage">个人设置</span>
             </el-menu-item>
@@ -82,6 +86,9 @@
             },
             getSignPage(){
                 this.$router.push('/sign')
+            },
+            getTradePage(){
+                this.$router.push('/trade')
             },
             getCurrentAbilityPage(){
                 this.$router.push('/currentplayer')
