@@ -1,5 +1,5 @@
 import {getWsToken} from "@/api/team";
-import {Message} from "element-ui";
+import {Message,Notification} from "element-ui";
 import Stomp from "stompjs";
 
 export default {
@@ -14,16 +14,12 @@ export default {
                 this.stompClient.connect({}, function (frame) {
                     console.log('Connected:' + frame);
                     Message({
-                        message: "连接全局ws成功",
+                        message: "成功连接到JRBM服务器",
                         type: "success"
                     });
                     // private channel
                     me.stompClient.subscribe("/user/queue/team", function (response) {
-                        Message({
-                            message: response.body,
-                            type: "success"
-                        });
-                        console.log(response.body);
+                        console.log("收到个人消息："+response.body);
                         let res = JSON.parse(response.body);
                         me.handleOperation(res.operation, res.body);
                     });
@@ -42,6 +38,11 @@ export default {
     handleOperation(operation, body) {
         if (operation == "我方收到交易请求") {
             console.log(body);
+        }else if(operation=="收到通知"){
+            Notification({
+                title: body.title,
+                message: body.content
+            })
         }
     },
 }

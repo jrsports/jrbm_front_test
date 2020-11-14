@@ -13,7 +13,7 @@
                         <el-tabs v-model="activeName" type="card" @tab-click="tabSwitch">
                             <el-tab-pane label="主页" name="main">
                                 <el-row>
-                                    <el-col span="14">
+                                    <el-col :span="14">
                                         <el-row>
                                             <el-card class="box-card">
                                                 <div slot="header">

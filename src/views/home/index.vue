@@ -18,7 +18,7 @@
                             <el-input v-model="form.password" type="password" autocomplete="off"></el-input>
                         </el-form-item>
                         <el-row>
-                            <el-col span=4 offset=20>
+                            <el-col :span="4" offset=20>
                                 <el-checkbox v-model="form.freeLoginType">7天免登录</el-checkbox>
                             </el-col>
                         </el-row>
@@ -107,7 +107,7 @@
         </el-dialog>
 
         <el-row>
-            <el-col span=12>
+            <el-col :span="12">
                 <ul class="infinite-list" style="height: 200px;">
                     <li v-for="i in chatMsg" :key="i" style="list-style-type:none;">{{ i }}</li>
                 </ul>
@@ -120,7 +120,7 @@
             </el-col>
         </el-row>
         <el-row>
-            <el-col span=12>
+            <el-col :span="12">
                 <el-avatar :size="50" :src="tradeRoom.initiatorTeam.avatar"></el-avatar>
                 <span>发起方球队：{{tradeRoom.initiatorTeam.teamName}}({{tradeRoom.initiatorInSeason?"赛季中":"休赛期"}})</span>
                 <span>{{tradeRoom.initiatorEntered?"已进入":"未进入"}}</span>
@@ -132,7 +132,7 @@
                 <p>当前报价：{{tradeRoom.legal?"合法":"不合法"}}|{{tradeRoom.submittable?"可提交":"不可提交"}}|{{tradeRoom.confirmable?"可确认":"不可确认"}}|{{tradeRoom.legal?"":"违反的规则为："+tradeRoom.regulationContent}}</p>
 
             </el-col>
-            <el-col span=12>
+            <el-col :span="12">
                 <el-avatar :size="50" :src="tradeRoom.targetTeam.avatar"></el-avatar>
                 <span>接收方球队：{{tradeRoom.targetTeam.teamName}}({{tradeRoom.targetInSeason?"赛季中":"休赛期"}})</span>
                 <span>{{tradeRoom.targetEntered?"已进入":"未进入"}}</span>
@@ -183,7 +183,7 @@
                     </el-table-column>
                 </el-table>
             </el-col>
-             <el-col span=12>
+             <el-col :span="12">
                 <el-table
                         ref="targetTable"
                         :data="tradeRoom.targetChip.playerChipList"
@@ -260,7 +260,7 @@
                     </el-table-column>
                 </el-table>
             </el-col>
-            <el-col span=12>
+            <el-col :span="12">
                 <el-table
                         ref="targetEggTable"
                         :data="tradeRoom.targetChip.eggChipList"

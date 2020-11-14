@@ -14,12 +14,12 @@
                     <el-tabs tab-position="left" style="height: 900px;">
                         <el-tab-pane label="大名单">
                             <el-row>
-                                <el-col span=12>
+                                <el-col ::span="12">
                                     <div>
                                         dd
                                     </div>
                                 </el-col>
-                                <el-col span=10>
+                                <el-col :span="10">
                                     <span>总工资/工资帽:{{lineUpData.totalSalary}}万/{{lineUpData.salaryCap}}万</span>
                                 </el-col>
                                 <el-button :icon="substituteLocked?'el-icon-lock':'el-icon-unlock'"

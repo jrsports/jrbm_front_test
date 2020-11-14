@@ -52,7 +52,7 @@
                     <el-tab-pane label="我的好友" name="myFriendListPane">
                         <div style="margin-top: 20px">
                             <el-row type="flex" align="middle" v-for="friend in getFriendList" :key="friend.friendId" style="margin-top: 10px">
-                                <el-col span=4>
+                                <el-col :span="4">
                                     <a @click="chatDialogVisible=true;openChat(friend.friendTeamId,friend.friendTeamName)"
                                        style="cursor: pointer;">
                                         <el-badge :value="friend.unRead" class="item">
@@ -64,7 +64,7 @@
                                     </a>
 
                                 </el-col>
-                                <el-col span=12>
+                                <el-col :span="12">
                                     <el-row >
                                         <h3 style="margin-top: 0px">{{friend.friendTeamName}}</h3>
                                     </el-row>
@@ -72,13 +72,13 @@
                                         <span style="font-size: smaller;color: gray;">霍勒迪1500w卖不卖？</span>
                                     </el-row>
                                 </el-col>
-                                <el-col span=4>
+                                <el-col :span="4">
                                     <el-button @click="getFriendDetail(friend.friendTeamId)">详情</el-button>
                                 </el-col>
-                                <el-col span=4>
+                                <el-col :span="4">
                                     <el-button @click="removeFriend(friend.friendId)">删除</el-button>
                                 </el-col>
-<!--                                <el-col span=4>-->
+<!--                                <el-col :span="4">-->
 <!--                                    <el-badge :value="12" class="item">-->
 <!--                                        <el-button icon="el-icon-chat-line-round"></el-button>-->
 <!--                                    </el-badge>-->
@@ -94,15 +94,15 @@
                                 <div v-for="friend in friendRequestList" :key="friend">
                                     <el-card shadow="hover">
                                         <el-row type="flex" align="middle">
-                                            <el-col span="14">
+                                            <el-col :span="14">
                                                 <h3>{{friend.friendTeamName}}</h3>
                                             </el-col>
-                                            <el-col span="5">
+                                            <el-col :span="5">
                                                 <el-button type="success" @click="acceptFriendRequest(friend.friendId)">
                                                     同意
                                                 </el-button>
                                             </el-col>
-                                            <el-col span="5">
+                                            <el-col :span="5">
                                                 <el-button type="warning" @click="refuseFriendRequest(friend.friendId)">
                                                     拒绝
                                                 </el-button>
@@ -116,10 +116,10 @@
                                 <div v-for="friend in myFriendRequestList" :key="friend">
                                     <el-card shadow="hover">
                                         <el-row type="flex" align="middle">
-                                            <el-col span="20">
+                                            <el-col :span="20">
                                                 <h3>{{friend.friendTeamName}}</h3>
                                             </el-col>
-                                            <el-col span=4>
+                                            <el-col :span="4">
                                                 <el-button type="success" @click="cancelFriendRequest(friend.friendId)">
                                                     撤销
                                                 </el-button>
@@ -133,7 +133,7 @@
                         </el-scrollbar>
                     </el-tab-pane>
                     <el-tab-pane label="添加好友" name="addFriendPane">
-                        <el-input placeholder="请输入球队名" v-model="friendSearchName" clearable>
+                        <el-input placeholder="请输入球队名" v-model="friendSearchName" clearable @input="searchFriend(friendSearchName)">
                             <el-button slot="append" icon="el-icon-search"
                                        @click="searchFriend(friendSearchName)"></el-button>
                         </el-input>
@@ -143,13 +143,13 @@
                                 <div v-for="friend in searchFriendList" :key="friend">
                                     <el-card shadow="hover">
                                         <el-row type="flex" align="middle">
-                                            <el-col span="14">
+                                            <el-col :span="14">
                                                 <h3>{{friend.teamName}}</h3>
                                             </el-col>
-                                            <el-col span="5">
+                                            <el-col :span="5">
                                                 <el-button icon="el-icon-warning-outline">查看</el-button>
                                             </el-col>
-                                            <el-col span="5">
+                                            <el-col :span="5">
                                                 <el-button type="info" v-if="friend.friendStatus==0"
                                                            icon="el-icon-circle-plus-outline"
                                                            @click="sendFriendRequest(friend.teamId);friend.friendStatus=1;">
@@ -180,7 +180,7 @@
                     <div v-for="msg in chat.chatRecordList" :key="msg.msgId">
                         <el-row type="flex" align="middle"
                                 v-if="msg.belong=='friend' && msg.fromTeamId==chat.currentChatDialogTeamId">
-                            <el-col span="2">
+                            <el-col :span="2">
                                 <el-avatar :size="40" shape="square"
                                            src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png">
                                 </el-avatar>
@@ -198,7 +198,7 @@
                                     <h3>{{msg.message}}</h3>
                                 </div>
                             </el-col>
-                            <el-col span="2">
+                            <el-col :span="2">
                                 <el-avatar :size="40" shape="square"
                                            src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png">
                                 </el-avatar>
@@ -220,7 +220,7 @@
                             @keyup.enter.native="sendMsg()">
                     </el-input>
                 </el-col>
-                <el-col span="2">
+                <el-col :span="2">
                     <el-button style="float: right" @click="sendMsg">发送</el-button>
                 </el-col>
             </el-row>
@@ -237,6 +237,12 @@
     import Friend from '../../../global/globalWebsocket'
 
     import TeamInfoDialog from "@/components/TeamInfoDialog";
+    import {
+        acceptFriendRequest, cancelFriendRequest,
+        getMyFriendRequestList,
+        getOtherFriendRequestList,
+        refuseFriendRequest, removeFriend, searchFriend, sendFriendRequest
+    } from "@/api/friend";
 
     export default {
         name: "navHeader",
@@ -393,101 +399,55 @@
                     this.getFriendRequestList();
                     this.getMyFriendRequestList();
                 } else if (tab.name == "myFriendListPane") {
-                    this.getFriendList();
+                    this.initFriendList();
                 }
             },
             getFriendRequestList() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/user/friend/getOtherFriendRequestList", null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
-                    if (res.code == 0) {
-                        me.friendRequestList = res.data;
-                    } else {
-                        alert(res.msg);
-                    }
+                getOtherFriendRequestList().then(res=>{
+                    this.friendRequestList = res.data;
                 });
             },
             getMyFriendRequestList() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/user/friend/getMyFriendRequestList", null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
-                    if (res.code == 0) {
-                        me.myFriendRequestList = res.data;
-                    } else {
-                        alert(res.msg);
-                    }
+                getMyFriendRequestList().then(res=>{
+                    this.myFriendRequestList = res.data;
                 });
             },
             acceptFriendRequest(friendId) {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/user/friend/acceptFriendRequest/" + friendId, null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
-                    if (res.code == 0) {
-                        me.$message({
+                acceptFriendRequest(friendId).then(res=>{
+                    if(res.code===0){
+                        this.$message({
                             message: "同意成功",
                             type: "success"
                         });
-                        me.getFriendRequestList();
-                        me.getMyFriendRequestList();
-                    } else {
-                        alert(res.msg);
+                        this.getFriendRequestList();
+                        this.getMyFriendRequestList();
+                        this.initFriendList();
                     }
+
                 });
             },
             refuseFriendRequest(friendId) {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/user/friend/refuseFriendRequest/" + friendId, null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
-                    if (res.code == 0) {
-                        me.$message({
+                refuseFriendRequest(friendId).then(res=>{
+                    if(res.code===0){
+                        this.$message({
                             message: "拒绝成功",
                             type: "success"
                         });
-                        me.getFriendRequestList();
-                        me.getMyFriendRequestList();
-                    } else {
-                        alert(res.msg);
+                        this.getFriendRequestList();
+                        this.getMyFriendRequestList();
                     }
+
                 });
             },
             cancelFriendRequest(friendId) {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/user/friend/cancelFriendRequest/" + friendId, null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
-                    if (res.code == 0) {
-                        me.$message({
-                            message: "撤销成功",
+                cancelFriendRequest(friendId).then(res=>{
+                    if(res.code===0){
+                        this.$message({
+                            message: "取消成功",
                             type: "success"
                         });
-                        me.getFriendRequestList();
-                        me.getMyFriendRequestList();
-                    } else {
-                        alert(res.msg);
+                        this.getFriendRequestList();
+                        this.getMyFriendRequestList();
                     }
                 });
             },
@@ -495,66 +455,34 @@
                 this.$refs.teamInfoDialogRef.show(teamId)
             },
             removeFriend(friendId) {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/user/friend/removeFriend/" + friendId, null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
-                    if (res.code == 0) {
-                        me.$message({
+                removeFriend(friendId).then(res=>{
+                    if(res.code===0){
+                        this.$message({
                             message: "删除成功",
                             type: "success"
                         });
-                        me.getFriendList();
-                    } else {
-                        alert(res.msg);
+                        this.initFriendList();
                     }
                 });
             },
             searchFriend(name) {
-                if (name == "" || name == null) {
+                if (name === "" || name == null) {
                     this.searchFriendList = [];
                     this.searchFriendCount = 0;
                     return;
                 }
                 const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/user/friend/searchFriend", {
-                    name: name
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
-                    if (res.code == 0) {
-                        me.searchFriendList = res.data;
-                        me.searchFriendCount = res.data.length;
-                    } else {
-                        alert(res.msg);
-                    }
+                searchFriend({name:name}).then(res=>{
+                    me.searchFriendList = res.data;
+                    me.searchFriendCount = res.data.length;
                 });
             },
             sendFriendRequest(teamId) {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/user/friend/sendFriendRequest/" + teamId, null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
-                    if (res.code == 0) {
-                        me.$message({
-                            message: "好友请求发送成功",
-                            type: "success"
-                        });
-                    } else {
-                        alert(res.msg);
-                    }
+                sendFriendRequest(teamId).then(()=>{
+                    this.$message({
+                        message: "好友请求发送成功",
+                        type: "success"
+                    });
                 });
             },
             sendMsg() {

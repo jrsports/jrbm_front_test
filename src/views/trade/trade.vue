@@ -9,7 +9,7 @@
             </el-aside>
             <el-main>
                 <el-row>
-                    <el-col span="16">
+                    <el-col :span="16">
                         <el-row>
                             <h2>交易搜索器</h2>
                             <el-input placeholder="输入球员名或球队名"  v-model="input3" class="input-with-select" style="margin-top: 15px;">
@@ -25,7 +25,7 @@
                             <h2>交易推荐</h2>
                         </el-row>
                     </el-col>
-                    <el-col span=8>
+                    <el-col :span="8">
                         <h2>交易动态</h2>
                     </el-col>
                 </el-row>
@@ -38,7 +38,6 @@
 </template>
 
 <script>
-    import Trade from '../../global/wsConnection'
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header"
     export default {
@@ -46,8 +45,8 @@
         components: {Sidebar, NavBar},
         data(){
             return{
-                tradeReceived:Trade.getTradeReceived(),
-                tradeRequestId:Trade.getTradeRequestId()
+                tradeReceived:null,
+                tradeRequestId:null
             }
         },
         methods:{

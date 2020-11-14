@@ -20,7 +20,9 @@
                                 width="100">
                             <template slot-scope="scope">
                                 <div class="block">
-                                    <el-avatar shape="square" :size="50" :src="scope.row.avatarUrl"></el-avatar>
+                                    <a @click="handlePlayerDetail(scope.row.upId)" style="cursor: pointer;">
+                                        <el-avatar shape="square" :size="50" :src="scope.row.avatarUrl"></el-avatar>
+                                    </a>
                                 </div>
                             </template>
                         </el-table-column>
@@ -58,45 +60,81 @@
                                 prop="grade"
                                 label="等级">
                         </el-table-column>
-                        <el-table-column
-                                fixed="right"
-                                label="操作"
-                                width="100">
-                            <template slot-scope="scope">
-                                <el-button @click="handlePlayerDetail(scope.row.upId)" type="text" size="small">
-                                    详细
-                                </el-button>
-                            </template>
-                        </el-table-column>
                     </el-table>
                 </el-tab-pane>
                 <el-tab-pane label="交易管理">
                     <el-row>
-                        <h3>交易评分：{{tradeInfo.score}}</h3>
-                        <h5>备注：{{tradeInfo.memo}}</h5>
+                        <el-col :span="18">
+                            <h3>交易评分：{{tradeInfo.score}}</h3>
+                            <h5>备注：{{tradeInfo.memo}}</h5>
+                        </el-col>
+
+                        <el-col :span="3">
+                            <h3>
+                                交易状态：{{tradeInfo.allowTrade===1?'开放':'关闭'}}
+                            </h3>
+<!--                            <el-switch-->
+<!--                                    :value="allowTrade===1"-->
+<!--                                    active-text="开放交易"-->
+<!--                                    inactive-text="关闭交易"-->
+<!--                                    active-color="#13ce66">-->
+<!--                            </el-switch>-->
+                        </el-col>
+                        <el-col :span="3">
+                            <el-button>发起交易</el-button>
+                        </el-col>
+
                     </el-row>
                     <el-row>
-                        <el-col span=8>
+                        <el-col :span="8">
                             <h4>可交易球员列表</h4>
                             <div v-for="player in tradeInfo.tradablePlayerList" :key="player">
                                 <el-row>
-                                    <el-col span=8>
-                                        <el-avatar shape="square" :size="30" :src="player.avatarUrl"></el-avatar>
-                                    </el-col>
-                                    <el-col span=8>
+                                    <el-col :span="8">
+                                        <a @click="handlePlayerDetail(player.upId)" style="cursor: pointer;">
+                                            <el-avatar shape="square" :size="30" :src="player.avatarUrl"></el-avatar>
+                                        </a>
+                                        </el-col>
+                                    <el-col :span="8">
                                         <span>{{player.chname}}</span>
                                     </el-col>
-                                    <el-col span=8>
+                                    <el-col :span="8">
                                         <el-tag :type="player.priority==0?'success':player.priority==1?'warning':'danger'">{{player.priority==0?'低':player.priority==1?'中':'高'}}</el-tag>
                                     </el-col>
                                 </el-row>
                             </div>
                         </el-col>
-                        <el-col span=8>
-                            <h4>可交易球员列表</h4>
+                        <el-col :span="8">
+                            <h4>不可交易球员列表</h4>
+                            <div v-for="player in tradeInfo.nonTradablePlayerList" :key="player">
+                                <el-row>
+                                    <el-col :span="8">
+                                        <a @click="handlePlayerDetail(player.upId)" style="cursor: pointer;">
+                                            <el-avatar shape="square" :size="30" :src="player.avatarUrl"></el-avatar>
+                                        </a>
+                                    </el-col>
+                                    <el-col :span="8">
+                                        <span>{{player.chname}}</span>
+                                    </el-col>
+                                    <el-col :span="8"></el-col>
+                                </el-row>
+                            </div>
                         </el-col>
-                        <el-col span=8>
-                            <h4>可交易球员列表</h4>
+                        <el-col :span="8">
+                            <h4>目标球员列表</h4>
+                            <div v-for="player in tradeInfo.targetPlayerList" :key="player">
+                                <el-row>
+                                    <el-col :span="8">
+                                        <a style="cursor: pointer;">
+                                            <el-avatar shape="square" :size="30" :src="player.avatarUrl"></el-avatar>
+                                        </a>
+                                    </el-col>
+                                    <el-col :span="8">
+                                        <span>{{player.chname}}</span>
+                                    </el-col>
+                                    <el-col :span="8"></el-col>
+                                </el-row>
+                            </div>
                         </el-col>
                     </el-row>
                 </el-tab-pane>
@@ -117,7 +155,7 @@
         components:{PlayerInfoDialog},
         data() {
             return {
-                teamDetailDialogVisible: true,
+                teamDetailDialogVisible: false,
                 teamInfo: {
                     rosterList: [{
                         avatarUrl: "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png",
@@ -138,12 +176,27 @@
                 tradeInfo:{
                     score:90,
                     memo:"都可以",
+                    allowTrade:1,
                     tradablePlayerList:[
                         {
                             upId:12,
                             avatarUrl:"https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png",
                             chname:"勒布朗-詹姆斯",
                             priority:"高"
+                        }
+                    ],
+                    nonTradablePlayerList:[
+                        {
+                            upId:12,
+                            avatarUrl:"https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png",
+                            chname:"勒布朗-詹姆斯"
+                        }
+                    ],
+                    targetPlayerList:[
+                        {
+                            bpId:10,
+                            chname:"安东尼-戴维斯",
+                            avatarUrl:"https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"
                         }
                     ]
                 }
