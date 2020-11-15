@@ -3,7 +3,7 @@
 
     <div>
         <el-menu :default-active="activeIndex" mode="horizontal">
-            <el-menu-item index="1" @click="drawerVisible=true;getNotice()">通知中心</el-menu-item>
+            <el-menu-item index="1" @click="drawerVisible=true;getNotificationList()">通知中心</el-menu-item>
             <el-avatar style="float:right" :src="getTeamAvatar"></el-avatar>
             <el-submenu index="2" style="float:right">
                 <template slot="title">{{getTeamName}}</template>
@@ -66,17 +66,20 @@
                                 </el-col>
                                 <el-col :span="12">
                                     <el-row >
-                                        <h3 style="margin-top: 0px">{{friend.friendTeamName}}</h3>
+                                        <a @click="getFriendDetail(friend.friendTeamId)" style="cursor: pointer">
+                                            <h3 style="margin-top: 0px">{{friend.friendTeamName}}</h3>
+                                        </a>
+
                                     </el-row>
                                     <el-row>
                                         <span style="font-size: smaller;color: gray;">霍勒迪1500w卖不卖？</span>
                                     </el-row>
                                 </el-col>
                                 <el-col :span="4">
-                                    <el-button @click="getFriendDetail(friend.friendTeamId)">详情</el-button>
+                                    <el-button icon="el-icon-connection"></el-button>
                                 </el-col>
                                 <el-col :span="4">
-                                    <el-button @click="removeFriend(friend.friendId)">删除</el-button>
+                                    <el-button icon="el-icon-delete" @click="removeFriend(friend.friendId)"></el-button>
                                 </el-col>
 <!--                                <el-col :span="4">-->
 <!--                                    <el-badge :value="12" class="item">-->
@@ -227,7 +230,7 @@
 
 
         </el-dialog>
-
+        <TradeRoomDialog></TradeRoomDialog>
         <TeamInfoDialog ref="teamInfoDialogRef"></TeamInfoDialog>
     </div>
 
@@ -235,7 +238,7 @@
 
 <script>
     import Friend from '../../../global/globalWebsocket'
-
+    import TradeRoomDialog from "@/components/TradeRoomDialog"
     import TeamInfoDialog from "@/components/TeamInfoDialog";
     import {
         acceptFriendRequest, cancelFriendRequest,
@@ -243,10 +246,11 @@
         getOtherFriendRequestList,
         refuseFriendRequest, removeFriend, searchFriend, sendFriendRequest
     } from "@/api/friend";
+    import {getNotificationList, readNotification} from "@/api/notification";
 
     export default {
         name: "navHeader",
-        components: {TeamInfoDialog},
+        components: {TradeRoomDialog, TeamInfoDialog},
         computed:{
             getTeamName(){
                 return this.$store.getters.teamName
@@ -323,38 +327,14 @@
                 if (note[0].read == 1) {
                     return;
                 }
-                this.axiosPost.post("http://www.jrsports.com/api/user/notice/read/" + noteId, null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
-                    if (res.code == 0) {
-                        note[0].read = 1;
-                    } else {
-                        alert(res.msg);
-                    }
+                readNotification(noteId).then(()=>{
+                    note[0].read = 1;
                 });
             },
-            getNotice() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/user/notice/getNotificationList", {
-                    pageNo: 1,
-                    pageSize: 10
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
-                    if (res.code == 0) {
-                        me.notificationList = res.data.recordList;
-                    } else {
-                        alert(res.msg);
-                    }
-                });
+            getNotificationList() {
+                getNotificationList({pageNo:1,pageSize:100}).then(res=>{
+                    this.notificationList = res.data.recordList;
+                })
             },
             exitTeam() {
                 sessionStorage.removeItem("teamToken");

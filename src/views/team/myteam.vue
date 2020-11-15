@@ -218,7 +218,6 @@
                         this.lineUpData.rosterList.forEach(function (item) {
                             convertPlayerInfo(item)
                         })
-                        console.log(this.lineUpData);
                         this.rosterTableLoading = false;
                     }
                 })

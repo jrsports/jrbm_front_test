@@ -7,6 +7,7 @@ const getters = {
     teamName: state => state.team.teamName,
     fund: state => state.team.fund,
     coin: state => state.team.coin,
-    friendList:state=>state.team.friendList
+    friendList:state=>state.team.friendList,
+    wsMsgRouter: state=>state.ws.wsMsgRouter
 }
 export default getters
