@@ -76,7 +76,7 @@
                                     </el-row>
                                 </el-col>
                                 <el-col :span="4">
-                                    <el-button icon="el-icon-connection"></el-button>
+                                    <el-button icon="el-icon-connection" @click="sendTradeRequest(friend.friendTeamId,friend.friendTeamName)"></el-button>
                                 </el-col>
                                 <el-col :span="4">
                                     <el-button icon="el-icon-delete" @click="removeFriend(friend.friendId)"></el-button>
@@ -231,6 +231,7 @@
 
         </el-dialog>
         <TradeRoomDialog></TradeRoomDialog>
+        <TradeRequestDialog ref="tradeRequestDialogRef"></TradeRequestDialog>
         <TeamInfoDialog ref="teamInfoDialogRef"></TeamInfoDialog>
     </div>
 
@@ -240,6 +241,7 @@
     import Friend from '../../../global/globalWebsocket'
     import TradeRoomDialog from "@/components/TradeRoomDialog"
     import TeamInfoDialog from "@/components/TeamInfoDialog";
+    import TradeRequestDialog from "@/components/TradeRequestDialog";
     import {
         acceptFriendRequest, cancelFriendRequest,
         getMyFriendRequestList,
@@ -247,10 +249,10 @@
         refuseFriendRequest, removeFriend, searchFriend, sendFriendRequest
     } from "@/api/friend";
     import {getNotificationList, readNotification} from "@/api/notification";
-
+    import {sendTradeRequest} from "@/api/traderoom";
     export default {
         name: "navHeader",
-        components: {TradeRoomDialog, TeamInfoDialog},
+        components: {TradeRoomDialog, TeamInfoDialog,TradeRequestDialog},
         computed:{
             getTeamName(){
                 return this.$store.getters.teamName
@@ -302,7 +304,6 @@
                 chatDialogVisible: false,
                 searchDialogVisible: false,
                 teamDetailDialogVisible:true,
-
                 searchLoading: false,
                 chat: {
                     currentChatDialogTeamId: -1,
@@ -484,6 +485,35 @@
                     message: msgContent,
                     toTeamId: toTeamId
                 }));
+            },
+
+
+            sendTradeRequest(targetTeamId,targetTeamName){
+                sendTradeRequest({targetTeamId:targetTeamId}).then(res=>{
+                    if(res.code===0){
+                        this.$refs.tradeRequestDialogRef.show(targetTeamName);
+
+
+                        // let no=this.$notify({
+                        //     title: '发起交易请求',
+                        //     message:  `等待${targetTeamName}接受交易请求...  ${tradeWaitTime}s<el-button>接受</el-button>`,
+                        //     duration: 0,
+                        //     showClose: false,
+                        //     dangerouslyUseHTMLString:true
+                        // });
+                        // let tradeRequestTimer=setInterval(function () {
+                        //     if(tradeWaitTime>0){
+                        //         // no.message='等待'+targetTeamName+'接受交易请求...  '+(--tradeWaitTime)+'s';
+                        //         no.message=`等待${targetTeamName}接受交易请求...  ${--tradeWaitTime}s<el-button>接受</el-button>`;
+                        //     }else{
+                        //         clearInterval(tradeRequestTimer);
+                        //         no.close();
+                        //         tradeWaitTime=30;
+                        //     }
+                        // },1000)
+                    }
+
+                });
             },
             handleChatMessage() {
 
