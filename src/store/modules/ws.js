@@ -1,20 +1,26 @@
 
 const state = {
+  // <channel,<router,function>>
   wsMsgRouter:new Map()
 }
 
 const mutations = {
-  ADD_WS_ROUTER: (state, routers) => {
-    routers.forEach(router=>{
-      state.wsMsgRouter.set(router.router,router.function);
+  ADD_WS_ROUTER: (state, routerData) => {
+    routerData.routers.forEach(router=>{
+      let map = state.wsMsgRouter.get(routerData.channel);
+      if(typeof(map)=="undefined"){
+        state.wsMsgRouter.set(routerData.channel,new Map().set(router.router,router.function));
+      }else{
+        map.set(router.router,router.function);
+      }
     })
   },
 }
 
 const actions = {
-  addRouter({ commit }, routers) {
+  addRouter({ commit }, routerData) {
     return new Promise(() => {
-      commit('ADD_WS_ROUTER', routers)
+      commit('ADD_WS_ROUTER', routerData)
     })
   },
 

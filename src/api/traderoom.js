@@ -31,3 +31,40 @@ export function refuseTradeRequest(data) {
     })
 }
 
+export function addChip(data) {
+    return request({
+        url:'/trade/room/addChip',
+        method:'post',
+        data:data
+    })
+}
+
+export function removeChip(data) {
+    return request({
+        url:'/trade/room/removeChip',
+        method:'post',
+        data:data
+    })
+}
+
+export function info() {
+    return request({
+        url:'/trade/room/info',
+        method:'post'
+    })
+}
+
+export function submit(data) {
+    return request({
+        url:'/trade/room/submit',
+        method:'post',
+        data:data
+    })
+}
+
+export function confirm() {
+    return request({
+        url:'/trade/room/confirm',
+        method:'post'
+    })
+}

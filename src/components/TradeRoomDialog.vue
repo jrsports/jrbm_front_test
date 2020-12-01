@@ -1,6 +1,6 @@
 <template>
     <el-container>
-        <el-dialog>
+        <el-dialog :visible.sync="roomDialogVisible" width="1800px">
             <el-row>
                 <el-col :span="12">
                     <ul class="infinite-list" style="height: 200px;">
@@ -10,8 +10,8 @@
                 <el-col>
                     <el-button @click="addChip">添加筹码</el-button>
                     <el-button @click="removeChip">移除筹码</el-button>
-                    <el-button @click="addOffer" v-if="tradeRoom.submittable && tradeRoom.legal">提交报价</el-button>
-                    <el-button @click="confirmOffer" v-if="tradeRoom.confirmable">确认报价</el-button>
+                    <el-button @click="submit" v-if="tradeRoom.submittable && tradeRoom.legal">提交报价</el-button>
+                    <el-button @click="confirm" v-if="tradeRoom.confirmable">确认报价</el-button>
                 </el-col>
             </el-row>
             <el-row>
@@ -200,7 +200,7 @@
             </el-row>
         </el-dialog>
 
-        <el-dialog :visible.sync="dialogVisible" width="300px" >
+        <el-dialog :visible.sync="dialogVisible" width="300px">
             <span>
                 {{content}}
             </span>
@@ -214,7 +214,14 @@
 
 <script>
     import GlobalWebsocket from "@/websocket/GlobalWebsocket";
-    import {acceptTradeRequest, refuseTradeRequest} from "@/api/traderoom";
+    import {
+        acceptTradeRequest,
+        addChip,
+        confirm,
+        info,
+        refuseTradeRequest,
+        removeChip, submit
+    } from "@/api/traderoom";
 
     let tradeWaitTime = 30;
     let tradeRequestTimer;
@@ -587,229 +594,193 @@
                     "initiatorTradeEggSalary": 0,
                     "initiatorTradePlayerSalary": 0,
                     "targetMaxSalaryLimitAfterTrade": 0
-                }, changeChipList: [],
+                },
+                changeChipList: [],
+                chatMsg: [],
                 chipMap: new Map(),
-                dialogVisible:false,
-                content:"",
-                tradeRequestId:-1
+                dialogVisible: false,
+                content: "",
+                tradeRequestId: -1,
+                roomDialogVisible: false
             }
         },
         created() {
             this.registerRoomRouter();
         },
         methods: {
-            room() {
-                var me = this;
-                console.log(sessionStorage.getItem("roomId"));
-                GlobalWebsocket.stompClient.subscribe("/channel/trade/room/" + sessionStorage.getItem("roomId"), function (response) {
-                    console.log("room:" + response.body);
-                    var res = JSON.parse(response.body);
-                    var operation = res.operation;
-                    var body = res.body;
-                    if (operation == "房间聊天消息") {
-                        me.chatMsg.push(body.content);
-                    } else if (operation == "球队进入房间") {
-                        if (body.initiatorEntered) {
-                            me.tradeRoom.initiatorEntered = true;
-                        } else {
-                            me.tradeRoom.targetEntered = true;
+            connectRoomChannel() {
+                let channel="/channel/trade/room/" + sessionStorage.getItem("roomId");
+                this.$store.dispatch('ws/addRouter', {
+                    "channel": channel,
+                    "routers": [
+                        {
+                            router: "/TRADE/room/房间聊天消息",
+                            function: this.handleRoomChatMsg
+                        },
+                        {
+                            router:"/TRADE/room/球队进入房间",
+                            function: this.handleTeamEntered
+                        },
+                        {
+                            router:"/TRADE/room/筹码更新",
+                            function: this.getRoom
+                        },
+                        {
+                            router:"/TRADE/room/提交报价",
+                            function: this.getRoom
                         }
-                    } else if (operation == "筹码更新" || operation == "提交报价") {
-                        me.getRoom();
-                    }
+                    ]
                 });
+                GlobalWebsocket.connect(channel);
             },
             handleRoomCreated(body) {
-                let me = this;
+                this.roomDialogVisible = true;
                 sessionStorage.setItem("roomId", body.tradeRoom.roomId);
-                this.room();
+                this.connectRoomChannel();
                 this.tradeRoom = body.tradeRoom;
+                let me = this;
                 this.tradeRoom.initiatorChip.playerChipList.foreach(chip => {
                     me.chipMap.set(chip.chipId);
                 });
             },
             handleTradeRequest(body) {
-                let me=this;
-                me.content=body.initiatorTeamName+'向你发起交易 '+tradeWaitTime+'s';
-                this.tradeRequestId=body.tradeRequestId;
-                this.dialogVisible=true;
+                let me = this;
+                me.content = body.initiatorTeamName + '向你发起交易 ' + tradeWaitTime + 's';
+                this.tradeRequestId = body.tradeRequestId;
+                this.dialogVisible = true;
                 tradeRequestTimer = setInterval(function () {
                     if (tradeWaitTime > 0) {
-                        me.content=body.initiatorTeamName+'向你发起交易 '+(--tradeWaitTime)+'s';
+                        me.content = body.initiatorTeamName + '向你发起交易 ' + (--tradeWaitTime) + 's';
                     } else {
                         clearInterval(tradeRequestTimer);
-                        me.dialogVisible=false;
+                        me.dialogVisible = false;
                         tradeWaitTime = 30;
                     }
                 }, 1000)
             },
-            handleCancelTradeRequest(body){
+            handleCancelTradeRequest(body) {
                 clearInterval(tradeRequestTimer);
-                this.dialogVisible=false;
+                this.dialogVisible = false;
                 tradeWaitTime = 30;
                 this.$message({
-                    message:body.initiatorTeamName+"已取消交易请求",
-                    type:"info"
+                    message: body.initiatorTeamName + "已取消交易请求",
+                    type: "info"
                 })
             },
-
-            acceptTradeRequest(){
-                this.dialogVisible = false;
-                acceptTradeRequest({tradeRequestId:this.tradeRequestId}).then(res=>{
-                    if(res.code===0){
+            handleRoomChatMsg(body) {
+                this.chatMsg.push(body.content);
+            },
+            handleTeamEntered(body){
+                if (body.initiatorEntered) {
+                    this.tradeRoom.initiatorEntered = true;
+                } else {
+                    this.tradeRoom.targetEntered = true;
+                }
+            },
+            acceptTradeRequest() {
+                acceptTradeRequest({tradeRequestId: this.tradeRequestId}).then(res => {
+                    if (res.code === 0) {
+                        clearInterval(tradeRequestTimer);
+                        this.dialogVisible = false;
+                        tradeWaitTime = 30;
                         this.$message({
-                            message:"接受成功",
-                            type:"info"
-                        })
+                            message: "接受成功，等待房间初始化",
+                            type: "success"
+                        });
                     }
                 })
             },
-            refuseTradeRequest(){
-                this.dialogVisible = false;
-                refuseTradeRequest({tradeRequestId:this.tradeRequestId}).then(res=>{
-                    if(res.code===0){
+            refuseTradeRequest() {
+                refuseTradeRequest({tradeRequestId: this.tradeRequestId}).then(res => {
+                    if (res.code === 0) {
+                        clearInterval(tradeRequestTimer);
+                        this.dialogVisible = false;
+                        tradeWaitTime = 30;
                         this.$message({
-                            message:"拒绝成功",
-                            type:"info"
+                            message: "拒绝成功",
+                            type: "info"
                         })
                     }
                 })
             },
             addChip() {
-                console.log(this.changeChipList);
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/trade/room/addChip", {
-                    chipIdList: me.changeChipList
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const createResponse = response.data;
-                    if (createResponse.code == 0) {
-                        me.$message({
+                addChip({chipIdList: this.changeChipList}).then(res => {
+                    if (res.code === 0) {
+                        this.$message({
                             message: "添加成功",
                             type: "success"
                         });
-                        me.getRoom();
-                    } else {
-                        me.$message({
-                            message: createResponse.msg,
-                            type: "warning"
-                        });
+                        this.getRoom();
                     }
-                });
+                })
             },
             removeChip() {
-                console.log(this.changeChipList);
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/trade/room/removeChip", {
-                    chipIdList: me.changeChipList
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const createResponse = response.data;
-                    if (createResponse.code == 0) {
-                        me.$message({
+                removeChip({chipIdList: this.changeChipList}).then(res => {
+                    if (res.code === 0) {
+                        this.$message({
                             message: "移除成功",
                             type: "success"
                         });
-                        me.getRoom();
-                    } else {
-                        me.$message({
-                            message: createResponse.msg,
-                            type: "warning"
-                        });
+                        this.getRoom();
                     }
-                });
+                })
             },
             getRoom() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/trade/room/getRoom", {}, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const createResponse = response.data;
-                    if (createResponse.code == 0) {
-                        me.tradeRoom = createResponse.data;
-
-                    } else {
-                        me.$message({
-                            message: createResponse.msg,
-                            type: "warning"
-                        });
+                info().then(res => {
+                    if (res.code === 0) {
+                        this.tradeRoom = res.data;
                     }
                 });
             },
-            addOffer() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/trade/room/submit", {
-                    comment: "一段带话"
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const createResponse = response.data;
-                    if (createResponse.code == 0) {
-                        me.$message({
+            submit() {
+                submit({comment: "一段带话"}).then(res => {
+                    if (res.code === 0) {
+                        this.$message({
                             message: "提交成功",
                             type: "success"
                         });
-                        me.getRoom();
-                    } else {
-                        me.$message({
-                            message: createResponse.msg,
-                            type: "warning"
-                        });
+                        this.getRoom();
                     }
                 });
             },
-            confirmOffer() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/trade/room/confirm", {}, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const createResponse = response.data;
-                    if (createResponse.code == 0) {
-                        me.$message({
+            confirm() {
+                confirm().then(res => {
+                    if (res.code === 0) {
+                        this.$message({
                             message: "确认成功",
                             type: "success"
                         });
-                        me.getRoom();
-                    } else {
-                        me.$message({
-                            message: createResponse.msg,
-                            type: "warning"
-                        });
+                        this.getRoom();
                     }
                 });
             },
+            handleSelectionChange(selectedRows) {
+                // console.log(val);
+                var me = this;
+                me.changeChipList = [];
+                selectedRows.forEach(row => {
+                    me.changeChipList.push(row.chipId);
+                });
+            },
             registerRoomRouter() {
-                this.$store.dispatch('ws/addRouter', [
-                    {
-                        router: "/TRADE/room/交易房间创建完毕",
-                        function: this.handleRoomCreated
-                    },
-                    {
-                        router: "/TRADE/request/我方收到交易请求",
-                        function: this.handleTradeRequest
-                    },
-                    {
-                        router:"/TRADE/request/对方取消交易请求",
-                        function: this.handleCancelTradeRequest
-                    }
-                ])
+                this.$store.dispatch('ws/addRouter', {
+                    "channel": "/user/queue/team",
+                    "routers": [
+                        {
+                            router: "/TRADE/request/交易房间创建完毕",
+                            function: this.handleRoomCreated
+                        },
+                        {
+                            router: "/TRADE/request/我方收到交易请求",
+                            function: this.handleTradeRequest
+                        },
+                        {
+                            router: "/TRADE/request/对方取消交易请求",
+                            function: this.handleCancelTradeRequest
+                        }
+                    ]
+                });
+
             }
         }
     }

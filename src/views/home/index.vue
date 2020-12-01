@@ -124,17 +124,8 @@
                 createTeamDialogVisible:false,
                 ifLogin:false,
                 captchaUrl:"",
-                chatMsg:[],
+
                 loading:false,
-                // tradeRoom:{
-                //
-                    // initiatorChip:{},
-                    // targetChip:{},
-                    // initiatorTeam:{},
-                    // targetTeam:{},
-                    // initiatorEntered:false,
-                    // targetEntered:false
-                // },
                 form:{
                     username:"",
                     password:"",
@@ -176,7 +167,7 @@
                     forceKick:ifForceKick
                 }).then((response)=>{
                     if(response.code===0){
-                        GlobalWebsocket.connect();
+                        GlobalWebsocket.connect("/user/queue/team");
                         me.serverDialogVisible=false;
                         me.$router.push('/myteam');
                     }else{
@@ -254,14 +245,7 @@
                 //     }
                 // });
             },
-            handleSelectionChange(selectedRows) {
-                // console.log(val);
-                var me=this;
-                me.changeChipList=[];
-                selectedRows.forEach(row=>{
-                    me.changeChipList.push(row.chipId);
-                });
-            },
+
 
             getCaptcha() {
                 var me=this;

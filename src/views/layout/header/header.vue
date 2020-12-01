@@ -250,6 +250,7 @@
     } from "@/api/friend";
     import {getNotificationList, readNotification} from "@/api/notification";
     import {sendTradeRequest} from "@/api/traderoom";
+    import {Notification} from "element-ui";
     export default {
         name: "navHeader",
         components: {TradeRoomDialog, TeamInfoDialog,TradeRequestDialog},
@@ -273,6 +274,9 @@
         mounted() {
             this.getMyTeamInfo();
             this.initFriendList();
+        },
+        created() {
+            this.registerNotificationRouter();
         },
         data() {
             return {
@@ -517,6 +521,22 @@
             },
             handleChatMessage() {
 
+            },
+            handleReceiveNotification(body){
+                Notification({
+                    title: body.title,
+                    message: body.content
+                })
+            },
+            registerNotificationRouter() {
+                this.$store.dispatch('ws/addRouter', {
+                    "channel": "/user/queue/team",
+                    "routers":[
+                    {
+                        router:"/USER/notification/收到通知",
+                        function: this.handleReceiveNotification
+                    }
+                ]})
             }
 
         }
