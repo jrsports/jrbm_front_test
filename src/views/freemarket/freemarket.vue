@@ -10,7 +10,7 @@
             <el-container>
                 <el-main>
                     <el-row>
-                        <el-col span="18">
+                        <el-col :span="18">
                             <div>
                                 <el-select v-model="positionFilterData" multiple placeholder="位置筛选">
                                     <el-option

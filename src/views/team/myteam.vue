@@ -16,7 +16,7 @@
                             <el-row>
                                 <el-col ::span="12">
                                     <div>
-                                        dd
+
                                     </div>
                                 </el-col>
                                 <el-col :span="10">

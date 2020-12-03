@@ -45,7 +45,7 @@
                 </el-col>
             </el-row>
             <el-row>
-                <el-col span=12>
+                <el-col :span="12">
                     <el-table
                             ref="initTable"
                             :data="tradeRoom.initiatorChip.playerChipList"
