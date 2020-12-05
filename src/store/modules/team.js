@@ -5,6 +5,7 @@ import {getTeamToken,setTeamToken} from '@/utils/tokenUtil'
 const state = {
   teamToken: getTeamToken(),
   teamName: '',
+  teamId:'',
   teamAvatar: '',
   fund:'-',
   coin:'-',
@@ -17,6 +18,9 @@ const mutations = {
   },
   SET_TEAM_NAME: (state, teamName) => {
     state.teamName = teamName
+  },
+  SET_TEAM_ID: (state, teamId) => {
+    state.teamId= teamId
   },
   SET_TEAM_AVATAR: (state, teamAvatar) => {
     state.teamAvatar = teamAvatar
@@ -39,6 +43,7 @@ const actions = {
         if(response.code===0){
           let data=response.data.teamInfo;
           commit('SET_TEAM_TOKEN', data.teamToken)
+          commit('SET_TEAM_ID', data.teamId)
           commit('SET_TEAM_NAME',data.teamName)
           commit('SET_TEAM_AVATAR',data.avatar)
           setTeamToken(data.teamToken)
@@ -55,6 +60,7 @@ const actions = {
         if(response.code===0){
           let data=response.data;
           commit('SET_TEAM_NAME',data.teamName)
+          commit('SET_TEAM_ID', data.teamId)
           commit('SET_TEAM_AVATAR',data.avatar)
           commit('SET_TEAM_FUND',data.fund)
           commit('SET_TEAM_COIN',data.coin)

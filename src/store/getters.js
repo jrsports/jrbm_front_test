@@ -5,6 +5,7 @@ const getters = {
     teamToken: state => state.team.teamToken,
     teamAvatar: state => state.team.teamAvatar,
     teamName: state => state.team.teamName,
+    teamId:state=>state.team.teamId,
     fund: state => state.team.fund,
     coin: state => state.team.coin,
     friendList:state=>state.team.friendList,

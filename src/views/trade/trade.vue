@@ -41,10 +41,48 @@
 <!--                        </div>-->
 <!--                    </el-tab-pane>-->
                     <el-tab-pane label="出售大厅">
-                        <el-button @click="handlePublish">发布</el-button>
+                        <el-row>
+                            <el-col :span="18">
+                                <el-form :inline="true" :model="sellPublishSearchForm">
+                                    <el-form-item label="球员">
+                                        <el-select
+                                                v-model="sellPublishSearchForm.bpId"
+                                                filterable
+                                                remote
+                                                clearable
+                                                reserve-keyword
+                                                placeholder="请输入球员名"
+                                                :remote-method="searchBasicPlayer"
+                                                :loading="basicPlayerSearchLoading">
+                                            <el-option
+                                                    v-for="item in basicPlayerSearchCandidates"
+                                                    :key="item.bpId"
+                                                    :label="item.chname"
+                                                    :value="item.bpId">
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="资金价格<=">
+                                        <el-input-number v-model="sellPublishSearchForm.maxFundPrice"  :min="1" :max="9999"></el-input-number>
+                                    </el-form-item>
+                                    <el-form-item label="JR币价格<=">
+                                        <el-input-number v-model="sellPublishSearchForm.maxCoinPrice"  :min="1" :max="9999"></el-input-number>
+                                    </el-form-item >
+                                    <el-form-item>
+                                        <el-button type="primary" @click="getSellPublish">搜索</el-button>
+                                    </el-form-item>
+                                </el-form>
+                            </el-col>
+                            <el-col :span="6">
+                                <el-button @click="handlePublish">发布</el-button>
+                                <el-button @click="handleMySellPublish">我的发布</el-button>
+                                <el-button icon="el-icon-refresh" @click="getSellPublish"></el-button>
+                            </el-col>
+                        </el-row>
+
                         <el-table
+                                ref="sellPublishTable"
                                 :data="sellPublishTableData"
-                                :key="dynamicKey"
                                 style="width: 100%">
                             <el-table-column
                                     label="球员"
@@ -73,13 +111,26 @@
                                     prop="timeLeft"
                                     label="剩余时间">
                             </el-table-column>
+                            <el-table-column label="操作">
+                                <template slot-scope="scope">
+                                    <el-button
+                                            v-if="isPublisher(scope.row)"
+                                            size="mini"
+                                            @click="handleCancelSell(scope.row)">撤回</el-button>
+                                    <el-button
+                                            v-if="!isPublisher(scope.row)"
+                                            size="mini"
+                                            type="success"
+                                            @click="handleBuySell(scope.row)">购买</el-button>
+                                </template>
+                            </el-table-column>
                         </el-table>
                     </el-tab-pane>
                     <el-tab-pane label="求购大厅"></el-tab-pane>
                 </el-tabs>
 
                 <el-dialog :visible.sync="sellPublishDialogVisible" title="发布出售信息">
-                    <el-form ref="form" :model="sellPublishForm" label-width="80px">
+                    <el-form ref="form" :model="sellPublishForm" label-width="200px">
                         <el-form-item label="可交易球员">
                             <el-select v-model="sellPublishForm.upId" placeholder="请选择要交易的球员">
                                 <el-option
@@ -108,6 +159,40 @@
                     </el-form>
 
                 </el-dialog>
+                <el-dialog :visible.sync="mySellPublishDialogVisible" title="我的发布">
+                    <el-table :data="mySellPublishTableData" style="width: 100%">
+                        <el-table-column
+                                label="球员"
+                                width="100">
+                            <template slot-scope="scope">
+                                <div class="block" @click="handlePlayerDetail(scope.row.upId)" style="cursor:pointer;">
+                                    <el-avatar shape="square" :size="50" :src="scope.row.avatar"></el-avatar>
+                                </div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="chname"
+                                label="中文名"
+                                width="180">
+                        </el-table-column>
+                        <el-table-column
+                                prop="price"
+                                label="价格">
+                        </el-table-column>
+                        <el-table-column
+                                prop="timeLeft"
+                                label="剩余时间">
+                        </el-table-column>
+                        <el-table-column label="操作">
+                            <template slot-scope="scope">
+                                <el-button
+                                        v-if="canCancel(scope.row)"
+                                        size="mini"
+                                        @click="handleCancelSell(scope.row)">撤回</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-dialog>
 
                 <PlayerInfoDialog ref="playerInfoDialogRef"></PlayerInfoDialog>
             </el-main>
@@ -118,9 +203,10 @@
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header"
-    import {getSellPublish, getTradable, publishSell} from "@/api/trade";
+    import {buySell, cancelSell, getMySellPublish, getSellPublish, getTradable, publishSell} from "@/api/trade";
     import {secondsToTime} from "@/utils/timeUtil";
     import PlayerInfoDialog from "@/components/PlayerInfoDialog";
+    import {searchBasicPlayer} from "@/api/player";
 
     export default {
         name: "Trade",
@@ -133,16 +219,24 @@
                 tradeReceived: null,
                 tradeRequestId: null,
                 sellPublishTableData: [],
+                mySellPublishTableData:[],
                 sellPublishDialogVisible: false,
-                // 保证更新数据后，table会显示最新数据
-                dynamicKey:0,
+                mySellPublishDialogVisible:false,
                 sellPublishForm: {
                     upId: "",
                     cardCount: 0,
                     coinPrice: 0,
                     fundPrice: 0
                 },
-                tradablePlayerList: []
+                tradablePlayerList: [],
+                sellPublishSearchForm:{
+                    bpId:null,
+                    maxFundPrice:9999,
+                    maxCoinPrice:9999
+                },
+                basicPlayerSearchCandidates:[],
+                basicPlayerSearchLoading:false,
+
             }
         },
         methods: {
@@ -201,7 +295,10 @@
                 });
             },
             getSellPublish() {
-                getSellPublish({pageRequest: {pageNo: 1, pageSize: 10}}).then(res => {
+                let query=this.sellPublishSearchForm;
+                console.log(query);
+                query.pageRequest={pageNo: 1, pageSize: 10};
+                getSellPublish(query).then(res => {
                     if (res.code === 0) {
                         this.sellPublishTableData = res.data.recordList;
                         this.sellPublishTableData.forEach(item=>{
@@ -210,32 +307,50 @@
                                 price+=item.fundPrice+"万资金"
                             }
                             if(item.coinPrice>0){
-                                price+="/"+item.coinPrice+"币";
+                                price+="/"+item.coinPrice+"JR币";
                             }
                             item.price=price;
                         });
-                        setInterval(this.handleSellPublishTime, 200);
+                        setInterval(this.handleSellPublishTime, 200,this.sellPublishTableData);
                     }
                 });
             },
-            handleSellPublishTime() {
-                this.dynamicKey++;
-                let data=this.sellPublishTableData;
-                data.forEach(item => {
+            handleSellPublishTime(data) {
+                data.forEach((item,index)=> {
                     let secondsLeft = parseInt((item.expireTime - new Date().getTime()) / 1000);
                     if (secondsLeft > 0) {
                         item.timeLeft = secondsToTime(secondsLeft);
                     } else {
                         item.timeLeft = "已失效"
                     }
+                    // el-table每次只能监听整个row的变化，当row中某个属性变化时，是无法追踪的，所以需要重新给table中的某一行赋值
+                    this.$set(data,index,item)
                 });
-                this.sellPublishTableData=data;
             },
             handlePublish() {
                 this.sellPublishDialogVisible = true;
                 getTradable().then(res => {
                     this.tradablePlayerList = res.data;
                 })
+            },
+            handleMySellPublish(){
+              getMySellPublish({pageRequest:{pageNo: 1, pageSize: 10}}).then(res=>{
+                  if(res.code===0){
+                      this.mySellPublishDialogVisible=true;
+                      this.mySellPublishTableData=res.data.recordList;
+                      this.mySellPublishTableData.forEach(item=>{
+                          let price="";
+                          if(item.fundPrice>0){
+                              price+=item.fundPrice+"万资金"
+                          }
+                          if(item.coinPrice>0){
+                              price+="/"+item.coinPrice+"JR币";
+                          }
+                          item.price=price;
+                      });
+                      setInterval(this.handleSellPublishTime, 200,this.mySellPublishTableData);
+                  }
+              });
             },
             publishSell() {
                 publishSell(this.sellPublishForm).then(res => {
@@ -252,6 +367,45 @@
             handlePlayerDetail(upId) {
                 this.$refs.playerInfoDialogRef.show(upId);
             },
+            handleCancelSell(row){
+                cancelSell({sellId:row.sellId}).then(res=>{
+                    if(res.code===0){
+                        this.$message({
+                            message:"撤回成功",
+                            type:"success"
+                        });
+                        this.getSellPublish();
+                    }
+                })
+            },
+            handleBuySell(row){
+                buySell({sellId:row.sellId}).then(res=>{
+                    if(res.code===0){
+                        this.$message({
+                            message:"购买成功",
+                            type:"success"
+                        });
+                        this.getSellPublish();
+                    }
+                })
+            },
+            isPublisher(row){
+                return row.sellerTeamId===this.$store.getters.teamId;
+            },
+            canCancel(row){
+                return row.expireTime>new Date();
+            },
+            searchBasicPlayer(chname){
+                if(chname!==''){
+                    this.basicPlayerSearchLoading=true;
+                    searchBasicPlayer({chname:chname}).then(res=>{
+                        if(res.code===0){
+                            this.basicPlayerSearchCandidates=res.data;
+                        }
+                    });
+                    this.basicPlayerSearchLoading=false;
+                }
+            }
         }
 
 
