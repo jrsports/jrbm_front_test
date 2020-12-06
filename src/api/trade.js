@@ -55,3 +55,44 @@ export function getTradable(data) {
         data:data
     })
 }
+
+
+export function getPurchasePublish(data) {
+    return request({
+        url:'/trade/purchase/getPurchasePublish',
+        method:'post',
+        data:data
+    })
+}
+
+export function publishPurchase(data) {
+    return request({
+        url:'/trade/purchase/publish',
+        method:'post',
+        data:data
+    })
+}
+
+export function sellPurchase(data) {
+    return request({
+        url:'/trade/purchase/sell',
+        method:'post',
+        data:data
+    })
+}
+
+export function cancelPurchase(data) {
+    return request({
+        url:'/trade/purchase/cancel',
+        method:'post',
+        data:data
+    })
+}
+
+export function getMyPurchasePublish(data) {
+    return request({
+        url:'/trade/purchase/getMyPurchasePublish',
+        method:'post',
+        data:data
+    })
+}
