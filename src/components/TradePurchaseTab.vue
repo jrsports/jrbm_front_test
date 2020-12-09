@@ -106,21 +106,32 @@
         <el-dialog :visible.sync="purchasePublishDialogVisible" title="发布求购信息">
             <el-form ref="form" :model="purchasePublishForm" label-width="200px">
                 <el-form-item label="球员">
-                    <el-select
-                            v-model="purchasePublishForm.bpId"
-                            filterable
-                            remote
-                            clearable
-                            placeholder="请输入球员名"
-                            :remote-method="searchBasicPlayer"
-                            :loading="basicPlayerSearchLoading">
-                        <el-option
-                                v-for="item in basicPlayerSearchCandidates"
-                                :key="item.bpId"
-                                :label="item.chname"
-                                :value="item.bpId">
-                        </el-option>
-                    </el-select>
+                    <el-row>
+                        <el-col :span="2">
+                            <el-avatar shape="square" :size="50" :src="selectedPlayerAvatar"></el-avatar>
+                        </el-col>
+                        <el-col :span="22">
+                            <el-select
+                                    v-model="purchasePublishForm.bpId"
+                                    filterable
+                                    remote
+                                    clearable
+                                    placeholder="请输入球员名"
+                                    :remote-method="searchBasicPlayer"
+                                    :loading="basicPlayerSearchLoading"
+                                    @change="handlePlayerSelected"
+                                    style="margin-top: 5px">
+                                <el-option
+                                        v-for="item in basicPlayerSearchCandidates"
+                                        :key="item.bpId"
+                                        :label="item.chname"
+                                        :value="item.bpId">
+                                </el-option>
+                            </el-select>
+                        </el-col>
+                    </el-row>
+
+
                 </el-form-item>
                 <el-form-item label="类型">
                     <el-radio v-model="purchasePublishForm.type" label="0">普通球员</el-radio>
@@ -331,6 +342,7 @@
                 purchasePublishDialogVisible: false,
                 myPurchasePublishDialogVisible: false,
                 historyPurchasePublishDialogVisible: false,
+                selectedPlayerAvatar:null,
                 purchasePublishForm: {
                     bpId: "",
                     cardCount: 0,
@@ -383,7 +395,12 @@
                             }
                             item.price = price;
                             if (item.type === 0) {
-                                item.salary = item.contractDto.totalSeason + "年" + item.contractDto.totalSalary + "万"
+                                if(item.contractDto.totalSeason!==null){
+                                    item.salary = item.contractDto.totalSeason + "年" + item.contractDto.totalSalary + "万"
+                                }else{
+                                    item.salary="不限";
+                                }
+
                             } else if (item.type === 1) {
                                 item.salary = item.signSalary;
                             }
@@ -514,6 +531,13 @@
                     });
                     this.basicPlayerSearchLoading = false;
                 }
+            },
+            handlePlayerSelected(bpId){
+                this.basicPlayerSearchCandidates.forEach(item=>{
+                    if(item.bpId===bpId){
+                        this.selectedPlayerAvatar=item.avatarUrl;
+                    }
+                });
             }
         }
 
