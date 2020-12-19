@@ -15,7 +15,7 @@ export default {
                 this.stompClient.connect({}, function (frame) {
                     console.log('Connected:' + frame);
                     Message({
-                        message: "成功连接到JRBM服务器",
+                        message: "成功连接到频道["+channel+"]",
                         type: "success"
                     });
                     me.stompClient.subscribe(channel, function (response) {

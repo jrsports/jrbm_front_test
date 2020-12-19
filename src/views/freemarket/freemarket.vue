@@ -23,54 +23,110 @@
                             </div>
                         </el-col>
                         <el-col :span="4">
-                            <h4 style="text-align:right" :class="{'newColor':newPlayerColorDisplay}">当前自由球员人数：{{freePlayerCount}}</h4>
+                            <h4 style="text-align:right" :class="{'newColor':newPlayerColorDisplay}">
+                                当前自由球员人数：{{freePlayerCount}}</h4>
                         </el-col>
                         <el-col :span="2">
-                            <el-button type="primary" icon="el-icon-refresh" circle @click="refreshFreePlayer(-1,9,false)"></el-button>
+                            <el-button type="primary" icon="el-icon-refresh" circle
+                                       @click="getFreePlayerList(-1,9)"></el-button>
                         </el-col>
                     </el-row>
                     <el-row>
-                        <el-button type="info" plain @click="signHistoryDialogVisible=true;getHistoryOfferList()">签约记录</el-button>
+                        <el-button type="info" plain @click="signHistoryDialogVisible=true;getHistoryOfferList()">签约记录
+                        </el-button>
                     </el-row>
-                    <el-row :gutter="20" style="margin-top: 10px">
-                        <el-col :span="8" v-for="fp in freePlayerListData" :key="fp.fpId">
-                            <div class="freePlayer" style="margin-top: 10px">
-                                <el-row>
-                                    <el-col :span="8">
-                                        <div class="block"><el-avatar class="playerAvatar" shape="square"  :src="squareUrl"></el-avatar></div>
-                                    </el-col>
-                                    <el-col :span="16">
-                                        <div>
-                                            <h3>{{fp.userPlayerBriefDto.chname}}<span>{{fp.userPlayerBriefDto.enname}}</span></h3>
-                                            <h3>{{fp.position}}|<span>进攻：{{fp.userPlayerBriefDto.offensiveOverall}}防守：{{fp.userPlayerBriefDto.defensiveOverall}}</span></h3>
-                                            <h4>原属球队：{{fp.source}}</h4>
-                                        </div>
-                                    </el-col>
-                                </el-row>
-                                <el-row :gutter="10" >
-                                    <el-col :span="12" style="text-align: center">
-                                        <el-button plain type="info" @click="viewPlayerDetail(fp.fpId);userPlayerDetailDialogVisible=true">球员详情</el-button>
-                                    </el-col>
-                                    <el-col :span="12" style="text-align: center" v-if="fp.timeValLeft>0">
-                                        <el-button plain type="success" @click="addOfferDialogVisible=true;addOfferForm.fpId=fp.fpId;getTeamOfferHistory();">谈判报价</el-button>
-                                    </el-col>
-                                </el-row>
-                                <el-row style="margin-top: 30px" v-if="fp.timeValLeft>0">
-                                    <el-col :span="12" style="text-align: center">
-                                        <span>剩余时间：{{fp.timeLeft}}</span>
-                                    </el-col>
-                                    <el-col :span="12" style="text-align: center">
-                                        <el-button type="text" @click="getOfferList(fp.fpId);offerDialogVisible = true">报价情况</el-button>
-                                    </el-col>
-                                </el-row>
-                                <el-row v-if="fp.timeValLeft<=0">
-                                    <h1>球员已过期</h1>
-                                </el-row>
 
-                            </div>
-                        </el-col>
-                    </el-row>
-                    <el-button icon="el-icon-caret-bottom" v-if="freePlayerCount>9" @click="refreshFreePlayer(lastFpId,3,true)" style="width:100%"></el-button>
+                    <el-table
+                            ref="freeMarketTable"
+                            :data="freePlayerListData"
+                            style="width: 100%">
+                        <el-table-column
+                                label="球员"
+                                width="100">
+                            <template slot-scope="scope">
+                                <div class="block" @click="handlePlayerDetail(scope.row.upId)" style="cursor:pointer;">
+                                    <el-avatar shape="square" :size="50" :src="scope.row.avatar"></el-avatar>
+                                </div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="chname"
+                                label="中文名"
+                                width="180">
+                        </el-table-column>
+                        <el-table-column
+                                prop="source"
+                                label="来源">
+                        </el-table-column>
+                        <el-table-column
+                                prop="lastTeamName"
+                                label="原属球队"
+                                width="180">
+                        </el-table-column>
+                        <el-table-column
+                                prop="offerCount"
+                                label="报价数量"
+                                width="180">
+                        </el-table-column>
+                        <el-table-column
+                                prop="timeLeft"
+                                label="剩余时间">
+                        </el-table-column>
+                    </el-table>
+
+<!--                    <el-row :gutter="20" style="margin-top: 10px">-->
+<!--                        <el-col :span="8" v-for="fp in freePlayerListData" :key="fp.fpId">-->
+<!--                            <div class="freePlayer" style="margin-top: 10px">-->
+<!--                                <el-row>-->
+<!--                                    <el-col :span="8">-->
+<!--                                        <div class="block">-->
+<!--                                            <el-avatar class="playerAvatar" shape="square" :src="squareUrl"></el-avatar>-->
+<!--                                        </div>-->
+<!--                                    </el-col>-->
+<!--                                    <el-col :span="16">-->
+<!--                                        <div>-->
+<!--                                            <h3>-->
+<!--                                                {{fp.userPlayerBriefDto.chname}}<span>{{fp.userPlayerBriefDto.enname}}</span>-->
+<!--                                            </h3>-->
+<!--                                            <h3>{{fp.position}}|<span>进攻：{{fp.userPlayerBriefDto.offensiveOverall}}防守：{{fp.userPlayerBriefDto.defensiveOverall}}</span>-->
+<!--                                            </h3>-->
+<!--                                            <h4>原属球队：{{fp.source}}</h4>-->
+<!--                                        </div>-->
+<!--                                    </el-col>-->
+<!--                                </el-row>-->
+<!--                                <el-row :gutter="10">-->
+<!--                                    <el-col :span="12" style="text-align: center">-->
+<!--                                        <el-button plain type="info"-->
+<!--                                                   @click="viewPlayerDetail(fp.fpId);userPlayerDetailDialogVisible=true">-->
+<!--                                            球员详情-->
+<!--                                        </el-button>-->
+<!--                                    </el-col>-->
+<!--                                    <el-col :span="12" style="text-align: center" v-if="fp.timeValLeft>0">-->
+<!--                                        <el-button plain type="success"-->
+<!--                                                   @click="addOfferDialogVisible=true;addOfferForm.fpId=fp.fpId;getTeamOfferHistory();">-->
+<!--                                            谈判报价-->
+<!--                                        </el-button>-->
+<!--                                    </el-col>-->
+<!--                                </el-row>-->
+<!--                                <el-row style="margin-top: 30px" v-if="fp.timeValLeft>0">-->
+<!--                                    <el-col :span="12" style="text-align: center">-->
+<!--                                        <span>剩余时间：{{fp.timeLeft}}</span>-->
+<!--                                    </el-col>-->
+<!--                                    <el-col :span="12" style="text-align: center">-->
+<!--                                        <el-button type="text" @click="getOfferList(fp.fpId);offerDialogVisible = true">-->
+<!--                                            报价情况-->
+<!--                                        </el-button>-->
+<!--                                    </el-col>-->
+<!--                                </el-row>-->
+<!--                                <el-row v-if="fp.timeValLeft<=0">-->
+<!--                                    <h1>球员已过期</h1>-->
+<!--                                </el-row>-->
+
+<!--                            </div>-->
+<!--                        </el-col>-->
+<!--                    </el-row>-->
+                    <el-button icon="el-icon-caret-bottom" v-if="freePlayerCount>9"
+                               @click="refreshFreePlayer(lastFpId,3,true)" style="width:100%"></el-button>
 
                     <el-dialog title="报价列表" :visible.sync="offerDialogVisible">
                         <el-table :data="offerData">
@@ -90,10 +146,14 @@
                                             :label="'第' + (index+1)+'年'"
                                             :key="index"
                                     >
-                                        <el-input-number v-model="offer.salary" @change="calculateTotalSalary" :min="0" :max="5000" label="当年薪资" style="width: 200px;margin-right:10px"></el-input-number><el-button v-if="index>0" @click.prevent="removeOffer(offer)">删除</el-button>
+                                        <el-input-number v-model="offer.salary" @change="calculateTotalSalary" :min="0"
+                                                         :max="5000" label="当年薪资"
+                                                         style="width: 200px;margin-right:10px"></el-input-number>
+                                        <el-button v-if="index>0" @click.prevent="removeOffer(offer)">删除</el-button>
                                     </el-form-item>
                                     <el-form-item>
-                                        <el-button type="primary" @click="addOffer()" :loading="addOfferLoading">报价</el-button>
+                                        <el-button type="primary" @click="addOffer()" :loading="addOfferLoading">报价
+                                        </el-button>
                                         <el-button v-if="addYearBtnVisible" @click="addOff">新增一年</el-button>
                                     </el-form-item>
                                 </el-form>
@@ -103,18 +163,18 @@
                             </el-col>
                         </el-row>
                         <el-row>
-<!--                            span-method="objectSpanMethod"-->
+                            <!--                            span-method="objectSpanMethod"-->
                             <h3>报价历史</h3>
                             <el-table
                                     :data="teamOfferHistoryData"
 
                                     border
                                     style="width: 100%; margin-top: 20px">
-<!--                                <el-table-column-->
-<!--                                        prop="offerContractSalaryList.times"-->
-<!--                                        label="报价次序"-->
-<!--                                        width="180">-->
-<!--                                </el-table-column>-->
+                                <!--                                <el-table-column-->
+                                <!--                                        prop="offerContractSalaryList.times"-->
+                                <!--                                        label="报价次序"-->
+                                <!--                                        width="180">-->
+                                <!--                                </el-table-column>-->
                                 <el-table-column
                                         prop="season"
                                         label="赛季">
@@ -140,13 +200,14 @@
                                     <el-button
                                             v-if="scope.row.offerFlowId!=null"
                                             size="mini"
-                                            @click="signFlowDialogVisible=true;viewSignFlow(scope.row)">查看</el-button>
+                                            @click="signFlowDialogVisible=true;viewSignFlow(scope.row)">查看
+                                    </el-button>
                                 </template>
                             </el-table-column>
                         </el-table>
                     </el-dialog>
                     <el-dialog title="签约流程" :visible.sync="signFlowDialogVisible">
-                        <el-steps :active="offerFlow.status" finish-status="success" align-center >
+                        <el-steps :active="offerFlow.status" finish-status="success" align-center>
                             <el-step title="签署流程发起" :description="offerFlow.flowStartTime"></el-step>
                             <el-step title="签署中" :description="offerFlow.currentProgress"></el-step>
                             <el-step title="签署完成" :description="offerFlow.flowFinishTime"></el-step>
@@ -224,6 +285,7 @@
 
                         </el-row>
                     </el-dialog>
+                    <PlayerInfoDialog ref="playerInfoDialogRef"></PlayerInfoDialog>
                 </el-main>
             </el-container>
         </el-container>
@@ -234,41 +296,40 @@
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header";
-
+    import PlayerInfoDialog from "@/components/PlayerInfoDialog";
+    import {getFreePlayerList} from "@/api/freeMarket";
+    import GlobalWebsocket from "@/websocket/GlobalWebsocket";
 
     export default {
         name: "freemarket",
-        components: {Sidebar,NavBar},
-        data(){
-            return{
-                teamName:"",
-                squareUrl: "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png",
-                freePlayerCount:0,
-                offensive:200,
-                defensive:200,
-                teamOfferHistoryData:[],
-                originalTeam:"originalTeam",
-                position:"PG",
-                offerDialogVisible:false,
-                addOfferDialogVisible:false,
-                signHistoryDialogVisible:false,
-                signFlowDialogVisible:false,
-                userPlayerDetailDialogVisible:false,
-                lastFpId:-1,
-                loading:true,
-                newPlayerColorDisplay:false,
-                addOfferLoading:false,
-                addYearBtnVisible:true,
-                offerFlow:{
-                    status:1,
-                    flowStartTime:"2020/2/16 11:46",
-                    flowFinishTime:"2020/2/16 11:46",
-                    currentProgress:"等待 ccTeam 同意签约"
+        components: {Sidebar, NavBar, PlayerInfoDialog},
+        data() {
+            return {
+                freePlayerListData: [],
+                freePlayerCount: 0,
+                offensive: 200,
+                defensive: 200,
+                teamOfferHistoryData: [],
+                originalTeam: "originalTeam",
+                position: "PG",
+                offerDialogVisible: false,
+                addOfferDialogVisible: false,
+                signHistoryDialogVisible: false,
+                signFlowDialogVisible: false,
+                userPlayerDetailDialogVisible: false,
+                lastFpId: -1,
+                loading: true,
+                newPlayerColorDisplay: false,
+                addOfferLoading: false,
+                addYearBtnVisible: true,
+                offerFlow: {
+                    status: 1,
+                    flowStartTime: "2020/2/16 11:46",
+                    flowFinishTime: "2020/2/16 11:46",
+                    currentProgress: "等待 ccTeam 同意签约"
                 },
-                playerDetail:{
-                    ability:{
-
-                    }
+                playerDetail: {
+                    ability: {}
                 },
                 positionFilterOptions: [{
                     value: '1',
@@ -286,390 +347,365 @@
                     value: '5',
                     label: 'C（中锋）'
                 }],
-                positionFilterData:[],
-                offerData:[
-
-                ],
-                signFlowData:[
+                positionFilterData: [],
+                offerData: [],
+                signFlowData: [
                     {
-                        teamName:"Koliday",
-                        sendTime:"2020/2/16 12:12",
-                        expireTime:"2020/2/16 14:12",
-                        finishTime:"2020/2/16 13:27",
-                        status:"已拒绝"
+                        teamName: "Koliday",
+                        sendTime: "2020/2/16 12:12",
+                        expireTime: "2020/2/16 14:12",
+                        finishTime: "2020/2/16 13:27",
+                        status: "已拒绝"
                     },
                     {
-                        teamName:"ccTeam",
-                        sendTime:"2020/2/16 12:12",
-                        expireTime:"2020/2/16 14:12",
-                        finishTime:"",
-                        status:"待签署"
+                        teamName: "ccTeam",
+                        sendTime: "2020/2/16 12:12",
+                        expireTime: "2020/2/16 14:12",
+                        finishTime: "",
+                        status: "待签署"
                     },
                     {
-                        teamName:"kkTeam",
-                        sendTime:"",
-                        expireTime:"",
-                        finishTime:"",
-                        status:"未发送"
+                        teamName: "kkTeam",
+                        sendTime: "",
+                        expireTime: "",
+                        finishTime: "",
+                        status: "未发送"
                     }
                 ],
-                signHistoryData:[
-                ],
-                addOfferForm:{
-                    fpId:-1,
-                    totalSeason:1,
-                    totalSalary:0,
-                    addOfferData:[
+                signHistoryData: [],
+                addOfferForm: {
+                    fpId: -1,
+                    totalSeason: 1,
+                    totalSalary: 0,
+                    addOfferData: [
                         {
-                            season:1,
-                            salary:0
+                            season: 1,
+                            salary: 0
                         }
                     ],
                 },
-                freePlayerListData:[]
+
             }
 
         },
-        mounted(){
-            this.teamName=sessionStorage.getItem("teamName");
-            this.refreshFreePlayer(-1,9,false);
-            this.iniFreemarketWebsocket();
-            setInterval(this.startTimer,1000);
+        mounted() {
+            this.connectFreeMarketChannel();
+            this.getFreePlayerList(-1, 9);
+            // setInterval(this.startTimer, 1000);
         },
-        methods:{
-            refreshFreePlayer(fpIdOffset,count,more){
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/freemarket/free/getFreePlayerList", {
-                    fpIdOffset:fpIdOffset,
-                    count:count
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const freeResponse = response.data;
-                    if (freeResponse.code === 0) {
-                        const newFreePlayerList=freeResponse.data.freePlayerList;
-                        me.freePlayerCount=freeResponse.data.count;
-                        if(more==false){
-                            me.freePlayerListData=[];
+        methods: {
+            connectFreeMarketChannel() {
+                let channel="/channel/freeMarket/freeMarket/freeMarket";
+                this.$store.dispatch('ws/addRouter', {
+                    "channel": channel,
+                    "routers": [
+                        {
+                            router: "/FREE_MARKET/freeMarket/新的自由球员流入",
+                            function: this.handleNewFreePlayer
                         }
-                        newFreePlayerList.forEach(function (item) {
-                            var t=parseInt((item.expireTime-new Date().getTime())/1000);
-                            if(t>0){
-                                item.timeValLeft=t;
-                                // console.log(item.timeValLeft);
-                                item.timeLeft=me.secondsToTime(t);
-                            }
-                            me.freePlayerListData.push(item)
-                            me.lastFpId=item.fpId;
-                        });
-                    } else {
-                        me.$message({
-                            message: freeResponse.msg,
-                            type: "warning"
-                        });
-                    }
+                    ]
                 });
+                GlobalWebsocket.connect(channel);
             },
-            getOfferList(fpId){
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/freemarket/offer/getOfferRecordList/"+fpId, null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const freeResponse = response.data;
-                    if (freeResponse.code === 0) {
-                        me.offerData=freeResponse.data;
-                        me.offerData.forEach(function(item){
-                            const l=item.offerContractSalaryList;
-                            const totalSeason = l.length;
-                            let totalSalary = 0;
-                            l.forEach(function (i) {
-                                totalSalary+=i.salary;
-                            });
-                            item.offer=totalSeason+"年"+totalSalary+"万"
-                        });
-                    } else {
-                        me.$message({
-                            message: freeResponse.msg,
-                            type: "warning"
-                        });
-                    }
-                });
+            handlePlayerDetail(upId) {
+                this.$refs.playerInfoDialogRef.show(upId);
             },
-            getHistoryOfferList(){
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/freemarket/free/getHistory", {
-                    pageNo:1,
-                    pageSize:10
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const freeResponse = response.data;
-                    if (freeResponse.code === 0) {
-                        let d=freeResponse.data.recordList;
-                        d.forEach(function (item) {
-                            if(item.status==2){
-                                item.status="等待签约";
-                            }else if(item.status==3){
-                                item.status="已签约";
-                            }else if(item.status==4){
-                                item.status="消失";
-                            }
-                        });
-                        me.signHistoryData=d;
-                        me.loading=false;
-                    } else {
-                        me.$message({
-                            message: freeResponse.msg,
-                            type: "warning"
-                        });
-                    }
-                });
-            },
-            viewSignFlow(row){
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/sign/offerFlow/getOfferFlow/"+row.offerFlowId, null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const freeResponse = response.data;
-                    if (freeResponse.code === 0) {
-                        let candidate=freeResponse.data.flowOfferList;
-                        candidate.forEach(function (item) {
-                            if(item.status==0){
-                                item.status="未发送";
-                            }else if(item.status==1){
-                                item.status="已发送";
-                            }else if(item.status==2){
-                                item.status="拒绝签约";
-                            }else if(item.status==3){
-                                item.status="签约成功";
-                            }else if(item.status==4){
-                                item.status="签约过期";
-                            }
-                        });
-                        me.signFlowData=candidate;
-                        const of=freeResponse.data;
-                        me.offerFlow.status=of.status;
-                        me.offerFlow.flowStartTime=of.flowStartTime;
-                        if(of.status==1){
-                            me.offerFlow.currentProgress="等待"+of.currentSignTeam+"确认签约";
-                        }else if(of.status==2){
-                            me.offerFlow.currentProgress=of.currentSignTeam+"签约成功";
-                        }else if(of.status==3){
-                            me.offerFlow.currentProgress="无人签约";
-                        }
-
-                        me.offerFlow.flowFinishTime=of.flowFinishTime;
-                    } else {
-                        me.$message({
-                            message: freeResponse.msg,
-                            type: "warning"
-                        });
-                    }
-                });
-            },
-            viewPlayerDetail(fpId){
-                const me=this;
-                me.freePlayerListData.forEach(function (item) {
-                    if(item.fpId==fpId){
-                        me.playerDetail.ability=item.playerDetail.ability;
-                        me.playerDetail.chname=item.playerDetail.chname;
-                        me.playerDetail.enname=item.playerDetail.enname;
-                        if(item.playerDetail.grade==1){
-                            item.playerDetail.grade="S+"
-                        }else if(item.playerDetail.grade==2){
-                            item.playerDetail.grade="S"
-                        }else if(item.playerDetail.grade==3){
-                            item.playerDetail.grade="S-"
-                        }else if(item.playerDetail.grade==4){
-                            item.playerDetail.grade="A+"
-                        }else if(item.playerDetail.grade==5){
-                            item.playerDetail.grade="A"
-                        }else if(item.playerDetail.grade==6){
-                            item.playerDetail.grade="A-"
-                        }else if(item.playerDetail.grade==7){
-                            item.playerDetail.grade="B+"
-                        }else if(item.playerDetail.grade==8){
-                            item.playerDetail.grade="B"
-                        }else if(item.playerDetail.grade==9){
-                            item.playerDetail.grade="B-"
-                        }else if(item.playerDetail.grade==10){
-                            item.playerDetail.grade="C+"
-                        }else if(item.playerDetail.grade==11){
-                            item.playerDetail.grade="C"
-                        }else if(item.playerDetail.grade==12){
-                            item.playerDetail.grade="C-"
-                        }else if(item.playerDetail.grade==13){
-                            item.playerDetail.grade="D+"
-                        }else if(item.playerDetail.grade==14){
-                            item.playerDetail.grade="D"
-                        }else if(item.playerDetail.grade==15){
-                            item.playerDetail.grade="D-"
-                        }
-                        
-                        me.playerDetail.grade=item.playerDetail.grade;
-                        me.playerDetail.overall=item.playerDetail.overall;
-                    }
-                });
-            },
-            addOffer(){
-                this.addOfferLoading=true;
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/freemarket/offer/addOffer", {
-                    fpId:this.addOfferForm.fpId,
-                    offerContractSalaryList:this.addOfferForm.addOfferData
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const freeResponse = response.data;
-                    if (freeResponse.code === 0) {
-                        me.offerData=freeResponse.data;
-                        me.$message({
-                            message: "报价成功",
+            getFreePlayerList(fpIdOffset, count) {
+                getFreePlayerList({
+                    fpIdOffset: fpIdOffset,
+                    count: count
+                }).then(res => {
+                    if (res.code === 0) {
+                        this.$message({
+                            message: "自由市场已自动刷新",
                             type: "success"
                         });
-                        me.addOfferLoading=false;
-                        me.addOfferDialogVisible=false;
-                    } else {
-                        me.$message({
-                            message: freeResponse.msg,
-                            type: "warning"
-                        });
-                    }
-                });
-            },
-            getTeamOfferHistory(){
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/freemarket/offer//getTeamOfferRecordHistory/"+me.addOfferForm.fpId, null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const freeResponse = response.data;
-                    if (freeResponse.code === 0) {
-                        me.teamOfferHistoryData=freeResponse.data[0].offerContractSalaryList;
-                    } else {
-                        me.$message({
-                            message: freeResponse.msg,
-                            type: "warning"
-                        });
-                    }
-                });
-            },
-            async iniFreemarketWebsocket(){
-                await this.globalws.applyWsToken();
-                const wsToken = sessionStorage.getItem("wsToken");
-                const url = "ws://www.jrsports.com/api/ws/freemarket/free?wsToken=" + wsToken;
-                this.freemarketWs = new WebSocket(url);
-                this.freemarketWs.onopen=this.freemarketWsOnopen;
-                this.freemarketWs.onclose=this.freemarketWsOnclose;
-                this.freemarketWs.onmessage=this.freemarketWsOnmessage;
-                this.freemarketWs.onerror=this.freemarketWsOnerror;
-            },
-            freemarketWsOnopen(){
-                this.$message({
-                    message: "已连接到自由市场",
-                    type: "success"
-                });
-            },
-            freemarketWsOnclose(){
+                        // const newFreePlayerList=res.data.freePlayerList;
+                        this.freePlayerCount=res.data.count;
+                        this.freePlayerListData=res.data.freePlayerList;
 
+                        // if(more===false){
+                        //     this.freePlayerListData=[];
+                        // }
+                        // let me=this;
+                        // newFreePlayerList.forEach(function (item) {
+                        //     var t=parseInt((item.expireTime-new Date().getTime())/1000);
+                        //     if(t>0){
+                        //         item.timeValLeft=t;
+                        //         item.timeLeft=me.secondsToTime(t);
+                        //     }
+                        //     me.freePlayerListData.push(item);
+                        //     me.lastFpId=item.fpId;
+                        // });
+                    }
+                });
             },
-            freemarketWsOnmessage(msg){
-                const response = JSON.parse(msg.data);
-                if(response.type==2){
-                    this.freePlayerCount=response.freePlayerCount;
-                    this.newPlayerColorDisplay=true;
-                    this.$notify({
-                        title: '自由市场消息',
-                        message: '有新的球员流入自由市场',
-                        type: 'success'
+            handleNewFreePlayer(body) {
+                console.log(body);
+                this.getFreePlayerList(-1,9);
+            },
+        },
+        getOfferList(fpId) {
+            const me = this;
+            this.axiosPost.post("http://www.jrsports.com/api/freemarket/offer/getOfferRecordList/" + fpId, null, {
+                headers: {
+                    "userToken": localStorage.getItem("userToken"),
+                    "teamToken": sessionStorage.getItem("teamToken")
+                }
+            }).then(function (response) {
+                const freeResponse = response.data;
+                if (freeResponse.code === 0) {
+                    me.offerData = freeResponse.data;
+                    me.offerData.forEach(function (item) {
+                        const l = item.offerContractSalaryList;
+                        const totalSeason = l.length;
+                        let totalSalary = 0;
+                        l.forEach(function (i) {
+                            totalSalary += i.salary;
+                        });
+                        item.offer = totalSeason + "年" + totalSalary + "万"
                     });
-                }else if(response.type==3){
-                    this.freePlayerCount=response.freePlayerCount;
+                } else {
+                    me.$message({
+                        message: freeResponse.msg,
+                        type: "warning"
+                    });
                 }
-
-            },
-            freemarketWsOnerror(){
-
-            },
-            secondsToTime(s) {
-                let h;
-                h = Math.floor(s / 60);
-                s = s % 60;
-                h += '';
-                s += '';
-                h = (h.length == 1) ? '0' + h : h;
-                s = (s.length == 1) ? '0' + s : s;
-                return h + ':' + s;
-            },
-            startTimer(){
-                const me=this;
-                this.freePlayerListData.forEach(function (item) {
-                    var t=parseInt((item.expireTime-new Date().getTime())/1000);
-                    if(t>=0){
-                        item.timeValLeft=t;
-                        // console.log(item.timeValLeft);
-                        item.timeLeft=me.secondsToTime(t);
+            });
+        },
+        getHistoryOfferList() {
+            const me = this;
+            this.axiosPost.post("http://www.jrsports.com/api/freemarket/free/getHistory", {
+                pageNo: 1,
+                pageSize: 10
+            }, {
+                headers: {
+                    "userToken": localStorage.getItem("userToken"),
+                    "teamToken": sessionStorage.getItem("teamToken")
+                }
+            }).then(function (response) {
+                const freeResponse = response.data;
+                if (freeResponse.code === 0) {
+                    let d = freeResponse.data.recordList;
+                    d.forEach(function (item) {
+                        if (item.status == 2) {
+                            item.status = "等待签约";
+                        } else if (item.status == 3) {
+                            item.status = "已签约";
+                        } else if (item.status == 4) {
+                            item.status = "消失";
+                        }
+                    });
+                    me.signHistoryData = d;
+                    me.loading = false;
+                } else {
+                    me.$message({
+                        message: freeResponse.msg,
+                        type: "warning"
+                    });
+                }
+            });
+        },
+        viewSignFlow(row) {
+            const me = this;
+            this.axiosPost.post("http://www.jrsports.com/api/sign/offerFlow/getOfferFlow/" + row.offerFlowId, null, {
+                headers: {
+                    "userToken": localStorage.getItem("userToken"),
+                    "teamToken": sessionStorage.getItem("teamToken")
+                }
+            }).then(function (response) {
+                const freeResponse = response.data;
+                if (freeResponse.code === 0) {
+                    let candidate = freeResponse.data.flowOfferList;
+                    candidate.forEach(function (item) {
+                        if (item.status == 0) {
+                            item.status = "未发送";
+                        } else if (item.status == 1) {
+                            item.status = "已发送";
+                        } else if (item.status == 2) {
+                            item.status = "拒绝签约";
+                        } else if (item.status == 3) {
+                            item.status = "签约成功";
+                        } else if (item.status == 4) {
+                            item.status = "签约过期";
+                        }
+                    });
+                    me.signFlowData = candidate;
+                    const of = freeResponse.data;
+                    me.offerFlow.status = of.status;
+                    me.offerFlow.flowStartTime = of.flowStartTime;
+                    if (of.status == 1) {
+                        me.offerFlow.currentProgress = "等待" + of.currentSignTeam + "确认签约";
+                    } else if (of.status == 2) {
+                        me.offerFlow.currentProgress = of.currentSignTeam + "签约成功";
+                    } else if (of.status == 3) {
+                        me.offerFlow.currentProgress = "无人签约";
                     }
-                });
-            },
-            removeOffer(item) {
-                const index = this.addOfferForm.addOfferData.indexOf(item);
-                this.addOfferForm.totalSeason--;
-                this.addOfferForm.addOfferData.splice(index, 1)
-                this.calculateTotalSalary();
-                this.addYearBtnVisible=true;
-            },
-            addOff(){
-                if(++this.addOfferForm.totalSeason==5){
-                    this.addYearBtnVisible=false;
+
+                    me.offerFlow.flowFinishTime = of.flowFinishTime;
+                } else {
+                    me.$message({
+                        message: freeResponse.msg,
+                        type: "warning"
+                    });
                 }
-                this.addOfferForm.addOfferData.push({
-                    season: this.addOfferForm.totalSeason,
-                    salary:0
-                });
-                this.calculateTotalSalary()
-            },
-            calculateTotalSalary(){
-                let total = 0;
-                this.addOfferForm.addOfferData.forEach(function(item){
-                    total+=item.salary;
-                });
-                this.addOfferForm.totalSalary=total;
+            });
+        },
+        viewPlayerDetail(fpId) {
+            const me = this;
+            me.freePlayerListData.forEach(function (item) {
+                if (item.fpId == fpId) {
+                    me.playerDetail.ability = item.playerDetail.ability;
+                    me.playerDetail.chname = item.playerDetail.chname;
+                    me.playerDetail.enname = item.playerDetail.enname;
+                    if (item.playerDetail.grade == 1) {
+                        item.playerDetail.grade = "S+"
+                    } else if (item.playerDetail.grade == 2) {
+                        item.playerDetail.grade = "S"
+                    } else if (item.playerDetail.grade == 3) {
+                        item.playerDetail.grade = "S-"
+                    } else if (item.playerDetail.grade == 4) {
+                        item.playerDetail.grade = "A+"
+                    } else if (item.playerDetail.grade == 5) {
+                        item.playerDetail.grade = "A"
+                    } else if (item.playerDetail.grade == 6) {
+                        item.playerDetail.grade = "A-"
+                    } else if (item.playerDetail.grade == 7) {
+                        item.playerDetail.grade = "B+"
+                    } else if (item.playerDetail.grade == 8) {
+                        item.playerDetail.grade = "B"
+                    } else if (item.playerDetail.grade == 9) {
+                        item.playerDetail.grade = "B-"
+                    } else if (item.playerDetail.grade == 10) {
+                        item.playerDetail.grade = "C+"
+                    } else if (item.playerDetail.grade == 11) {
+                        item.playerDetail.grade = "C"
+                    } else if (item.playerDetail.grade == 12) {
+                        item.playerDetail.grade = "C-"
+                    } else if (item.playerDetail.grade == 13) {
+                        item.playerDetail.grade = "D+"
+                    } else if (item.playerDetail.grade == 14) {
+                        item.playerDetail.grade = "D"
+                    } else if (item.playerDetail.grade == 15) {
+                        item.playerDetail.grade = "D-"
+                    }
+
+                    me.playerDetail.grade = item.playerDetail.grade;
+                    me.playerDetail.overall = item.playerDetail.overall;
+                }
+            });
+        },
+        addOffer() {
+            this.addOfferLoading = true;
+            const me = this;
+            this.axiosPost.post("http://www.jrsports.com/api/freemarket/offer/addOffer", {
+                fpId: this.addOfferForm.fpId,
+                offerContractSalaryList: this.addOfferForm.addOfferData
+            }, {
+                headers: {
+                    "userToken": localStorage.getItem("userToken"),
+                    "teamToken": sessionStorage.getItem("teamToken")
+                }
+            }).then(function (response) {
+                const freeResponse = response.data;
+                if (freeResponse.code === 0) {
+                    me.offerData = freeResponse.data;
+                    me.$message({
+                        message: "报价成功",
+                        type: "success"
+                    });
+                    me.addOfferLoading = false;
+                    me.addOfferDialogVisible = false;
+                } else {
+                    me.$message({
+                        message: freeResponse.msg,
+                        type: "warning"
+                    });
+                }
+            });
+        },
+        getTeamOfferHistory() {
+            const me = this;
+            this.axiosPost.post("http://www.jrsports.com/api/freemarket/offer//getTeamOfferRecordHistory/" + me.addOfferForm.fpId, null, {
+                headers: {
+                    "userToken": localStorage.getItem("userToken"),
+                    "teamToken": sessionStorage.getItem("teamToken")
+                }
+            }).then(function (response) {
+                const freeResponse = response.data;
+                if (freeResponse.code === 0) {
+                    me.teamOfferHistoryData = freeResponse.data[0].offerContractSalaryList;
+                } else {
+                    me.$message({
+                        message: freeResponse.msg,
+                        type: "warning"
+                    });
+                }
+            });
+        },
+        secondsToTime(s) {
+            let h;
+            h = Math.floor(s / 60);
+            s = s % 60;
+            h += '';
+            s += '';
+            h = (h.length == 1) ? '0' + h : h;
+            s = (s.length == 1) ? '0' + s : s;
+            return h + ':' + s;
+        },
+        startTimer() {
+            const me = this;
+            this.freePlayerListData.forEach(function (item) {
+                var t = parseInt((item.expireTime - new Date().getTime()) / 1000);
+                if (t >= 0) {
+                    item.timeValLeft = t;
+                    // console.log(item.timeValLeft);
+                    item.timeLeft = me.secondsToTime(t);
+                }
+            });
+        },
+        removeOffer(item) {
+            const index = this.addOfferForm.addOfferData.indexOf(item);
+            this.addOfferForm.totalSeason--;
+            this.addOfferForm.addOfferData.splice(index, 1)
+            this.calculateTotalSalary();
+            this.addYearBtnVisible = true;
+        },
+        addOff() {
+            if (++this.addOfferForm.totalSeason == 5) {
+                this.addYearBtnVisible = false;
             }
+            this.addOfferForm.addOfferData.push({
+                season: this.addOfferForm.totalSeason,
+                salary: 0
+            });
+            this.calculateTotalSalary()
+        },
+        calculateTotalSalary() {
+            let total = 0;
+            this.addOfferForm.addOfferData.forEach(function (item) {
+                total += item.salary;
+            });
+            this.addOfferForm.totalSalary = total;
         }
     }
 </script>
 
 <style>
-    .freePlayer{
+    .freePlayer {
         background-color: #d3dce6;
-        width:500px;
+        width: 500px;
         height: 300px;
     }
-    .playerAvatar{
-        width:120px;
-        height:120px;
+
+    .playerAvatar {
+        width: 120px;
+        height: 120px;
         margin-left: 10px;
         margin-top: 10px;
     }
-    .newColor{
+
+    .newColor {
         color: seagreen;
     }
 </style>

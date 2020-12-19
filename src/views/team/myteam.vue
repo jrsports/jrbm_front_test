@@ -88,7 +88,7 @@
                                         <el-button @click="handlePlayerDetail(scope.row.upId)" type="text" size="small">
                                             详细
                                         </el-button>
-                                        <el-button type="text" size="small">编辑</el-button>
+                                        <el-button @click="handlePlayerReserve(scope.row.upId)" type="text" size="small">下放</el-button>
                                     </template>
                                 </el-table-column>
                             </el-table>
@@ -136,6 +136,17 @@
                                         prop="grade"
                                         label="等级">
                                 </el-table-column>
+                                <el-table-column
+                                        fixed="right"
+                                        label="操作"
+                                        width="100">
+                                    <template slot-scope="scope">
+                                        <el-button @click="handlePlayerDetail(scope.row.upId)" type="text" size="small">
+                                            详细
+                                        </el-button>
+                                        <el-button @click="handlePlayerPromote(scope.row.upId)" type="text" size="small">提拔</el-button>
+                                    </template>
+                                </el-table-column>
                             </el-table>
                         </el-tab-pane>
                         <el-tab-pane label="球员蛋"></el-tab-pane>
@@ -156,6 +167,7 @@
     import {getLineUp, substitute} from "@/api/team";
     import {convertPlayerInfo} from "@/utils/PlayerInfoUtil";
     import PlayerInfoDialog from "@/components/PlayerInfoDialog";
+    import {promote, reserve} from "@/api/player";
 
     export default {
         name: "gameindex",
@@ -224,6 +236,28 @@
             },
             handlePlayerDetail(upId) {
                 this.$refs.playerInfoDialogRef.show(upId);
+            },
+            handlePlayerReserve(upId){
+                reserve({upId:upId}).then(res=>{
+                   if(res.code===0){
+                       this.$message({
+                           message:"下放成功",
+                           type:"success"
+                       });
+                       this.getUserPlayerList();
+                   }
+                });
+            },
+            handlePlayerPromote(upId){
+                promote({upId:upId}).then(res=>{
+                    if(res.code===0){
+                        this.$message({
+                            message:"提拔成功",
+                            type:"success"
+                        });
+                        this.getUserPlayerList();
+                    }
+                });
             },
             handlePlayerSelect(row) {
                 if (this.substituteLocked) {
