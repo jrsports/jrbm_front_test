@@ -26,8 +26,18 @@
                                     v-if="colShow">
                             </el-table-column>
                             <el-table-column
-                                    prop="playerChname"
-                                    label="球员">
+                                    label="球员"
+                                    width="100">
+                                <template slot-scope="scope">
+                                    <div class="block" @click="handlePlayerDetail(scope.row.upId)" style="cursor:pointer;">
+                                        <el-avatar shape="square" :size="50" :src="scope.row.avatar"></el-avatar>
+                                    </div>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    prop="chname"
+                                    label="中文名"
+                                    width="180">
                             </el-table-column>
                             <el-table-column
                                     prop="source"
@@ -45,10 +55,12 @@
                                 <template slot-scope="scope" v-if="scope.row.timeLeft!='已过期'">
                                     <el-button
                                             size="mini"
-                                            @click="signContract(scope.row)">接受</el-button>
+                                            @click="signContract(scope.row)">接受
+                                    </el-button>
                                     <el-button
                                             size="mini"
-                                            @click="refuseContract(scope.row)">拒绝</el-button>
+                                            @click="refuseContract(scope.row)">拒绝
+                                    </el-button>
                                 </template>
                             </el-table-column>
                         </el-table>
@@ -58,6 +70,11 @@
                         <div slot="header">
                             <span>签约记录</span>
                         </div>
+                        <el-select v-model="signRecordStatus" placeholder="请选择" @change="getSignContractList">
+                            <el-option key="2" label="已签约" value="2"></el-option>
+                            <el-option key="3" label="已拒绝" value="3"></el-option>
+                            <el-option key="4" label="已过期" value="4"></el-option>
+                        </el-select>
                         <el-table
                                 v-loading="loading"
                                 :data="signedData"
@@ -67,8 +84,18 @@
                                     label="合同编号">
                             </el-table-column>
                             <el-table-column
-                                    prop="playerChname"
-                                    label="球员">
+                                    label="球员"
+                                    width="100">
+                                <template slot-scope="scope">
+                                    <div class="block" @click="handlePlayerDetail(scope.row.upId)" style="cursor:pointer;">
+                                        <el-avatar shape="square" :size="50" :src="scope.row.avatar"></el-avatar>
+                                    </div>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    prop="chname"
+                                    label="中文名"
+                                    width="180">
                             </el-table-column>
                             <el-table-column
                                     prop="source"
@@ -94,7 +121,8 @@
                                 <template slot-scope="scope">
                                     <el-button
                                             size="mini"
-                                            @click="viewContractDetail(scope.row);contractDetailDialogVisible=true">详情</el-button>
+                                            @click="viewContractDetail(scope.row)">详情
+                                    </el-button>
                                 </template>
                             </el-table-column>
                         </el-table>
@@ -106,6 +134,7 @@
                             <el-table-column property="salary" label="薪资"></el-table-column>
                         </el-table>
                     </el-dialog>
+                    <PlayerInfoDialog ref="playerInfoDialogRef"></PlayerInfoDialog>
                 </el-main>
             </el-container>
         </el-container>
@@ -115,191 +144,157 @@
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header";
+    import PlayerInfoDialog from "@/components/PlayerInfoDialog";
+    import {getUnsignedContractList} from "@/api/sign";
+    import {getSignContractList} from "@/api/sign";
+    import {signContract} from "@/api/sign";
+    import {refuseContract} from "@/api/sign";
+
     export default {
-        components: {Sidebar,NavBar},
+        components: {Sidebar, NavBar,PlayerInfoDialog},
         name: "sign",
-        data(){
-            return{
-                unSignedData:[],
-                signedData:[],
-                colShow:false,
-                contractDetailDialogVisible:false,
-                contractDetailData:[
+        data() {
+            return {
+                unSignedData: [],
+                signedData: [],
+                colShow: false,
+                signRecordStatus:"已签约",
+                contractDetailDialogVisible: false,
+                contractDetailData: [
                     {
-                        season:"第一赛季",
-                        salary:"500万"
+                        season: "第一赛季",
+                        salary: "500万"
                     },
                     {
-                        season:"第二赛季",
-                        salary:"600万"
+                        season: "第二赛季",
+                        salary: "600万"
                     },
                     {
-                        season:"第三赛季",
-                        salary:"700万"
+                        season: "第三赛季",
+                        salary: "700万"
                     },
                     {
-                        season:"第四赛季",
-                        salary:"800万"
+                        season: "第四赛季",
+                        salary: "800万"
                     },
                 ],
-                loading:true
+                loading: true
             }
         },
-        mounted(){
-          this.getUnsignedContractList();
-          this.getSignedContractList();
+        mounted() {
+            this.getUnsignedContractList();
+            this.getSignContractList(2);
         },
-        methods:{
+        methods: {
             getUnsignedContractList() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/sign/sign/getUnsignedContractList", {
-                    pageNo:1,
-                    pageSize:10
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+                getUnsignedContractList({
+                    pageNo: 1,
+                    pageSize: 10
+                }).then(res => {
                     if (res.code === 0) {
-                        let sd=res.data.recordList;
+                        let sd = res.data.recordList;
                         sd.forEach(function (item) {
-                            if(item.source==1){
-                                item.source="自由市场";
+                            if (item.source === 1) {
+                                item.source = "自由市场";
                             }
-                            if(item.type==1){
-                                item.type="签约";
+                            if (item.type === 1) {
+                                item.type = "签约";
                             }
                         });
-                        setInterval(me.startTimer,1000);
-                       me.unSignedData=sd;
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
+                        setInterval(this.startTimer, 1000);
+                        this.unSignedData = sd;
                     }
                 });
             },
-            getSignedContractList() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/sign/sign/getSignedContractList", {
-                    pageNo:1,
-                    pageSize:10
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
+            getSignContractList(status) {
+                getSignContractList({
+                    status: status,
+                    pageRequest: {
+                        pageNo: 1,
+                        pageSize: 10
                     }
-                }).then(function (response) {
-                    const res = response.data;
+                }).then(res => {
                     if (res.code === 0) {
-                        let sd=res.data.recordList;
+                        let sd = res.data.recordList;
                         sd.forEach(function (item) {
-                            if(item.source==1){
-                                item.source="自由市场";
+                            if (item.source == 1) {
+                                item.source = "自由市场";
                             }
-                            if(item.type==1){
-                                item.type="签约";
+                            if (item.type == 1) {
+                                item.type = "签约";
                             }
-                            if(item.status==2){
-                                item.status="签约成功";
-                            }else if(item.status==3){
-                                item.status="拒绝签约";
-                            }else if(item.status==4){
-                                item.status="已过期";
+                            if (item.status == 2) {
+                                item.status = "签约成功";
+                            } else if (item.status == 3) {
+                                item.status = "拒绝签约";
+                            } else if (item.status == 4) {
+                                item.status = "已过期";
                             }
-                            item.contract=item.contractDetailDto.totalSeason+"年"+item.contractDetailDto.totalSalary+"万"
+                            item.contract = item.contractDto.totalSeason + "年" + item.contractDto.totalSalary + "万"
                         });
-                        me.signedData=sd;
-                        me.loading=false;
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
+                        this.signedData = sd;
+                        this.loading = false;
                     }
                 });
             },
             signContract(row) {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/sign/sign/signContract", {
-                    contractId:row.contractId,
-                    signToken:row.signToken
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+                signContract({
+                    contractId: row.contractId,
+                    signToken: row.signToken
+                }).then(res => {
                     if (res.code === 0) {
-                        me.$message({
+                        this.$message({
                             message: "签约成功",
                             type: "success"
                         });
-                        me.getUnsignedContractList();
-                        me.getSignedContractList();
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
+                        this.getUnsignedContractList();
+                        this.getSignedContractList();
                     }
                 });
             },
             refuseContract(row) {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/sign/sign/refuseContract", {
-                    contractId:row.contractId,
-                    signToken:row.signToken
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+                refuseContract({
+                    contractId: row.contractId,
+                    signToken: row.signToken
+                }).then(res => {
                     if (res.code === 0) {
-                        me.$message({
+                        this.$message({
                             message: "拒绝成功",
                             type: "success"
                         });
-                        me.getUnsignedContractList();
-                        me.getSignedContractList();
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
+                        this.getUnsignedContractList();
+                        this.getSignedContractList();
                     }
                 });
             },
-            viewContractDetail(row){
-                const me=this;
-                const d=me.signedData;
+            handlePlayerDetail(upId) {
+                this.$refs.playerInfoDialogRef.show(upId);
+            },
+            viewContractDetail(row) {
+                this.contractDetailDialogVisible=true;
+                const me = this;
+                const d = me.signedData;
                 d.forEach(function (item) {
-                    if(item.contractId==row.contractId){
-                        me.contractDetailData=item.contractDetailDto.contractSalaryEntityList;
+                    if (item.contractId == row.contractId) {
+                        me.contractDetailData = item.contractDto.contractDetailReqDtoList;
                     }
                 })
             },
-            startTimer(){
-                const me=this;
-                let temp=[];
+            startTimer() {
+                const me = this;
+                let temp = [];
                 this.unSignedData.forEach(function (item) {
-                    var t=parseInt((item.expireTime-new Date().getTime())/1000);
-                    if(t>0){
-                        item.timeValLeft=t;
+                    var t = parseInt((item.expireTime - new Date().getTime()) / 1000);
+                    if (t > 0) {
+                        item.timeValLeft = t;
                         // console.log(item.timeValLeft);
-                        item.timeLeft=me.secondsToTime(t);
-                    }else{
-                        item.timeLeft="已过期";
+                        item.timeLeft = me.secondsToTime(t);
+                    } else {
+                        item.timeLeft = "已过期";
                     }
                     temp.push(item);
                 });
-                this.unSignedData=temp;
+                this.unSignedData = temp;
             },
             secondsToTime(s) {
                 let h;
