@@ -167,7 +167,7 @@
                     forceKick:ifForceKick
                 }).then((response)=>{
                     if(response.code===0){
-                        GlobalWebsocket.connect("/user/queue/team");
+                        GlobalWebsocket.connect();
                         me.serverDialogVisible=false;
                         me.$router.push('/myteam');
                     }else{

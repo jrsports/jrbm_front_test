@@ -631,7 +631,7 @@
                         }
                     ]
                 });
-                GlobalWebsocket.connect(channel);
+                GlobalWebsocket.subscribe(channel);
             },
             handleRoomCreated(body) {
                 this.roomDialogVisible = true;

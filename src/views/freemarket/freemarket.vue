@@ -423,7 +423,7 @@
                         }
                     ]
                 });
-                GlobalWebsocket.connect(channel);
+                GlobalWebsocket.subscribe(channel);
             },
             handlePlayerDetail(upId) {
                 this.$refs.playerInfoDialogRef.show(upId);
