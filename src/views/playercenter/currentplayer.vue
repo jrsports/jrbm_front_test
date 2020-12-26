@@ -36,6 +36,7 @@
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header";
+    import {getCurrentPlayerList} from "@/api/player";
     export default {
         name: "currentplayer",
         components: {Sidebar,NavBar},
@@ -60,29 +61,20 @@
                 this.getCurrentPlayerList(pageNo,pageSize);
             },
             getCurrentPlayerList(pageNo,pageSize) {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/player/basic/getCurrentPlayerList", {
+                getCurrentPlayerList({
                     pageNo:pageNo,
                     pageSize:pageSize
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+                }).then(res=>{
                     if (res.code === 0) {
                         let rec=res.data.recordList;
                         rec.forEach(function (item,index) {
                             item.no=(res.data.pageNo-1)*res.data. pageSize+index+1;
                         });
-                        me.currentPlayerData=rec;
-                        me.currentPlayerData.totalRecordCount=res.data.totalRecordCount;
-                        me.currentPlayerData.totalPageCount=res.data.totalPageCount;
-                        me.currentPlayerData.pageNo=res.data.pageNo;
-                        me.currentPlayerData. pageSize=res.data. pageSize;
-                    } else {
-                        alert(res.message);
+                        this.currentPlayerData=rec;
+                        this.currentPlayerData.totalRecordCount=res.data.totalRecordCount;
+                        this.currentPlayerData.totalPageCount=res.data.totalPageCount;
+                        this.currentPlayerData.pageNo=res.data.pageNo;
+                        this.currentPlayerData. pageSize=res.data. pageSize;
                     }
                 });
             },

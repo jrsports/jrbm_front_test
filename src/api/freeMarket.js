@@ -30,3 +30,11 @@ export function getOfferRecordList(data) {
     })
 }
 
+export function getHistory(data) {
+    return request({
+        url:'/freemarket/freeMarket/getHistory',
+        method:'post',
+        data:data
+    })
+}
+

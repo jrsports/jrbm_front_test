@@ -32,8 +32,7 @@
                         </el-col>
                     </el-row>
                     <el-row>
-                        <el-button type="info" plain @click="signHistoryDialogVisible=true;getHistoryOfferList()">签约记录
-                        </el-button>
+                        <el-button type="info" plain @click="getHistoryOfferList()">签约记录</el-button>
                     </el-row>
 
                     <el-table
@@ -74,6 +73,7 @@
                         <el-table-column label="操作">
                             <template slot-scope="scope">
                                 <el-button
+                                        v-if="scope.row.timeLeft!=='已过期'"
                                         size="mini"
                                         @click="handleAddOffer(scope.row.fpId)">谈判
                                 </el-button>
@@ -181,14 +181,14 @@
                                 <!--                                        label="报价次序"-->
                                 <!--                                        width="180">-->
                                 <!--                                </el-table-column>-->
-<!--                                <el-table-column-->
-<!--                                        prop="contractDetailReqDtoList.season"-->
-<!--                                        label="赛季">-->
-<!--                                </el-table-column>-->
-<!--                                <el-table-column-->
-<!--                                        prop="contractDetailReqDtoList.salary"-->
-<!--                                        label="薪资">-->
-<!--                                </el-table-column>-->
+                                <!--                                <el-table-column-->
+                                <!--                                        prop="contractDetailReqDtoList.season"-->
+                                <!--                                        label="赛季">-->
+                                <!--                                </el-table-column>-->
+                                <!--                                <el-table-column-->
+                                <!--                                        prop="contractDetailReqDtoList.salary"-->
+                                <!--                                        label="薪资">-->
+                                <!--                                </el-table-column>-->
                                 <el-table-column prop="offer" label="报价"></el-table-column>
                                 <el-table-column prop="intention" label="意向"></el-table-column>
                                 <el-table-column prop="offerTime" label="报价时间"></el-table-column>
@@ -210,7 +210,7 @@
                                     <el-button
                                             v-if="scope.row.offerFlowId!=null"
                                             size="mini"
-                                            @click="signFlowDialogVisible=true;viewSignFlow(scope.row)">查看
+                                            @click="viewSignFlow(scope.row)">查看
                                     </el-button>
                                 </template>
                             </el-table-column>
@@ -231,70 +231,6 @@
                             <el-table-column property="status" label="签署状态"></el-table-column>
                         </el-table>
                     </el-dialog>
-                    <el-dialog title="球员详情" :visible.sync="userPlayerDetailDialogVisible">
-                        <el-row>
-                            <el-col :span="6">
-                                <el-avatar shape="square" :size="100" :src="playerDetail.avatarUrl"></el-avatar>
-                            </el-col>
-                            <el-col :span="6">
-                                <h3>{{playerDetail.chname}}</h3>
-                                <h5>{{playerDetail.enname}}</h5>
-                            </el-col>
-                            <el-col :span="6">
-                                <h1>总评：{{playerDetail.overall}}</h1>
-                            </el-col>
-                            <el-col :span="6">
-                                <h1>等级：{{playerDetail.grade}}</h1>
-                            </el-col>
-                            <el-card style="width: 100%">
-                                <div slot="header">
-                                    <span>能力值</span>
-                                    <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
-                                </div>
-                                <el-row>
-                                    <el-col :span="4">突破：{{playerDetail.ability.breakthrough}}</el-col>
-                                    <el-col :span="4">中距离：{{playerDetail.ability.midrange}}</el-col>
-                                    <el-col :span="4">内线：{{playerDetail.ability.inside}}</el-col>
-                                    <el-col :span="4">三分：{{playerDetail.ability.three}}</el-col>
-                                    <el-col :span="4">罚球：{{playerDetail.ability.freethrow}}</el-col>
-                                    <el-col :span="4">造犯规：{{playerDetail.ability.causefoul}}</el-col>
-                                </el-row>
-                                <el-row style="margin-top: 15px">
-                                    <el-col :span="4">传球稳定：{{playerDetail.ability.passStability}}</el-col>
-                                    <el-col :span="4">传球精确：{{playerDetail.ability.passAccuracy}}</el-col>
-                                    <el-col :span="4">视野：{{playerDetail.ability.passVision}}</el-col>
-                                    <el-col :span="4">抢断：{{playerDetail.ability.steal}}</el-col>
-                                    <el-col :span="4">篮板：{{playerDetail.ability.rebound}}</el-col>
-                                    <el-col :span="4">逼抢：{{playerDetail.ability.forcing}}</el-col>
-                                </el-row>
-                                <el-row style="margin-top: 15px">
-                                    <el-col :span="4">防盖帽：{{playerDetail.ability.blocking}}</el-col>
-                                    <el-col :span="4">防突破：{{playerDetail.ability.antiBreakthrough}}</el-col>
-                                    <el-col :span="4">防中距离：{{playerDetail.ability.antiMidrange}}</el-col>
-                                    <el-col :span="4">防三分：{{playerDetail.ability.antiThree}}</el-col>
-                                    <el-col :span="4">防内线：{{playerDetail.ability.antiInside}}</el-col>
-                                    <el-col :span="4">干净度：{{playerDetail.ability.clean}}</el-col>
-                                </el-row>
-                                <el-row style="margin-top: 15px">
-                                    <el-col :span="4">运球：{{playerDetail.ability.dribble}}</el-col>
-                                    <el-col :span="4">受助攻：{{playerDetail.ability.beAssisted}}</el-col>
-                                    <el-col :span="4">投篮倾向：{{playerDetail.ability.shootIncline}}</el-col>
-                                    <el-col :span="4">突破倾向：{{playerDetail.ability.breakthroughIncline}}</el-col>
-                                    <el-col :span="4">中投倾向：{{playerDetail.ability.midrangeIncline}}</el-col>
-                                    <el-col :span="4">三分倾向：{{playerDetail.ability.threeIncline}}</el-col>
-                                </el-row>
-                                <el-row style="margin-top: 15px">
-                                    <el-col :span="4">内线倾向：{{playerDetail.ability.insideIncline}}</el-col>
-                                    <el-col :span="4">传球倾向：{{playerDetail.ability.passIncline}}</el-col>
-                                    <el-col :span="4">进攻综合：{{playerDetail.ability.offensiveOverall}}</el-col>
-                                    <el-col :span="4">防守综合：{{playerDetail.ability.defensiveOverall}}</el-col>
-                                    <el-col :span="4">球权：{{playerDetail.ability.ballWeight}}</el-col>
-                                    <el-col :span="4"></el-col>
-                                </el-row>
-                            </el-card>
-
-                        </el-row>
-                    </el-dialog>
                     <PlayerInfoDialog ref="playerInfoDialogRef"></PlayerInfoDialog>
                 </el-main>
             </el-container>
@@ -307,10 +243,17 @@
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header";
     import PlayerInfoDialog from "@/components/PlayerInfoDialog";
-    import {addOffer, getFreePlayerList, getOfferRecordList, getTeamOfferRecordHistory} from "@/api/freeMarket";
+    import {
+        addOffer,
+        getFreePlayerList,
+        getHistory,
+        getOfferRecordList,
+        getTeamOfferRecordHistory
+    } from "@/api/freeMarket";
     import GlobalWebsocket from "@/websocket/GlobalWebsocket";
     import {secondsToTime} from "@/utils/timeUtil";
     import {formatDate} from "@/utils/date";
+    import {getSignFlow} from "@/api/sign";
 
     export default {
         name: "freemarket",
@@ -323,8 +266,8 @@
                 defensive: 200,
                 teamOfferHistoryData: [{
                     contractDetailReqDtoList: {
-                        season:1,
-                        salary:100
+                        season: 1,
+                        salary: 100
                     }
                 }
                 ],
@@ -397,7 +340,6 @@
                     totalSalary: 0,
                     addOfferData: [
                         {
-                            season: 1,
                             salary: 0
                         }
                     ],
@@ -410,6 +352,9 @@
             this.connectFreeMarketChannel();
             this.getFreePlayerList(-1, 9);
             // setInterval(this.startTimer, 1000);
+        },
+        beforeDestroy(){
+            GlobalWebsocket.unsubscribe("/channel/freeMarket/freeMarket/freeMarket");
         },
         methods: {
             connectFreeMarketChannel() {
@@ -485,7 +430,7 @@
                         this.offerDialogVisible = true;
                         this.offerData = res.data;
                         this.offerData.forEach(function (item) {
-                            item.offerTime=formatDate(new Date(item.offerTime), "yyyy-MM-dd hh:mm:ss");
+                            item.offerTime = formatDate(new Date(item.offerTime), "yyyy-MM-dd hh:mm:ss");
                             const l = item.contractDetailReqDtoList;
                             const totalSeason = l.length;
                             let totalSalary = 0;
@@ -498,19 +443,13 @@
                 });
             },
             getHistoryOfferList() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/freemarket/free/getHistory", {
+                getHistory({
                     pageNo: 1,
                     pageSize: 10
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const freeResponse = response.data;
-                    if (freeResponse.code === 0) {
-                        let d = freeResponse.data.recordList;
+                }).then(res=>{
+                    if (res.code === 0) {
+                        this.signHistoryDialogVisible=true;
+                        let d = res.data.recordList;
                         d.forEach(function (item) {
                             if (item.status == 2) {
                                 item.status = "等待签约";
@@ -520,27 +459,16 @@
                                 item.status = "消失";
                             }
                         });
-                        me.signHistoryData = d;
-                        me.loading = false;
-                    } else {
-                        me.$message({
-                            message: freeResponse.msg,
-                            type: "warning"
-                        });
+                        this.signHistoryData = d;
+                        this.loading = false;
                     }
                 });
             },
             viewSignFlow(row) {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/sign/offerFlow/getOfferFlow/" + row.offerFlowId, null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const freeResponse = response.data;
-                    if (freeResponse.code === 0) {
-                        let candidate = freeResponse.data.flowOfferList;
+                getSignFlow(row.offerFlowId).then(res => {
+                    if (res.code === 0) {
+                        this.signFlowDialogVisible=true;
+                        let candidate = res.data.flowOfferList;
                         candidate.forEach(function (item) {
                             if (item.status == 0) {
                                 item.status = "未发送";
@@ -554,24 +482,20 @@
                                 item.status = "签约过期";
                             }
                         });
-                        me.signFlowData = candidate;
-                        const of = freeResponse.data;
-                        me.offerFlow.status = of.status;
-                        me.offerFlow.flowStartTime = of.flowStartTime;
+                        this.signFlowData = candidate;
+                        const of = res.data;
+                        this.offerFlow.status = of.status;
+                        this.offerFlow.flowStartTime = of.flowStartTime;
                         if (of.status == 1) {
-                            me.offerFlow.currentProgress = "等待" + of.currentSignTeam + "确认签约";
+                            this.offerFlow.currentProgress = "等待" + of.currentSignTeam + "确认签约";
                         } else if (of.status == 2) {
-                            me.offerFlow.currentProgress = of.currentSignTeam + "签约成功";
+                            this.offerFlow.currentProgress = of.currentSignTeam + "签约成功";
+                            this.offerFlow.status=4
                         } else if (of.status == 3) {
-                            me.offerFlow.currentProgress = "无人签约";
+                            this.offerFlow.currentProgress = "无人签约";
+                            this.offerFlow.status=4
                         }
-
-                        me.offerFlow.flowFinishTime = of.flowFinishTime;
-                    } else {
-                        me.$message({
-                            message: freeResponse.msg,
-                            type: "warning"
-                        });
+                        this.offerFlow.flowFinishTime = of.flowFinishTime;
                     }
                 });
             },
@@ -599,7 +523,7 @@
                     if (res.code === 0) {
                         this.teamOfferHistoryData = res.data;
                         this.teamOfferHistoryData.forEach(function (item) {
-                            item.offerTime=formatDate(new Date(item.offerTime), "yyyy-MM-dd hh:mm:ss");
+                            item.offerTime = formatDate(new Date(item.offerTime), "yyyy-MM-dd hh:mm:ss");
                             const l = item.contractDetailReqDtoList;
                             const totalSeason = l.length;
                             let totalSalary = 0;
@@ -624,7 +548,7 @@
                     this.addYearBtnVisible = false;
                 }
                 this.addOfferForm.addOfferData.push({
-                    season: this.addOfferForm.totalSeason,
+                    // season: this.addOfferForm.totalSeason,
                     salary: 0
                 });
                 this.calculateTotalSalary()

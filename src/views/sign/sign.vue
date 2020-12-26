@@ -145,7 +145,6 @@
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header";
     import PlayerInfoDialog from "@/components/PlayerInfoDialog";
-    import {getUnsignedContractList} from "@/api/sign";
     import {getSignContractList} from "@/api/sign";
     import {signContract} from "@/api/sign";
     import {refuseContract} from "@/api/sign";
@@ -187,9 +186,12 @@
         },
         methods: {
             getUnsignedContractList() {
-                getUnsignedContractList({
-                    pageNo: 1,
-                    pageSize: 10
+                getSignContractList({
+                    status: 1,
+                    pageRequest: {
+                        pageNo: 1,
+                        pageSize: 10
+                    }
                 }).then(res => {
                     if (res.code === 0) {
                         let sd = res.data.recordList;

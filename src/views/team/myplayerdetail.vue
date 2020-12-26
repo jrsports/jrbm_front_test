@@ -30,16 +30,16 @@
                         <el-table-column property="currentSeasonSalary" label="本赛季工资"></el-table-column>
                         <el-table-column property="nextSeasonSalary" label="下赛季工资"></el-table-column>
                     </el-table>
-<!--                    <el-pagination-->
-<!--                            background-->
-<!--                            layout="prev, pager, next"-->
-<!--                            :total="currentPlayerTablePage.totalRecordCount"-->
-<!--                            :page-count="currentPlayerTablePage.totalPageCount"-->
-<!--                            :current-page="currentPlayerTablePage.pageNo"-->
-<!--                            :page-size="currentPlayerTablePage.pageSize"-->
-<!--                            @current-change="handleCurrentChange"-->
-<!--                            >-->
-<!--                    </el-pagination>-->
+                    <!--                    <el-pagination-->
+                    <!--                            background-->
+                    <!--                            layout="prev, pager, next"-->
+                    <!--                            :total="currentPlayerTablePage.totalRecordCount"-->
+                    <!--                            :page-count="currentPlayerTablePage.totalPageCount"-->
+                    <!--                            :current-page="currentPlayerTablePage.pageNo"-->
+                    <!--                            :page-size="currentPlayerTablePage.pageSize"-->
+                    <!--                            @current-change="handleCurrentChange"-->
+                    <!--                            >-->
+                    <!--                    </el-pagination>-->
                 </el-main>
             </el-container>
         </el-container>
@@ -49,122 +49,48 @@
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header";
+    import {getUserPlayerDetailList} from "@/api/player";
+    import {convertPlayerInfo} from "@/utils/PlayerInfoUtil";
+
     export default {
         name: "myplayerdetail",
-        components: {Sidebar,NavBar},
-        data(){
-            return{
-                myPlayerDetailData:[],
-                currentPlayerTablePage:{
-                    totalRecordCount:150,
-                    totalPageCount:15,
-                    pageNo:1,
-                    pageSize:10
+        components: {Sidebar, NavBar},
+        data() {
+            return {
+                myPlayerDetailData: [],
+                currentPlayerTablePage: {
+                    totalRecordCount: 150,
+                    totalPageCount: 15,
+                    pageNo: 1,
+                    pageSize: 10
                 },
-                totalSalary:0,
-                totalSalaryLimit:7800,
-                nextTotalSalary:0,
-                nextTotalSalaryLimit:7900,
-                loading:false
+                totalSalary: 0,
+                totalSalaryLimit: 7800,
+                nextTotalSalary: 0,
+                nextTotalSalaryLimit: 7900,
+                loading: false
             }
         },
-        mounted(){
+        mounted() {
             this.getUserPlayerDetailList();
         },
-        methods:{
-            handleCurrentChange(pageNo){
-                this.currentPlayerTablePage.pageNo=pageNo;
-                const pageSize=this.currentPlayerTablePage.pageSize;
-                this.getCurrentPlayerList(pageNo,pageSize);
+        methods: {
+            handleCurrentChange(pageNo) {
+                this.currentPlayerTablePage.pageNo = pageNo;
+                const pageSize = this.currentPlayerTablePage.pageSize;
+                this.getCurrentPlayerList(pageNo, pageSize);
             },
             getUserPlayerDetailList() {
-                const me = this;
-                this.loading=true;
-                this.axiosPost.post("http://www.jrsports.com/api/player/userPlayer/getUserPlayerDetailList", null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+                getUserPlayerDetailList().then(res => {
                     if (res.code === 0) {
-                        let rec=res.data;
-                        let nextTotalSalary=0;
+                        let rec = res.data;
+                        let nextTotalSalary = 0;
+
                         rec.forEach(function (item) {
-                            if(item.order==1){
-                                item.order="首发PG"
-                            }else if(item.order==2){
-                                item.order="首发SG"
-                            }else if(item.order==3){
-                                item.order="首发SF"
-                            }else if(item.order==4){
-                                item.order="首发PF"
-                            }else if(item.order==5){
-                                item.order="首发C"
-                            }
-                            if(item.position==1){
-                                item.position="PG"
-                            }else if(item.position==2){
-                                item.position="SG"
-                            }else if(item.position==3){
-                                item.position="SF"
-                            }else if(item.position==4){
-                                item.position="PF"
-                            }else if(item.position==5){
-                                item.position="C"
-                            }
-                            
-                            if(item.grade==1){
-                                item.grade="S+"
-                            }else if(item.grade==2){
-                                item.grade="S"
-                            }else if(item.grade==3){
-                                item.grade="S-"
-                            }else if(item.grade==4){
-                                item.grade="A+"
-                            }else if(item.grade==5){
-                                item.grade="A"
-                            }else if(item.grade==6){
-                                item.grade="A-"
-                            }else if(item.grade==7){
-                                item.grade="B+"
-                            }else if(item.grade==8){
-                                item.grade="B"
-                            }else if(item.grade==9){
-                                item.grade="B-"
-                            }else if(item.grade==10){
-                                item.grade="C+"
-                            }else if(item.grade==11){
-                                item.grade="C"
-                            }else if(item.grade==12){
-                                item.grade="C-"
-                            }else if(item.grade==13){
-                                item.grade="D+"
-                            }else if(item.grade==14){
-                                item.grade="D"
-                            }else if(item.grade==15){
-                                item.grade="D-"
-                            }
-
-
-
-                            if(item.type==0){
-                                item.type="现役";
-                            }else{
-                                item.type="历史";
-                            }
-
-                            nextTotalSalary+=item.nextSeasonSalary;
+                            convertPlayerInfo(item);
                         });
-                        me.loading=false;
-                        me.myPlayerDetailData=rec;
-                        me.nextTotalSalary=nextTotalSalary;
-                        // me.currentPlayerData.totalRecordCount=res.data.totalRecordCount;
-                        // me.currentPlayerData.totalPageCount=res.data.totalPageCount;
-                        // me.currentPlayerData.pageNo=res.data.pageNo;
-                        // me.currentPlayerData. pageSize=res.data. pageSize;
-                    } else {
-                        alert(res.message);
+                        this.myPlayerDetailData = rec;
+                        this.nextTotalSalary = nextTotalSalary;
                     }
                 });
             },

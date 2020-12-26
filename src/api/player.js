@@ -23,3 +23,26 @@ export function promote(data) {
         data:data
     })
 }
+
+export function dismiss(data) {
+    return request({
+        url:'/player/userPlayer/dismiss',
+        method:'post',
+        data:data
+    })
+}
+
+export function getCurrentPlayerList(data) {
+    return request({
+        url:'/player/basic/getCurrentPlayerList',
+        method:'post',
+        data:data
+    })
+}
+
+export function getUserPlayerDetailList() {
+    return request({
+        url:'/player/userPlayer/getUserPlayerDetailList',
+        method:'post'
+    })
+}

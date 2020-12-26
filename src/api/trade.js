@@ -24,6 +24,14 @@ export function getHistorySellPublish(data) {
     })
 }
 
+export function getHistoryPurchasePublish(data) {
+    return request({
+        url:'/trade/purchase/getHistoryPurchasePublish',
+        method:'post',
+        data:data
+    })
+}
+
 export function publishSell(data) {
     return request({
         url:'/trade/sell/publish',

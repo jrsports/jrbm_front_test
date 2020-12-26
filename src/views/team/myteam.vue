@@ -83,12 +83,13 @@
                                 <el-table-column
                                         fixed="right"
                                         label="操作"
-                                        width="100">
+                                        width="120">
                                     <template slot-scope="scope">
                                         <el-button @click="handlePlayerDetail(scope.row.upId)" type="text" size="small">
                                             详细
                                         </el-button>
                                         <el-button @click="handlePlayerReserve(scope.row.upId)" type="text" size="small">下放</el-button>
+                                        <el-button @click="handlePlayerDismiss(scope.row.upId)" type="text" size="small">解雇</el-button>
                                     </template>
                                 </el-table-column>
                             </el-table>
@@ -167,7 +168,7 @@
     import {getLineUp, substitute} from "@/api/team";
     import {convertPlayerInfo} from "@/utils/PlayerInfoUtil";
     import PlayerInfoDialog from "@/components/PlayerInfoDialog";
-    import {promote, reserve} from "@/api/player";
+    import {dismiss, promote, reserve} from "@/api/player";
 
     export default {
         name: "gameindex",
@@ -239,13 +240,24 @@
             },
             handlePlayerReserve(upId){
                 reserve({upId:upId}).then(res=>{
-                   if(res.code===0){
-                       this.$message({
-                           message:"下放成功",
-                           type:"success"
-                       });
-                       this.getUserPlayerList();
-                   }
+                    if(res.code===0){
+                        this.$message({
+                            message:"下放成功",
+                            type:"success"
+                        });
+                        this.getUserPlayerList();
+                    }
+                });
+            },
+            handlePlayerDismiss(upId){
+                dismiss({upId:upId}).then(res=>{
+                    if(res.code===0){
+                        this.$message({
+                            message:"解雇成功",
+                            type:"success"
+                        });
+                        this.getUserPlayerList();
+                    }
                 });
             },
             handlePlayerPromote(upId){

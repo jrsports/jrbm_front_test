@@ -6,6 +6,7 @@ import store from '@/store'
 export default {
     stompClient: null,
     isConnected:false,
+    subscription:new Map(),
     connect() {
         getWsToken().then(res => {
             const me = this;
@@ -44,12 +45,19 @@ export default {
     },
     doSubscribe(channel){
         let me=this;
-        this.stompClient.subscribe(channel, function (response) {
+        let subs=this.stompClient.subscribe(channel, function (response) {
             console.log("channel["+channel+"]收到消息["+response.body+"]");
             let res = JSON.parse(response.body);
             // 分发消息
             me.dispatchMessage(channel,res);
         });
+        this.subscription.set(channel,subs);
+    },
+    unsubscribe(channel){
+        console.log("unsub",this.subscription.get(channel));
+        // this.subscription.get(channel).unsubscribe();
+        this.stompClient.unsubscribe(channel)
+
     },
     disconnect() {
         if (this.stompClient) {

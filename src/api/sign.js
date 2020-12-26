@@ -32,3 +32,10 @@ export function refuseContract(data) {
     })
 }
 
+export function getSignFlow(flowId) {
+    return request({
+        url:'/sign/offerFlow/getOfferFlow/'+flowId,
+        method:'post'
+    })
+}
+
