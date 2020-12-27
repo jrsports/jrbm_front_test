@@ -128,7 +128,8 @@
                             <el-tab-pane label="数据" name="stats">
                                 <el-tabs v-model="statsTab" @tab-click="handleStatsTabSwitch">
                                     <el-tab-pane label="球队数据" name="teamStats">
-                                        <el-tabs v-model="teamStatsTab" tab-position="left" @tab-click="handleTeamStatsSwitch">
+                                        <el-tabs v-model="teamStatsTab" tab-position="left"
+                                                 @tab-click="handleTeamStatsSwitch">
                                             <el-tab-pane label="西部排名" name="west">
                                                 <el-table :data="teamRankData" height="560">
                                                     <el-table-column type="index" label="排名"></el-table-column>
@@ -156,7 +157,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="得分榜" name="score">
-                                                <el-table :data="teamStatsRankData" >
+                                                <el-table :data="teamStatsRankData">
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="teamName"
                                                                      label="球队"></el-table-column>
@@ -169,7 +170,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="失分榜" name="loss">
-                                                <el-table :data="teamStatsRankData" >
+                                                <el-table :data="teamStatsRankData">
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="teamName"
                                                                      label="球队"></el-table-column>
@@ -182,7 +183,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="篮板榜" name="reb">
-                                                <el-table :data="teamStatsRankData" >
+                                                <el-table :data="teamStatsRankData">
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="teamName"
                                                                      label="球队"></el-table-column>
@@ -195,7 +196,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="助攻榜" name="assist">
-                                                <el-table :data="teamStatsRankData" >
+                                                <el-table :data="teamStatsRankData">
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="teamName"
                                                                      label="球队"></el-table-column>
@@ -208,7 +209,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="抢断榜" name="steal">
-                                                <el-table :data="teamStatsRankData" >
+                                                <el-table :data="teamStatsRankData">
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="teamName"
                                                                      label="球队"></el-table-column>
@@ -221,7 +222,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="失误榜" name="turnover">
-                                                <el-table :data="teamStatsRankData" >
+                                                <el-table :data="teamStatsRankData">
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="teamName"
                                                                      label="球队"></el-table-column>
@@ -234,7 +235,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="盖帽榜" name="block">
-                                                <el-table :data="teamStatsRankData" >
+                                                <el-table :data="teamStatsRankData">
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="teamName"
                                                                      label="球队"></el-table-column>
@@ -249,9 +250,10 @@
                                         </el-tabs>
                                     </el-tab-pane>
                                     <el-tab-pane label="球员数据" name="playerStats">
-                                        <el-tabs v-model="playerStatsTab" tab-position="left" @tab-click="handlePlayerStatsSwitch">
+                                        <el-tabs v-model="playerStatsTab" tab-position="left"
+                                                 @tab-click="handlePlayerStatsSwitch">
                                             <el-tab-pane label="得分榜" name="score">
-                                                <el-table :data="playerStatsRankData" >
+                                                <el-table :data="playerStatsRankData">
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="playerName"
                                                                      label="球员"></el-table-column>
@@ -266,7 +268,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="篮板榜" name="reb">
-                                                <el-table :data="playerStatsRankData" >
+                                                <el-table :data="playerStatsRankData">
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="playerName"
                                                                      label="球员"></el-table-column>
@@ -281,7 +283,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="助攻榜" name="assist">
-                                                <el-table :data="playerStatsRankData" >
+                                                <el-table :data="playerStatsRankData">
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="playerName"
                                                                      label="球员"></el-table-column>
@@ -296,7 +298,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="抢断榜" name="steal">
-                                                <el-table :data="playerStatsRankData" >
+                                                <el-table :data="playerStatsRankData">
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="playerName"
                                                                      label="球员"></el-table-column>
@@ -311,7 +313,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="失误榜" name="turnover">
-                                                <el-table :data="playerStatsRankData" >
+                                                <el-table :data="playerStatsRankData">
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="playerName"
                                                                      label="球员"></el-table-column>
@@ -326,7 +328,7 @@
                                                 </el-table>
                                             </el-tab-pane>
                                             <el-tab-pane label="盖帽榜" name="block">
-                                                <el-table :data="playerStatsRankData" >
+                                                <el-table :data="playerStatsRankData">
                                                     <el-table-column type="index" label="排名"></el-table-column>
                                                     <el-table-column property="playerName"
                                                                      label="球员"></el-table-column>
@@ -350,10 +352,10 @@
                     </div>
                     <div v-if="seasonStatus.signUpStatus!=2">
                         <el-row>
-                            <h1 style="font-size: 5em;text-align: center">休赛期还剩15天</h1>
+                            <h1 style="font-size: 5em;text-align: center">休赛期还剩{{seasonStatus.timeLeft}}</h1>
                         </el-row>
                         <el-row>
-                            <h1 style="font-size: 3em;text-align: center">新赛季：第4赛季</h1>
+                            <h1 style="font-size: 3em;text-align: center">新赛季：第{{seasonStatus.signUpSeason}}赛季</h1>
                         </el-row>
                         <el-row>
                             <h1 style="font-size: 3em;text-align: center">组别：新秀赛季组</h1>
@@ -382,7 +384,7 @@
                                 </el-radio-group>
                             </el-form-item>
                             <el-form-item>
-                                <el-button type="primary" plain @click="signUp()"  style="width: 100%">
+                                <el-button type="primary" plain @click="signUp()" style="width: 100%">
                                     报名
                                 </el-button>
                             </el-form-item>
@@ -390,8 +392,8 @@
                     </el-dialog>
 
 
-
-                    <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" close-on-click-modal=false width="100%"
+                    <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" close-on-click-modal=false
+                               width="100%"
                                @close="quitLive">
                         <h3>{{scores}}{{matchTime}}</h3>
                         <ul class="infinite-list" style="height: 500px;overflow-y:scroll;">
@@ -469,7 +471,6 @@
                     </el-dialog>
 
 
-
                 </el-main>
             </el-container>
         </el-container>
@@ -479,26 +480,39 @@
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header";
+    import {} from "@/api/season";
+    import {signUp} from "@/api/season";
+    import {getSignUpStatus} from "@/api/season";
+    import {getMySchedule} from "@/api/season";
+    import {getSchedule} from "@/api/season";
+    import {getMyTodaySchedule} from "@/api/season";
+    import {getPlayOffView} from "@/api/season";
+    import {getSeasonPlayerStatsRank} from "@/api/season";
+    import {viewStats} from "@/api/season";
+    import {secondsToTime} from "@/utils/timeUtil"
+
     var onCourtPlayers;
     export default {
         components: {Sidebar, NavBar},
         name: "season",
         data() {
             return {
-                scheduleSwitch:true,
-                scheduleDate:new Date(),
-                teamAvgLossRankData:[],
-                teamAvgRebRankData:[],
-                awayStatsData:[],
-                homeStatsData:[],
-                teamStatsRankData:[],
-                playerStatsRankData:[],
-                teamStatsTab:"west",
-                playerStatsTab:"score",
-                statsTab:"teamStats",
-                seasonStatus:{
-                    signUpStatus:0,
-                    phase:0
+                scheduleSwitch: true,
+                scheduleDate: new Date(),
+                teamAvgLossRankData: [],
+                teamAvgRebRankData: [],
+                awayStatsData: [],
+                homeStatsData: [],
+                teamStatsRankData: [],
+                playerStatsRankData: [],
+                teamStatsTab: "west",
+                playerStatsTab: "score",
+                statsTab: "teamStats",
+                seasonStatus: {
+                    signUpStatus: 0,
+                    phase: 0,
+                    signUpSeason:0,
+                    deadline:0
                 },
                 rankActiveName: "west",
                 vsTeam: "Koliday   VS    ccTeam",
@@ -507,9 +521,9 @@
                 signUpForm: {
                     conference: '西部'
                 },
-                matchStatsDialogVisible:false,
-                matchStatsData:[],
-                teamAvgScoreRankData:[],
+                matchStatsDialogVisible: false,
+                matchStatsData: [],
+                teamAvgScoreRankData: [],
                 matchLiveDialogVisible: false,
                 activeName: "main",
                 myScheduleData: [],
@@ -529,14 +543,14 @@
                 awayTeamName: "",
                 matchCount: 0,
                 ongoingPrompt: "匹配",
-                playerIn:-1,
-                playerOut:-1
+                playerIn: -1,
+                playerOut: -1
             }
         },
         async mounted() {
             await this.getSignUpStatus();
             console.log(this.signUpStatus);
-            if (this.seasonStatus.signUpStatus==2) {
+            if (this.seasonStatus.signUpStatus == 2) {
                 this.getMyTodaySchedule();
                 this.getTeamRank(1);
             }
@@ -544,74 +558,56 @@
         methods: {
 
             signUp() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/season/signUp/", {
-                    conference: me.signUpForm.conference == "西部" ? 1 : 2
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+                signUp({
+                    conference: this.signUpForm.conference == "西部" ? 1 : 2
+                }).then(res => {
                     if (res.code === 0) {
-                        me.$message({
+                        this.$message({
                             message: res.msg,
                             type: "success"
                         });
-                        me.applySeasonDialogVisible = false;
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
+                        this.applySeasonDialogVisible = false;
                     }
                 });
             },
             async getSignUpStatus() {
-                const me = this;
-                await this.axiosPost.post("http://www.jrsports.com/api/season/signUp/getSeasonStatus", null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+                getSignUpStatus().then(res => {
                     if (res.code === 0) {
-                        me.seasonStatus = res.data;
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
+                        this.seasonStatus = res.data;
+                        if(!this.seasonStatus.deadline){
+                            this.seasonStatus.timeLeft="不限";
+                        }else{
+                            let secondsLeft = parseInt((this.seasonStatus.deadline - new Date().getTime()) / 1000);
+                            this.seasonStatus.timeLeft=secondsToTime(secondsLeft);
+                            setInterval(this.handleSignUpTime,500);
+                        }
+
                     }
                 });
             },
-            switchSchedule(val){
-                if(val){
+            handleSignUpTime(){
+                let secondsLeft = parseInt((this.seasonStatus.deadline - new Date().getTime()) / 1000);
+                this.seasonStatus.timeLeft=secondsToTime(secondsLeft);
+            },
+            switchSchedule(val) {
+                if (val) {
                     this.getMySchedule();
-                }else{
+                } else {
                     this.getAllSchedule();
                 }
             },
             getMySchedule() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/season/schedule/getMySchedule", {
-                    date:me.scheduleDate
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+                getMySchedule({
+                    date: this.scheduleDate
+                }).then(res => {
                     if (res.code === 0) {
+                        let me = this;
                         let d = res.data;
                         d.forEach(function (item) {
                             if (item.status == 0) {
                                 item.result = "未赛";
-                                item.matchBriefInfoDto.homeScore="-";
-                                item.matchBriefInfoDto.awayScore="-";
+                                item.matchBriefInfoDto.homeScore = "-";
+                                item.matchBriefInfoDto.awayScore = "-";
                             } else if (item.status == 1) {
                                 item.result = "进行中";
                             } else {
@@ -623,33 +619,21 @@
                             }
                         });
                         me.myScheduleData = d;
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
                     }
                 });
             },
             getAllSchedule() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/season/schedule/getSchedule", {
-                    teamId:null,
-                    date:me.scheduleDate
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+                getSchedule({
+                    teamId: null,
+                    date: this.scheduleDate
+                }).then(res => {
                     if (res.code === 0) {
                         let d = res.data;
                         d.forEach(function (item) {
                             if (item.status == 0) {
                                 item.result = "未赛";
-                                item.matchBriefInfoDto.homeScore="-";
-                                item.matchBriefInfoDto.awayScore="-";
+                                item.matchBriefInfoDto.homeScore = "-";
+                                item.matchBriefInfoDto.awayScore = "-";
                             } else if (item.status == 1) {
                                 item.result = "进行中";
                             } else {
@@ -658,29 +642,17 @@
                                 // } else if (item.result == 1) {
                                 //     item.result = "胜";
                                 // }
-                                item.result="完场";
+                                item.result = "完场";
                             }
                         });
-                        me.myScheduleData = d;
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
+                        this.myScheduleData = d;
                     }
                 });
             },
             getMyTodaySchedule() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/season/schedule/getMyTodaySchedule", {
-                    date:me.scheduleDate
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+                getMyTodaySchedule({
+                    date: this.scheduleDate
+                }).then(res=>{
                     if (res.code === 0) {
                         let d = res.data;
                         d.forEach(function (item) {
@@ -701,32 +673,15 @@
                                 item.matchTime = "19:00";
                             }
                         });
-                        me.myTodayScheduleData = d;
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
+                        this.myTodayScheduleData = d;
                     }
                 });
             },
             getPlayOffView() {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/season/schedule/getPlayOffView", null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+                getPlayOffView().then(res=>{
                     if (res.code === 0) {
                         let d = res.data;
                         console.log(d);
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
                     }
                 });
             },
@@ -763,12 +718,12 @@
                 });
             },
 
-            getSeasonStatsRank(type,phase,target) {
+            getSeasonStatsRank(type, phase, target) {
                 const me = this;
                 this.axiosPost.post("http://www.jrsports.com/api/season/stats/getTeamStatsRank", {
-                    type:type,
-                    phase:phase,
-                    target:target
+                    type: type,
+                    phase: phase,
+                    target: target
                 }, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
@@ -787,30 +742,17 @@
                     }
                 });
             },
-            getSeasonPlayerStatsRank(type,phase) {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/season/stats/getPlayerStatsRank", {
-                    type:type,
-                    phase:phase
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+            getSeasonPlayerStatsRank(type, phase) {
+                getSeasonPlayerStatsRank({
+                    type: type,
+                    phase: phase
+                }).then(res=>{
                     if (res.code === 0) {
-                        let d = res.data;
-                        me.playerStatsRankData = d;
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
+                        this.playerStatsRankData = res.data;
                     }
                 });
             },
-            enterLive(row){
+            enterLive(row) {
                 this.matchLiveDialogVisible = true;
                 this.matchLive(row.matchId);
             },
@@ -843,7 +785,7 @@
             },
             async applyTicket(matchId) {
                 const me = this;
-                await this.axiosPost.post("http://www.jrsports.com/api/matchserver/ticket/apply/" + matchId, null,{
+                await this.axiosPost.post("http://www.jrsports.com/api/matchserver/ticket/apply/" + matchId, null, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
                         "teamToken": sessionStorage.getItem("teamToken")
@@ -976,79 +918,69 @@
                     this.getTeamRank(2);
                 }
             },
-            handleTeamStatsSwitch(tab){
+            handleTeamStatsSwitch(tab) {
                 if (tab.name == "west") {
                     this.getTeamRank(1);
                 } else if (tab.name == "east") {
                     this.getTeamRank(2);
                 } else if (tab.name == "score") {
-                    this.getSeasonStatsRank("score",0,0);
-                } else if(tab.name=="loss"){
-                    this.getSeasonStatsRank("score",0,1);
-                } else if(tab.name=="reb"){
-                    this.getSeasonStatsRank("rebound",0,0);
-                }else if(tab.name=="assist"){
-                    this.getSeasonStatsRank("assist",0,0);
-                }else if(tab.name=="steal"){
-                    this.getSeasonStatsRank("steal",0,0);
-                }else if(tab.name=="turnover"){
-                    this.getSeasonStatsRank("turnover",0,0);
-                }else if(tab.name=="block"){
-                    this.getSeasonStatsRank("block",0,0);
+                    this.getSeasonStatsRank("score", 0, 0);
+                } else if (tab.name == "loss") {
+                    this.getSeasonStatsRank("score", 0, 1);
+                } else if (tab.name == "reb") {
+                    this.getSeasonStatsRank("rebound", 0, 0);
+                } else if (tab.name == "assist") {
+                    this.getSeasonStatsRank("assist", 0, 0);
+                } else if (tab.name == "steal") {
+                    this.getSeasonStatsRank("steal", 0, 0);
+                } else if (tab.name == "turnover") {
+                    this.getSeasonStatsRank("turnover", 0, 0);
+                } else if (tab.name == "block") {
+                    this.getSeasonStatsRank("block", 0, 0);
                 }
             },
-            handlePlayerStatsSwitch(tab){
+            handlePlayerStatsSwitch(tab) {
                 if (tab.name == "score") {
-                    this.getSeasonPlayerStatsRank("score",0);
-                } else if(tab.name=="reb"){
-                    this.getSeasonPlayerStatsRank("rebound",0);
-                }else if(tab.name=="assist"){
-                    this.getSeasonPlayerStatsRank("assist",0);
-                }else if(tab.name=="steal"){
-                    this.getSeasonPlayerStatsRank("steal",0);
-                }else if(tab.name=="turnover"){
-                    this.getSeasonPlayerStatsRank("turnover",0);
-                }else if(tab.name=="block"){
-                    this.getSeasonPlayerStatsRank("block",0);
+                    this.getSeasonPlayerStatsRank("score", 0);
+                } else if (tab.name == "reb") {
+                    this.getSeasonPlayerStatsRank("rebound", 0);
+                } else if (tab.name == "assist") {
+                    this.getSeasonPlayerStatsRank("assist", 0);
+                } else if (tab.name == "steal") {
+                    this.getSeasonPlayerStatsRank("steal", 0);
+                } else if (tab.name == "turnover") {
+                    this.getSeasonPlayerStatsRank("turnover", 0);
+                } else if (tab.name == "block") {
+                    this.getSeasonPlayerStatsRank("block", 0);
                 }
             },
-            handleStatsTabSwitch(tab){
-              if(tab.name=="playerStats" && this.playerStatsRankData.length==0){
-                  this.getSeasonPlayerStatsRank("score",0);
-              }
+            handleStatsTabSwitch(tab) {
+                if (tab.name == "playerStats" && this.playerStatsRankData.length == 0) {
+                    this.getSeasonPlayerStatsRank("score", 0);
+                }
             },
             viewStats(row) {
-                const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/matchserver/match/getMatchDetailInfo/"+row.matchId,null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const matchStatsResponse = response.data;
-                    if (matchStatsResponse.code === 0) {
-                        // let i;
-                        let data=matchStatsResponse.data;
-                        let homeTeamId=data.matchBriefInfoDto.homeTeamId;
-                        let awayTeamId=data.matchBriefInfoDto.awayTeamId;
+                viewStats(row.matchId).then(res=>{
+                    if (res.code === 0) {
+                        let data = res.data;
+                        let homeTeamId = data.matchBriefInfoDto.homeTeamId;
+                        let awayTeamId = data.matchBriefInfoDto.awayTeamId;
                         console.log(homeTeamId);
                         console.log(data.matchPlayerStatsDtoMap);
-                        let homeData=data.matchPlayerStatsDtoMap[homeTeamId];
+                        let homeData = data.matchPlayerStatsDtoMap[homeTeamId];
 
-                        let awayData=data.matchPlayerStatsDtoMap[awayTeamId];
+                        let awayData = data.matchPlayerStatsDtoMap[awayTeamId];
                         //转换时间
-                        for(let i = 0; i<homeData.length; i++){
-                            homeData[i]["time"]=me.secondsToTime(homeData[i]["time"]/10)
+                        for (let i = 0; i < homeData.length; i++) {
+                            homeData[i]["time"] = this.secondsToTime(homeData[i]["time"] / 10)
                         }
-                        for(let i=0;i<awayData.length;i++){
-                            awayData[i]["time"]=me.secondsToTime(awayData[i]["time"]/10)
+                        for (let i = 0; i < awayData.length; i++) {
+                            awayData[i]["time"] = this.secondsToTime(awayData[i]["time"] / 10)
                         }
 
-                        me.homeStatsData=homeData;
-                        me.awayStatsData=awayData;
-                        me.matchStatsDialogVisible=true;
-                    } else {
-                        alert(matchStatsResponse.message);
+                        this.homeStatsData = homeData;
+                        this.awayStatsData = awayData;
+                        this.matchStatsDialogVisible = true;
                     }
                 });
             },
