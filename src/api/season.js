@@ -61,3 +61,10 @@ export function viewStats(data) {
         method:'post'
     })
 }
+
+export function getTeamRank(data) {
+    return request({
+        url:'/season/stats/getTeamRank/' + data,
+        method:'post'
+    })
+}

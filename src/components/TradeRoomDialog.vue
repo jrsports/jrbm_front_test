@@ -205,8 +205,8 @@
                 {{content}}
             </span>
             <span slot="footer" class="dialog-footer">
-                <el-button @click="refuseTradeRequest">拒绝</el-button>
-                <el-button type="primary" @click="acceptTradeRequest">接受</el-button>
+                <el-button @click="refuseTradeInvitation">拒绝</el-button>
+                <el-button type="primary" @click="acceptTradeInvitation">接受</el-button>
             </span>
         </el-dialog>
     </el-container>
@@ -215,16 +215,16 @@
 <script>
     import GlobalWebsocket from "@/websocket/GlobalWebsocket";
     import {
-        acceptTradeRequest,
+        acceptTradeInvitation,
         addChip,
         confirm,
         info,
-        refuseTradeRequest,
+        refuseTradeInvitation,
         removeChip, submit
     } from "@/api/traderoom";
 
     let tradeWaitTime = 30;
-    let tradeRequestTimer;
+    let tradeInvitationTimer;
     export default {
         name: "TradeRoomDialog",
         data() {
@@ -600,7 +600,7 @@
                 chipMap: new Map(),
                 dialogVisible: false,
                 content: "",
-                tradeRequestId: -1,
+                invitationId: -1,
                 roomDialogVisible: false
             }
         },
@@ -643,27 +643,27 @@
                     me.chipMap.set(chip.chipId);
                 });
             },
-            handleTradeRequest(body) {
+            handleTradeInvitation(body) {
                 let me = this;
-                me.content = body.initiatorTeamName + '向你发起交易 ' + tradeWaitTime + 's';
-                this.tradeRequestId = body.tradeRequestId;
+                me.content = body.inviterTeamName + '向你发起交易 ' + tradeWaitTime + 's';
+                this.invitationId = body.invitationId;
                 this.dialogVisible = true;
-                tradeRequestTimer = setInterval(function () {
+                tradeInvitationTimer = setInterval(function () {
                     if (tradeWaitTime > 0) {
-                        me.content = body.initiatorTeamName + '向你发起交易 ' + (--tradeWaitTime) + 's';
+                        me.content = body.inviterTeamName + '向你发起交易 ' + (--tradeWaitTime) + 's';
                     } else {
-                        clearInterval(tradeRequestTimer);
+                        clearInterval(tradeInvitationTimer);
                         me.dialogVisible = false;
                         tradeWaitTime = 30;
                     }
                 }, 1000)
             },
-            handleCancelTradeRequest(body) {
-                clearInterval(tradeRequestTimer);
+            handleCancelTradeInvitation(body) {
+                clearInterval(tradeInvitationTimer);
                 this.dialogVisible = false;
                 tradeWaitTime = 30;
                 this.$message({
-                    message: body.initiatorTeamName + "已取消交易请求",
+                    message: body.inviterTeamName + "已取消交易请求",
                     type: "info"
                 })
             },
@@ -677,10 +677,10 @@
                     this.tradeRoom.targetEntered = true;
                 }
             },
-            acceptTradeRequest() {
-                acceptTradeRequest({tradeRequestId: this.tradeRequestId}).then(res => {
+            acceptTradeInvitation() {
+                acceptTradeInvitation({invitationId: this.invitationId}).then(res => {
                     if (res.code === 0) {
-                        clearInterval(tradeRequestTimer);
+                        clearInterval(tradeInvitationTimer);
                         this.dialogVisible = false;
                         tradeWaitTime = 30;
                         this.$message({
@@ -690,10 +690,10 @@
                     }
                 })
             },
-            refuseTradeRequest() {
-                refuseTradeRequest({tradeRequestId: this.tradeRequestId}).then(res => {
+            refuseTradeInvitation() {
+                refuseTradeInvitation({invitationId: this.invitationId}).then(res => {
                     if (res.code === 0) {
-                        clearInterval(tradeRequestTimer);
+                        clearInterval(tradeInvitationTimer);
                         this.dialogVisible = false;
                         tradeWaitTime = 30;
                         this.$message({
@@ -771,12 +771,12 @@
                             function: this.handleRoomCreated
                         },
                         {
-                            router: "/TRADE/request/我方收到交易请求",
-                            function: this.handleTradeRequest
+                            router: "/TRADE/request/发送邀请",
+                            function: this.handleTradeInvitation
                         },
                         {
-                            router: "/TRADE/request/对方取消交易请求",
-                            function: this.handleCancelTradeRequest
+                            router: "/TRADE/request/取消邀请",
+                            function: this.handleCancelTradeInvitation
                         }
                     ]
                 });

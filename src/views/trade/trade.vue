@@ -70,14 +70,14 @@
         data() {
             return {
                 tradeReceived: null,
-                tradeRequestId: null,
+                invitationId: null,
 
             }
         },
         methods: {
             createTrade() {
                 var me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/trade/trade/createTradeRequest", {
+                this.axiosPost.post("http://www.jrsports.com/api/trade/trade/createTradeInvitation", {
                     "targetTeamId": "432919740818919424"
                 }, {
                     headers: {
@@ -95,8 +95,8 @@
             },
             acceptTrade() {
                 var me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/trade/trade/acceptTradeRequest", {
-                    "tradeRequestId": "432919740818919424"
+                this.axiosPost.post("http://www.jrsports.com/api/trade/trade/acceptTradeInvitation", {
+                    "invitationId": "432919740818919424"
                 }, {
                     headers: {
                         "userToken": localStorage.getItem("userToken"),
@@ -113,7 +113,7 @@
             },
             refuseTrade() {
                 var me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/trade/trade/createTradeRequest", {
+                this.axiosPost.post("http://www.jrsports.com/api/trade/trade/createTradeInvitation", {
                     "targetTeamId": "432919740818919424"
                 }, {
                     headers: {

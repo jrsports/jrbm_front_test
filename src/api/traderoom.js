@@ -1,31 +1,31 @@
 import request from '@/utils/request'
 
-export function sendTradeRequest(data) {
+export function sendTradeInvitation(data) {
     return request({
-        url:'/trade/trade/createTradeRequest',
+        url:'/trade/invitation/createTradeInvitation',
         method:'post',
         data:data
     })
 }
 
-export function cancelTradeRequest() {
+export function cancelTradeInvitation() {
     return request({
-        url:'/trade/trade/cancelTradeRequest',
+        url:'/trade/invitation/cancelTradeInvitation',
         method:'post'
     })
 }
 
-export function acceptTradeRequest(data) {
+export function acceptTradeInvitation(data) {
     return request({
-        url:'/trade/trade/acceptTradeRequest',
+        url:'/trade/invitation/acceptTradeInvitation',
         method:'post',
         data:data
     })
 }
 
-export function refuseTradeRequest(data) {
+export function refuseTradeInvitation(data) {
     return request({
-        url:'/trade/trade/refuseTradeRequest',
+        url:'/trade/invitation/refuseTradeInvitation',
         method:'post',
         data:data
     })

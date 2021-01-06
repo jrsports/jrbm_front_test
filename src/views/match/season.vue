@@ -392,42 +392,7 @@
                     </el-dialog>
 
 
-                    <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" close-on-click-modal=false
-                               width="100%"
-                               @close="quitLive">
-                        <h3>{{scores}}{{matchTime}}</h3>
-                        <ul class="infinite-list" style="height: 500px;overflow-y:scroll;">
-                            <li v-for="i in liveContent" :key="i" style="list-style-type:none;">{{ i }}</li>
-                        </ul>
-                        <el-table ref="statTable" :data="stats" :row-class-name="onCourt" highlight-current-row
-                                  @current-change="handleSubstitute">
-                            <el-table-column property="order" label="球员序号"></el-table-column>
-                            <el-table-column property="chname" label="姓名"></el-table-column>
-                            <el-table-column property="timeMinutes" label="上场时间"></el-table-column>
-                            <el-table-column property="score" label="得分"></el-table-column>
-                            <el-table-column property="rebound" label="篮板"></el-table-column>
-                            <el-table-column property="assist" label="助攻"></el-table-column>
-                            <el-table-column property="steal" label="抢断"></el-table-column>
-                            <el-table-column property="turnover" label="失误"></el-table-column>
-                            <el-table-column property="block" label="盖帽"></el-table-column>
-                            <el-table-column property="beBlocked" label="被盖"></el-table-column>
-                            <el-table-column property="foul" label="犯规"></el-table-column>
-                            <el-table-column property="totalAttempt" label="总出手数"></el-table-column>
-                            <el-table-column property="totalIn" label="总命中数"></el-table-column>
-                            <el-table-column property="threeAttempt" label="三分出手"></el-table-column>
-                            <el-table-column property="threeIn" label="三分命中"></el-table-column>
-                            <el-table-column property="freeThrowAttempt" label="罚球出手"></el-table-column>
-                            <el-table-column property="freeThrowIn" label="罚球命中"></el-table-column>
 
-
-                            <!--                <el-table-column label="进入游戏">-->
-                            <!--                    <template slot-scope="scope">-->
-                            <!--                        <el-button @click="getGamePage(scope.row)">进入游戏</el-button>-->
-                            <!--                    </template>-->
-
-                            <!--                </el-table-column>-->
-                        </el-table>
-                    </el-dialog>
 
                     <el-dialog title="数据统计" :visible.sync="matchStatsDialogVisible" width="80%">
                         <el-table ref="statTable" :data="homeStatsData">
@@ -490,6 +455,7 @@
     import {getSeasonPlayerStatsRank} from "@/api/season";
     import {viewStats} from "@/api/season";
     import {secondsToTime} from "@/utils/timeUtil"
+    import {getTeamRank} from "@/api/season";
 
     var onCourtPlayers;
     export default {
@@ -534,7 +500,7 @@
                     rate_diff: "80%/0.0",
                     recent: "4连胜"
                 }],
-                liveContent: ["比赛直播即将开始"],
+
                 scores: "",
                 stats: [],
                 finishedMatchData: [],
@@ -547,16 +513,10 @@
                 playerOut: -1
             }
         },
-        async mounted() {
-            await this.getSignUpStatus();
-            console.log(this.signUpStatus);
-            if (this.seasonStatus.signUpStatus == 2) {
-                this.getMyTodaySchedule();
-                this.getTeamRank(1);
-            }
+        mounted() {
+            this.getSignUpStatus();
         },
         methods: {
-
             signUp() {
                 signUp({
                     conference: this.signUpForm.conference == "西部" ? 1 : 2
@@ -570,7 +530,7 @@
                     }
                 });
             },
-            async getSignUpStatus() {
+            getSignUpStatus() {
                 getSignUpStatus().then(res => {
                     if (res.code === 0) {
                         this.seasonStatus = res.data;
@@ -580,6 +540,10 @@
                             let secondsLeft = parseInt((this.seasonStatus.deadline - new Date().getTime()) / 1000);
                             this.seasonStatus.timeLeft=secondsToTime(secondsLeft);
                             setInterval(this.handleSignUpTime,500);
+                        }
+                        if (this.seasonStatus.signUpStatus == 2) {
+                            this.getMyTodaySchedule();
+                            this.getTeamRank(1);
                         }
 
                     }
@@ -655,6 +619,7 @@
                 }).then(res=>{
                     if (res.code === 0) {
                         let d = res.data;
+                        console.log(d);
                         d.forEach(function (item) {
                             if (item.status == 0) {
                                 item.result = "未赛";
@@ -687,13 +652,7 @@
             },
             getTeamRank(conference) {
                 const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/season/stats/getTeamRank/" + conference, null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+                getTeamRank(conference).then(res=>{
                     if (res.code === 0) {
                         let d = res.data;
                         d.forEach(function (item) {
@@ -709,15 +668,9 @@
 
                         });
                         me.teamRankData = d;
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
                     }
                 });
             },
-
             getSeasonStatsRank(type, phase, target) {
                 const me = this;
                 this.axiosPost.post("http://www.jrsports.com/api/season/stats/getTeamStatsRank", {
