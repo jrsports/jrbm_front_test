@@ -456,6 +456,7 @@
     import {viewStats} from "@/api/season";
     import {secondsToTime} from "@/utils/timeUtil"
     import {getTeamRank} from "@/api/season";
+    import {getSeasonStatsRank} from "@/api/season";
 
     var onCourtPlayers;
     export default {
@@ -673,25 +674,14 @@
             },
             getSeasonStatsRank(type, phase, target) {
                 const me = this;
-                this.axiosPost.post("http://www.jrsports.com/api/season/stats/getTeamStatsRank", {
+                getSeasonStatsRank({
                     type: type,
                     phase: phase,
                     target: target
-                }, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const res = response.data;
+                }).then(res=>{
                     if (res.code === 0) {
                         let d = res.data;
                         me.teamStatsRankData = d;
-                    } else {
-                        me.$message({
-                            message: res.msg,
-                            type: "warning"
-                        });
                     }
                 });
             },

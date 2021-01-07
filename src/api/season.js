@@ -47,6 +47,14 @@ export function getPlayOffView(data) {
     })
 }
 
+export function getSeasonStatsRank(data) {
+    return request({
+        url:'/season/stats/getTeamStatsRank',
+        method:'post',
+        data:data
+    })
+}
+
 export function getSeasonPlayerStatsRank(data) {
     return request({
         url:'/season/stats/getPlayerStatsRank',

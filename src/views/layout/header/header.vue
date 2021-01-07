@@ -11,7 +11,7 @@
                 <el-menu-item index="3-2">选项2</el-menu-item>
                 <el-menu-item index="3-3" @click="exitTeam()">退出球队</el-menu-item>
             </el-submenu>
-            <el-menu-item index="3" style="float:right">{{currentSeason}}</el-menu-item>
+            <el-menu-item index="3" style="float:right" @click="toSeasonPage()">{{getSeason}}</el-menu-item>
             <el-menu-item index="4" style="float:right">
                 <i class="el-icon-money"></i>${{getTeamFund}}
                 <i class="el-icon-coin"></i>{{getTeamCoin}}
@@ -276,6 +276,14 @@
             },
             getFriendList(){
                 return this.$store.getters.friendList
+            },
+            getSeason(){
+                let season=this.$store.getters.season;
+                if(season<=0){
+                    return "休赛期";
+                }else{
+                    return "第"+season+"赛季";
+                }
             }
         },
         mounted() {
@@ -330,6 +338,9 @@
                 }).catch(()=>{
 
                 })
+            },
+            toSeasonPage(){
+                this.$router.push('/season');
             },
             readNotice(noteId) {
                 var note = this.notificationList.filter((n) => {

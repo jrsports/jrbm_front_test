@@ -9,6 +9,7 @@ const state = {
   teamAvatar: '',
   fund:'-',
   coin:'-',
+  season:0,
   friendList:[]
 }
 
@@ -31,6 +32,9 @@ const mutations = {
   SET_TEAM_COIN: (state, coin) => {
     state.coin = coin
   },
+  SET_TEAM_SEASON: (state, season) => {
+    state.season = season
+  },
   SET_FRIEND_LIST: (state, friendList) => {
     state.friendList = friendList
   },
@@ -45,6 +49,7 @@ const actions = {
           commit('SET_TEAM_TOKEN', data.teamToken)
           commit('SET_TEAM_ID', data.teamId)
           commit('SET_TEAM_NAME',data.teamName)
+          commit('SET_TEAM_SEASON',data.season)
           commit('SET_TEAM_AVATAR',data.avatar)
           setTeamToken(data.teamToken)
         }
@@ -64,6 +69,7 @@ const actions = {
           commit('SET_TEAM_AVATAR',data.avatar)
           commit('SET_TEAM_FUND',data.fund)
           commit('SET_TEAM_COIN',data.coin)
+          commit('SET_TEAM_SEASON',data.season)
         }
         resolve(response)
       }).catch(error => {
