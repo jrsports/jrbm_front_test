@@ -14,3 +14,10 @@ export function getTeamList() {
         method:'post'
     })
 }
+
+export function applyWsToken() {
+    return request({
+        url:'/user/websocket/apply',
+        method:'post'
+    })
+}

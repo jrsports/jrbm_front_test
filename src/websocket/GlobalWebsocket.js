@@ -14,6 +14,7 @@ export default {
                 const wsToken = res.data;
                 const socket = new WebSocket("ws://www.jrsports.com/global?wsToken=" + wsToken);
                 this.stompClient = Stomp.over(socket);
+                this.stompClient.debug=null;
                 this.stompClient.connect({}, function () {
                     // console.log('Connected:' + frame);
                     console.log("成功连接到JRBM服务器");
@@ -46,7 +47,7 @@ export default {
     doSubscribe(channel){
         let me=this;
         let subs=this.stompClient.subscribe(channel, function (response) {
-            console.log("channel["+channel+"]收到消息["+response.body+"]");
+            // console.log("channel["+channel+"]收到消息["+response.body+"]");
             let res = JSON.parse(response.body);
             // 分发消息
             me.dispatchMessage(channel,res);
@@ -54,9 +55,10 @@ export default {
         this.subscription.set(channel,subs);
     },
     unsubscribe(channel){
-        console.log("unsub",this.subscription.get(channel));
-        // this.subscription.get(channel).unsubscribe();
-        this.stompClient.unsubscribe(channel)
+        // console.log("unsub",this.subscription.get(channel));
+        console.log("unsub",channel);
+        this.subscription.get(channel).unsubscribe();
+        // this.stompClient.unsubscribe(channel)
 
     },
     disconnect() {

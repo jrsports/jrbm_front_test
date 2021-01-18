@@ -279,7 +279,6 @@
                 if (this.selectedUpId > 0) {
                     // 取消选择
                     if (this.selectedUpId === row.upId) {
-                        console.log(this.$refs.rosterTable);
                         this.$refs.rosterTable.setCurrentRow();
                     } else {
                         this.substitute(this.selectedUpId, row.upId);

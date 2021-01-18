@@ -435,6 +435,8 @@
                         </el-table>
                     </el-dialog>
 
+                    <MatchLiveDialog ref="matchLiveDialogRef"></MatchLiveDialog>
+
 
                 </el-main>
             </el-container>
@@ -445,6 +447,7 @@
 <script>
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header";
+    import MatchLiveDialog from "@/components/MatchLiveDialog";
     import {} from "@/api/season";
     import {signUp} from "@/api/season";
     import {getSignUpStatus} from "@/api/season";
@@ -458,9 +461,9 @@
     import {getTeamRank} from "@/api/season";
     import {getSeasonStatsRank} from "@/api/season";
 
-    var onCourtPlayers;
+
     export default {
-        components: {Sidebar, NavBar},
+        components: {Sidebar, NavBar,MatchLiveDialog},
         name: "season",
         data() {
             return {
@@ -491,7 +494,6 @@
                 matchStatsDialogVisible: false,
                 matchStatsData: [],
                 teamAvgScoreRankData: [],
-                matchLiveDialogVisible: false,
                 activeName: "main",
                 myScheduleData: [],
                 myTodayScheduleData: [],
@@ -501,17 +503,11 @@
                     rate_diff: "80%/0.0",
                     recent: "4连胜"
                 }],
-
-                scores: "",
-                stats: [],
                 finishedMatchData: [],
-                matchTime: "",
                 homeTeamName: "",
                 awayTeamName: "",
                 matchCount: 0,
                 ongoingPrompt: "匹配",
-                playerIn: -1,
-                playerOut: -1
             }
         },
         mounted() {
@@ -620,7 +616,6 @@
                 }).then(res=>{
                     if (res.code === 0) {
                         let d = res.data;
-                        console.log(d);
                         d.forEach(function (item) {
                             if (item.status == 0) {
                                 item.result = "未赛";
@@ -696,158 +691,7 @@
                 });
             },
             enterLive(row) {
-                this.matchLiveDialogVisible = true;
-                this.matchLive(row.matchId);
-            },
-            async matchLive(matchId) { //连接websocket
-                await this.applyWsToken();
-                await this.applyTicket(matchId);
-                const wsToken = sessionStorage.getItem("wsToken");
-                const url = "ws://www.jrsports.com/api/ws/matchserver/matchlive?ticket=" + this.ticket + "&wsToken=" + wsToken;
-                this.websock = new WebSocket(url);
-                this.websock.onmessage = this.websocketonmessage;
-                this.websock.onopen = this.websocketonopen;
-                this.websock.onerror = this.websocketonerror;
-                this.websock.onclose = this.websocketclose;
-            },
-            async applyWsToken() {
-                await this.axiosPost.post("http://www.jrsports.com/api/user/websocket/apply", null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const serverResponse = response.data;
-                    if (serverResponse.code == 0) {
-                        sessionStorage.setItem("wsToken", serverResponse.data);
-                    } else {
-                        alert(serverResponse.msg);
-                    }
-
-                });
-            },
-            async applyTicket(matchId) {
-                const me = this;
-                await this.axiosPost.post("http://www.jrsports.com/api/matchserver/ticket/apply/" + matchId, null, {
-                    headers: {
-                        "userToken": localStorage.getItem("userToken"),
-                        "teamToken": sessionStorage.getItem("teamToken")
-                    }
-                }).then(function (response) {
-                    const serverResponse = response.data;
-                    if (serverResponse.code == 0) {
-                        me.ticket = serverResponse.data;
-                    } else {
-                        alert(serverResponse.msg);
-                    }
-
-                });
-            },
-            websocketonopen() { //连接建立之后执行send方法发送数据
-
-            },
-            websocketonerror() {//连接建立失败重连
-            },
-            websocketonmessage(msg) {
-                const me = this;
-                const response = JSON.parse(msg.data);
-                if (response.code == 0) {
-                    if (response.type == 0) {
-                        //加入匹配池成功
-                        this.startBtnVisible = false;
-                        this.cancelBtnVisible = true;
-                        me.$message({
-                            message: response.message,
-                            type: "success"
-                        });
-                    } else if (response.type == 1) {
-                        //匹配到对手
-                        this.matchConfirmDialogVisible = true;
-                        this.cancelBtnVisible = false;
-                        me.$message({
-                            message: response.message,
-                            type: "success"
-                        });
-                    } else if (response.type == 3) {
-                        //双方都确认
-                        me.$message({
-                            message: response.message,
-                            type: "success"
-                        });
-                        this.matchLiveDialogVisible = true;
-                        this.matchConfirmDialogVisible = false;
-                        // this.ongoingmatchVisible=true;
-                        // this.websock.close();
-                    } else if (response.type == 5) {
-                        //本方确认成功
-                        this.matchConfirmBtnVisible = false;
-                        this.ifConfirmed = true;
-                        me.$message({
-                            message: response.message,
-                            type: "success"
-                        });
-                    } else if (response.type == 8) {
-                        //比赛创建
-                        this.matchLive(response.data);
-                    } else if (response.type == 16) {
-                        //取消匹配成功
-                        this.startBtnVisible = true;
-                        this.cancelBtnVisible = false;
-                        me.$message({
-                            message: response.message,
-                            type: "success"
-                        });
-                    } else if (response.type == 99) {
-                        const d = response.data;
-                        //比赛直播
-                        this.liveContent.unshift(d.message);
-                        this.scores = d.homeStats.score + ":" + d.awayStats.score;
-                        this.stats = d.stats;
-                        onCourtPlayers = d.onCourtPlayers;
-                    } else if (response.type == 98) {
-                        const t = response.data;
-                        //时间更新
-                        this.matchTime = t.matchTimeStr;
-                    } else if (response.type == 97) {
-                        const d = response.data;
-                        //换人请求
-                        this.liveContent.unshift(d.message);
-                    } else if (response.type == -1) {
-                        me.$message({
-                            message: response.message,
-                            type: "warning"
-                        });
-                    } else {
-                        me.$message({
-                            message: response.message,
-                            type: "success"
-                        });
-                    }
-                } else {
-                    me.$message({
-                        message: "服务器出错",
-                        type: "error"
-                    });
-                }
-            },
-            onCourt({rowIndex}) {
-                for (var i of onCourtPlayers) {
-                    if (rowIndex == i) {
-                        return 'success-row';
-                    }
-                }
-                return '';
-            },
-            websocketsend(Data) {//数据发送
-                this.websock.send(Data)
-            },
-            websocketclose(e) {  //关闭
-                console.log("断开连接 " + e);
-                // this.$message({
-                //     message: "断开连接 " + e,
-                //     type: "warning"
-                // });
-                // location.reload();
+                this.$refs.matchLiveDialogRef.loadMatch(row.matchId);
             },
             tabSwitch(tab) {
                 if (tab.name == "schedule") {
@@ -908,8 +752,6 @@
                         let data = res.data;
                         let homeTeamId = data.matchBriefInfoDto.homeTeamId;
                         let awayTeamId = data.matchBriefInfoDto.awayTeamId;
-                        console.log(homeTeamId);
-                        console.log(data.matchPlayerStatsDtoMap);
                         let homeData = data.matchPlayerStatsDtoMap[homeTeamId];
 
                         let awayData = data.matchPlayerStatsDtoMap[awayTeamId];
@@ -936,9 +778,6 @@
                 h = (h.length == 1) ? '0' + h : h;
                 s = (s.length == 1) ? '0' + s : s;
                 return h + ':' + s;
-            },
-            quitLive() {
-                this.websock.close();
             },
         }
     }

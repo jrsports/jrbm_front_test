@@ -1,14 +1,7 @@
 <template>
     <el-container>
         <el-header>
-            <el-menu mode="horizontal" style="text-align: right">
-                <el-submenu index="1">
-                    <template slot="title">欢迎{{teamName}}</template>
-                    <el-menu-item index="2-1">我的账户</el-menu-item>
-                    <el-menu-item index="2-2">充值</el-menu-item>
-                    <el-menu-item index="2-3">设置</el-menu-item>
-                </el-submenu>
-            </el-menu>
+            <nav-bar></nav-bar>
         </el-header>
         <el-container>
             <el-aside width="200px">
@@ -171,17 +164,14 @@
         name: "match",
         components: {Sidebar},
         mounted() {
-            this.teamName=sessionStorage.getItem("teamName");
             this.getOngoingMatch();
             this.getFinishedMatch();
         },
         data() {
             return {
-                teamName: "null",
                 matchConfirmDialogVisible: false,
                 startBtnVisible: false,
                 cancelBtnVisible: false,
-                matchLiveDialogVisible: false,
                 matchConfirmBtnVisible: true,
                 ongoingmatchVisible: false,
                 finishedMatchVisible: true,

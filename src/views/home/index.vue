@@ -214,7 +214,6 @@
                     password:this.form.password,
                     freeLoginType:this.freeLoginType?1:0
                 }).then(()=>{
-                    console.log("!!")
                     this.loginDialogVisible = false;
                     this.ifLogin = true;
                 }).catch(()=>{

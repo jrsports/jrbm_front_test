@@ -30,3 +30,10 @@ export function refuseFriendMatchInvitation(data) {
         data:data
     })
 }
+
+export function applyTicket(data) {
+    return request({
+        url:'/matchserver/ticket/apply/'+data,
+        method:'post'
+    })
+}
