@@ -11,10 +11,10 @@
             </el-aside>
             <el-container>
                 <el-main>
-                    <el-tabs v-model="activeName" type="card">
+                    <el-tabs v-model="activeName" type="card" @tab-click="switchTab">
 
                         <el-tab-pane label="球员选秀大会" name="playerDraft">
-                            <el-tabs v-model="activeDate" type="borderCard" tab-position="left">
+                            <el-tabs v-model="activeDate" type="borderCard" tab-position="left" @tab-click="switchPlayerDraftTab">
                                 <el-tab-pane label="今日选秀" name="draft">
                                     <el-card>
                                         <div slot="header">
@@ -29,11 +29,22 @@
                                             <el-table-column
                                                     fixed="right"
                                                     label="操作"
-                                                    width="100">
+                                                    width="180">
                                                 <template slot-scope="scope">
                                                     <el-button @click="handleSignUpDialog(scope.row.draftId)" type="text" size="small">详情</el-button>
                                                 </template>
                                             </el-table-column>
+                                        </el-table>
+                                    </el-card>
+                                    <el-card style="margin-top: 50px">
+                                        <div slot="header">
+                                            <span>抽签中</span>
+                                        </div>
+                                        <el-table :data="drawingList">
+                                            <el-table-column property="draftId" label="选秀ID"></el-table-column>
+                                            <el-table-column property="maxPlayerCount" label="参选球员数量"></el-table-column>
+                                            <el-table-column property="maxTeamCount" label="球队数量"></el-table-column>
+                                            <el-table-column property="progress" label="当前进度"></el-table-column>
                                         </el-table>
                                     </el-card>
                                     <el-card style="margin-top: 50px">
@@ -118,13 +129,13 @@
                         </el-tab-pane>
                     </el-tabs>
 
-                    <el-dialog :visible.sync="dialogVisible" title="选秀大会">
+                    <el-dialog :visible.sync="dialogVisible" title="选秀大会" width="1100px">
                         <div v-if="dialogType===1">
                             <el-row v-if="!isSignedUp">
                                 <el-input-number v-model="cardCount" label="报名卡数量"></el-input-number>
                                 <el-button @click="handleSignUp">报名</el-button>
                             </el-row>
-                            <el-table :data="draftTeamListData">
+                            <el-table :data="draftTeamListData" height="800px">
                                 <el-table-column
                                         prop="teamName"
                                         label="球队名">
@@ -141,16 +152,33 @@
                         </div>
                         <div v-if="dialogType===2">
                             <el-tabs v-model="activeDraftDetailTab" type="card">
+                                <el-tab-pane label="选秀直播" name="pick">
+                                    <el-table :data="draftRoomData">
+                                        <el-table-column
+                                                prop="draftOrder"
+                                                label="顺位">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="teamName"
+                                                label="球队名">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="pickStatus"
+                                                label="选人状态">
+                                        </el-table-column>
+                                    </el-table>
+                                </el-tab-pane>
                                 <el-tab-pane label="球员名单" name="playerList">
                                     <el-table
                                             :data="draftPlayerListData"
+                                            height="500px"
                                             style="width: 100%">
                                         <el-table-column
                                                 label="球员"
                                                 width="100">
                                             <template slot-scope="scope">
                                                 <div class="block" @click="handlePlayerDetail(scope.row.upId)" style="cursor:pointer;">
-                                                    <el-avatar shape="square" :size="50" :src="scope.row.avatar"></el-avatar>
+                                                    <el-avatar shape="square" :size="50" :src="scope.row.avatarUrl"></el-avatar>
                                                 </div>
                                             </template>
                                         </el-table-column>
@@ -160,20 +188,19 @@
                                                 width="180">
                                         </el-table-column>
                                         <el-table-column
+                                                prop="position"
+                                                label="位置">
+                                        </el-table-column>
+                                        <el-table-column
                                                 prop="type"
                                                 label="类型">
                                         </el-table-column>
                                         <el-table-column
-                                                prop="purchaseTeamName"
-                                                label="求购球队"
-                                                width="180">
-                                        </el-table-column>
-                                        <el-table-column
                                                 prop="price"
-                                                label="价格">
+                                                label="市价">
                                         </el-table-column>
                                         <el-table-column
-                                                prop="salary"
+                                                prop="expectSalary"
                                                 label="期望薪资">
                                         </el-table-column>
                                     </el-table>
@@ -210,7 +237,7 @@
 <script>
     import NavBar from "@/views/layout/header/header";
     import Sidebar from "@/views/layout/sidebar/sidebar";
-    import {getDraftList, getDraftTeamList, signUpDraft} from "@/api/draft";
+    import {getDraftList, getDraftPlayerList, getDraftRoom, getDraftTeamList, signUpDraft} from "@/api/draft";
     import {secondsToTime} from "@/utils/timeUtil";
     import {formatDate} from "@/utils/date";
     import GlobalWebsocket from "@/websocket/GlobalWebsocket";
@@ -237,7 +264,8 @@
                 dialogType:1,
                 selectedDraftId:-1,
                 cardCount:1,
-                isSignedUp:false
+                isSignedUp:false,
+                draftRoomData:{}
             }
         },
         methods:{
@@ -249,10 +277,37 @@
                         {
                             router: "/DRAFT/info/球队报名选秀大会",
                             function: this.handleNewSignUp
+                        },
+                        {
+                            router: "/DRAFT/info/选秀抽签",
+                            function: this.handleDrawMsg
                         }
                     ]
                 });
                 GlobalWebsocket.subscribe(channel);
+            },
+            connectDraftRoomChannel(draftId){
+                let channel = "/channel/draft/room/"+draftId;
+                this.$store.dispatch('ws/addRouter', {
+                    "channel": channel,
+                    "routers": [
+                        {
+                            router: "/DRAFT/room/下一个选人",
+                            function: this.handleNextPick
+                        }
+                    ]
+                });
+                GlobalWebsocket.subscribe(channel);
+            },
+            switchTab(tab){
+              if(tab.name==="playerDraft"){
+                  this.getDraftList();
+              }
+            },
+            switchPlayerDraftTab(tab){
+                if(tab.name==="draft"){
+                    this.getDraftList();
+                }
             },
             getDraftList(){
                 getDraftList({date:new Date().getTime()}).then(res=>{
@@ -302,22 +357,57 @@
             handleDraftDetail(row){
                 getDraftTeamList({draftId:row.draftId}).then(res=>{
                     if(res.code===0){
-                        this.draftTeamListData=res.data;
+                        this.draftTeamListData=res.data.teamList;
+                        this.draftTeamListData.forEach(item=>{
+                           if(item.draftOrder===1){
+                               item.draftOrder="状元";
+                           } else if(item.draftOrder===2){
+                               item.draftOrder="榜眼";
+                           }else if(item.draftOrder===3){
+                                item.draftOrder="探花";
+                            }
+                        });
                         this.dialogVisible=true;
                         this.dialogType=2;
                     }
                 });
+                getDraftPlayerList({draftId:row.draftId}).then(res=>{
+                    if(res.code===0){
+                        this.draftPlayerListData=res.data.playerList;
+                    }
+                });
+                this.connectDraftRoomChannel(row.draftId);
+                this.getDraftRoom(row.draftId);
             },
             handleSignUp(){
                 signUpDraft({draftId:this.selectedDraftId,cardCount:this.cardCount}).then(res=>{
                     if(res.code===0){
                         this.handleSignUpDialog(this.selectedDraftId);
+                        this.getDraftList();
                         this.$message({
                             message: "报名成功",
                             type: "success"
                         });
                     }
                 })
+            },
+            handleDrawMsg(body){
+                console.log(body);
+                this.drawingList.forEach((item, index)=>{
+                    if(item.draftId===body.draftId){
+                        item.progress=body.content;
+                        this.$set(this.drawingList, index, item);
+                    }
+                })
+            },
+            handleNextPick(body){
+                console.log(body);
+                this.getDraftRoom(body.draftId);
+            },
+            getDraftRoom(draftId){
+                getDraftRoom({draftId:draftId}).then(res=>{
+                    this.draftRoomData=res.data.teamList;
+                });
             }
         }
     }

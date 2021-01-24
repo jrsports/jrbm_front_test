@@ -9,125 +9,124 @@
             </el-aside>
             <el-container>
                 <el-main>
-                    <el-card>
-                        <div slot="header">
-                            <span>待签约</span>
-                        </div>
-                        <el-table
-                                :data="unSignedData"
-                                style="width: 100%">
-                            <el-table-column
-                                    prop="contractId"
-                                    label="合同编号">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="signToken"
-                                    label="签约令牌"
-                                    v-if="colShow">
-                            </el-table-column>
-                            <el-table-column
-                                    label="球员"
-                                    width="100">
-                                <template slot-scope="scope">
-                                    <div class="block" @click="handlePlayerDetail(scope.row.upId)" style="cursor:pointer;">
-                                        <el-avatar shape="square" :size="50" :src="scope.row.avatar"></el-avatar>
-                                    </div>
-                                </template>
-                            </el-table-column>
-                            <el-table-column
-                                    prop="chname"
-                                    label="中文名"
-                                    width="180">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="source"
-                                    label="签约来源">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="type"
-                                    label="签约类型">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="timeLeft"
-                                    label="截止时间">
-                            </el-table-column>
-                            <el-table-column label="签约">
-                                <template slot-scope="scope" v-if="scope.row.timeLeft!='已过期'">
-                                    <el-button
-                                            size="mini"
-                                            @click="signContract(scope.row)">接受
-                                    </el-button>
-                                    <el-button
-                                            size="mini"
-                                            @click="refuseContract(scope.row)">拒绝
-                                    </el-button>
-                                </template>
-                            </el-table-column>
-                        </el-table>
-                    </el-card>
-                    <el-divider></el-divider>
-                    <el-card class="box-card">
-                        <div slot="header">
-                            <span>签约记录</span>
-                        </div>
-                        <el-select v-model="signRecordStatus" placeholder="请选择" @change="getSignContractList">
-                            <el-option key="2" label="已签约" value="2"></el-option>
-                            <el-option key="3" label="已拒绝" value="3"></el-option>
-                            <el-option key="4" label="已过期" value="4"></el-option>
-                        </el-select>
-                        <el-table
-                                v-loading="loading"
-                                :data="signedData"
-                                style="width: 100%">
-                            <el-table-column
-                                    prop="contractId"
-                                    label="合同编号">
-                            </el-table-column>
-                            <el-table-column
-                                    label="球员"
-                                    width="100">
-                                <template slot-scope="scope">
-                                    <div class="block" @click="handlePlayerDetail(scope.row.upId)" style="cursor:pointer;">
-                                        <el-avatar shape="square" :size="50" :src="scope.row.avatar"></el-avatar>
-                                    </div>
-                                </template>
-                            </el-table-column>
-                            <el-table-column
-                                    prop="chname"
-                                    label="中文名"
-                                    width="180">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="source"
-                                    label="签约来源">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="type"
-                                    label="签约类型">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="status"
-                                    label="签约状态">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="signTime"
-                                    label="签约时间">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="contract"
-                                    label="合同">
-                            </el-table-column>
-                            <el-table-column label="合同详情">
-                                <template slot-scope="scope">
-                                    <el-button
-                                            size="mini"
-                                            @click="viewContractDetail(scope.row)">详情
-                                    </el-button>
-                                </template>
-                            </el-table-column>
-                        </el-table>
-                    </el-card>
 
+                    <el-tabs v-model="activeSignTab" type="card">
+                        <el-tab-pane label="待谈判" name="negotiation">
+
+                        </el-tab-pane>
+                        <el-tab-pane label="待签约" name="unsigned">
+                            <el-table
+                                    :data="unSignedData"
+                                    style="width: 100%">
+                                <el-table-column
+                                        prop="contractId"
+                                        label="合同编号">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="signToken"
+                                        label="签约令牌"
+                                        v-if="colShow">
+                                </el-table-column>
+                                <el-table-column
+                                        label="球员"
+                                        width="100">
+                                    <template slot-scope="scope">
+                                        <div class="block" @click="handlePlayerDetail(scope.row.upId)" style="cursor:pointer;">
+                                            <el-avatar shape="square" :size="50" :src="scope.row.avatar"></el-avatar>
+                                        </div>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column
+                                        prop="chname"
+                                        label="中文名"
+                                        width="180">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="source"
+                                        label="签约来源">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="type"
+                                        label="签约类型">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="timeLeft"
+                                        label="截止时间">
+                                </el-table-column>
+                                <el-table-column label="签约">
+                                    <template slot-scope="scope" v-if="scope.row.timeLeft!='已过期'">
+                                        <el-button
+                                                size="mini"
+                                                @click="signContract(scope.row)">接受
+                                        </el-button>
+                                        <el-button
+                                                size="mini"
+                                                @click="refuseContract(scope.row)">拒绝
+                                        </el-button>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </el-tab-pane>
+                        <el-tab-pane label="签约历史" name="history">
+                            <el-select v-model="signRecordStatus" placeholder="请选择" @change="getSignContractList">
+                                <el-option key="2" label="已签约" value="2"></el-option>
+                                <el-option key="3" label="已拒绝" value="3"></el-option>
+                                <el-option key="4" label="已过期" value="4"></el-option>
+                            </el-select>
+                            <el-table
+                                    v-loading="loading"
+                                    :data="signedData"
+                                    style="width: 100%">
+                                <el-table-column
+                                        prop="contractId"
+                                        label="合同编号">
+                                </el-table-column>
+                                <el-table-column
+                                        label="球员"
+                                        width="100">
+                                    <template slot-scope="scope">
+                                        <div class="block" @click="handlePlayerDetail(scope.row.upId)" style="cursor:pointer;">
+                                            <el-avatar shape="square" :size="50" :src="scope.row.avatar"></el-avatar>
+                                        </div>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column
+                                        prop="chname"
+                                        label="中文名"
+                                        width="180">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="source"
+                                        label="签约来源">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="type"
+                                        label="签约类型">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="status"
+                                        label="签约状态">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="signTime"
+                                        label="签约时间">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="contract"
+                                        label="合同">
+                                </el-table-column>
+                                <el-table-column label="合同详情">
+                                    <template slot-scope="scope">
+                                        <el-button
+                                                size="mini"
+                                                @click="viewContractDetail(scope.row)">详情
+                                        </el-button>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </el-tab-pane>
+
+                    </el-tabs>
                     <el-dialog title="合同详情" :visible.sync="contractDetailDialogVisible">
                         <el-table :data="contractDetailData">
                             <el-table-column property="season" label="赛季"></el-table-column>
@@ -157,6 +156,7 @@
                 unSignedData: [],
                 signedData: [],
                 colShow: false,
+                activeSignTab:"negotiation",
                 signRecordStatus:"已签约",
                 contractDetailDialogVisible: false,
                 contractDetailData: [

@@ -16,9 +16,25 @@ export function getDraftTeamList(data) {
     })
 }
 
+export function getDraftPlayerList(data) {
+    return request({
+        url:'/draft/draft/playerList',
+        method:'post',
+        data:data
+    })
+}
+
 export function signUpDraft(data) {
     return request({
         url:'/draft/signUp/',
+        method:'post',
+        data:data
+    })
+}
+
+export function getDraftRoom(data) {
+    return request({
+        url:'/draft/pick/room',
         method:'post',
         data:data
     })
