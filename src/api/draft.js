@@ -39,3 +39,13 @@ export function getDraftRoom(data) {
         data:data
     })
 }
+
+export function pickPlayer(data) {
+    return request({
+        url:'/draft/pick/pick',
+        method:'post',
+        data:data
+    })
+}
+
+

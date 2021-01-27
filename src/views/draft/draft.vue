@@ -55,7 +55,14 @@
                                             <el-table-column property="draftId" label="选秀ID"></el-table-column>
                                             <el-table-column property="maxPlayerCount" label="参选球员数量"></el-table-column>
                                             <el-table-column property="maxTeamCount" label="球队数量"></el-table-column>
-                                            <el-table-column property="progress" label="当前进度"></el-table-column>
+                                            <el-table-column
+                                                    fixed="right"
+                                                    label="操作"
+                                                    width="100">
+                                                <template slot-scope="scope">
+                                                    <el-button @click="handleDraftDetail(scope.row,4)" type="text" size="small">详情</el-button>
+                                                </template>
+                                            </el-table-column>
                                         </el-table>
                                     </el-card>
                                     <el-card style="margin-top: 50px">
@@ -72,7 +79,7 @@
                                                     label="操作"
                                                     width="100">
                                                 <template slot-scope="scope">
-                                                    <el-button @click="handleDraftDetail(scope.row)" type="text" size="small">详情</el-button>
+                                                    <el-button @click="handleDraftDetail(scope.row,3)" type="text" size="small">详情</el-button>
                                                 </template>
                                             </el-table-column>
                                         </el-table>
@@ -150,10 +157,10 @@
                                 </el-table-column>
                             </el-table>
                         </div>
-                        <div v-if="dialogType===2">
+                        <div v-if="dialogType!==1">
                             <el-tabs v-model="activeDraftDetailTab" type="card">
-                                <el-tab-pane label="选秀直播" name="pick">
-                                    <el-table :data="draftRoomData">
+                                <el-tab-pane label="选秀直播" name="pick" v-if="dialogType===3">
+                                    <el-table :data="draftRoomData.teamList">
                                         <el-table-column
                                                 prop="draftOrder"
                                                 label="顺位">
@@ -203,6 +210,19 @@
                                                 prop="expectSalary"
                                                 label="期望薪资">
                                         </el-table-column>
+                                        <el-table-column
+                                                v-if="dialogType===3"
+                                                fixed="right"
+                                                label="操作"
+                                                width="100">
+                                            <template slot-scope="scope">
+                                                <el-button v-if="canPick(scope.row)" @click="pickPlayer(scope.row)" type="text" size="small">
+                                                    选择
+                                                </el-button>
+                                                <el-tag v-if="!isPicked(scope.row)">未被选</el-tag>
+                                                <el-tag v-if="isPicked(scope.row)" type="success">已被选</el-tag>
+                                            </template>
+                                        </el-table-column>
                                     </el-table>
                                 </el-tab-pane>
                                 <el-tab-pane label="球队名单&抽签结果" name="teamList">
@@ -237,10 +257,18 @@
 <script>
     import NavBar from "@/views/layout/header/header";
     import Sidebar from "@/views/layout/sidebar/sidebar";
-    import {getDraftList, getDraftPlayerList, getDraftRoom, getDraftTeamList, signUpDraft} from "@/api/draft";
+    import {
+        getDraftList,
+        getDraftPlayerList,
+        getDraftRoom,
+        getDraftTeamList,
+        pickPlayer,
+        signUpDraft
+    } from "@/api/draft";
     import {secondsToTime} from "@/utils/timeUtil";
     import {formatDate} from "@/utils/date";
     import GlobalWebsocket from "@/websocket/GlobalWebsocket";
+
     export default {
         components: {Sidebar,NavBar},
         mounted(){
@@ -309,6 +337,12 @@
                     this.getDraftList();
                 }
             },
+            canPick(row){
+              return this.draftRoomData.currentTeam && row.teamId===null;
+            },
+            isPicked(row){
+                return row.teamId!==null;
+            },
             getDraftList(){
                 getDraftList({date:new Date().getTime()}).then(res=>{
                     if(res.code===0){
@@ -325,8 +359,18 @@
                     }
                 });
             },
+            pickPlayer(row){
+                pickPlayer({draftId:row.draftId,draftPlayerId:row.draftPlayerId}).then(res=>{
+                    if(res.code===0){
+                        this.$message({
+                            message: "选人成功",
+                            type: "success"
+                        });
+                    }
+                });
+            },
             handleNewSignUp(body){
-                console.log(body.teamId+"报名了选秀大会"+body.draftId);
+                console.log(body);
                 this.getDraftList();
             },
             handleWaitingStartTimer(data){
@@ -354,30 +398,41 @@
                     }
                 });
             },
-            handleDraftDetail(row){
-                getDraftTeamList({draftId:row.draftId}).then(res=>{
-                    if(res.code===0){
-                        this.draftTeamListData=res.data.teamList;
-                        this.draftTeamListData.forEach(item=>{
-                           if(item.draftOrder===1){
-                               item.draftOrder="状元";
-                           } else if(item.draftOrder===2){
-                               item.draftOrder="榜眼";
-                           }else if(item.draftOrder===3){
-                                item.draftOrder="探花";
-                            }
-                        });
-                        this.dialogVisible=true;
-                        this.dialogType=2;
-                    }
-                });
-                getDraftPlayerList({draftId:row.draftId}).then(res=>{
-                    if(res.code===0){
-                        this.draftPlayerListData=res.data.playerList;
-                    }
-                });
-                this.connectDraftRoomChannel(row.draftId);
-                this.getDraftRoom(row.draftId);
+            handleDraftDetail(row,draftStatus){
+                if(draftStatus===4){
+                    this.dialogType=3;
+                }else{
+                    this.dialogType=2;
+                }
+
+                if(this.dialogType===3){
+                    this.connectDraftRoomChannel(row.draftId);
+                    this.getDraftRoom(row.draftId);
+                    this.dialogVisible=true;
+                }else{
+                    getDraftTeamList({draftId:row.draftId}).then(res=>{
+                        if(res.code===0){
+                            this.draftTeamListData=res.data.teamList;
+                            this.draftTeamListData.forEach(item=>{
+                                if(item.draftOrder===1){
+                                    item.draftOrder="状元";
+                                } else if(item.draftOrder===2){
+                                    item.draftOrder="榜眼";
+                                }else if(item.draftOrder===3){
+                                    item.draftOrder="探花";
+                                }
+                            });
+                            this.dialogVisible=true;
+
+                        }
+                    });
+                    getDraftPlayerList({draftId:row.draftId}).then(res=>{
+                        if(res.code===0){
+                            this.draftPlayerListData=res.data.playerList;
+                        }
+                    });
+                }
+
             },
             handleSignUp(){
                 signUpDraft({draftId:this.selectedDraftId,cardCount:this.cardCount}).then(res=>{
@@ -392,7 +447,6 @@
                 })
             },
             handleDrawMsg(body){
-                console.log(body);
                 this.drawingList.forEach((item, index)=>{
                     if(item.draftId===body.draftId){
                         item.progress=body.content;
@@ -406,8 +460,26 @@
             },
             getDraftRoom(draftId){
                 getDraftRoom({draftId:draftId}).then(res=>{
-                    this.draftRoomData=res.data.teamList;
+                    this.draftRoomData=res.data;
+                    this.draftPlayerListData=res.data.playerList;
+                    setInterval(this.handlePickTimer,200,this.draftRoomData)
                 });
+            },
+            handlePickTimer(data){
+                // if(!data){
+                //     return;
+                // }
+                data.teamList.forEach((item, index)=>{
+                    if(item.teamId===this.draftRoomData.currentTeamId){
+                        let secondsLeft = parseInt((data.currentExpire - new Date().getTime()) / 1000);
+                        if (secondsLeft > 0) {
+                            item.pickStatus = secondsToTime(secondsLeft);
+                        } else {
+                            item.pickStatus = "已过期"
+                        }
+                        this.$set(data, index, item);
+                    }
+                })
             }
         }
     }
