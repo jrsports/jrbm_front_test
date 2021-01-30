@@ -10,10 +10,52 @@
             <el-container>
                 <el-main>
 
-                    <el-tabs v-model="activeSignTab" type="card">
-                        <el-tab-pane label="待谈判" name="negotiation">
+                    <el-tabs v-model="activeSignTab" type="card" @tab-click="switchTab">
+                        <el-tab-pane name="negotiation">
+                            <div slot="label">
+                                <el-badge is-dot :hidden="!hasNegotiation">
+                                    <span>待谈判</span>
+                                </el-badge>
+                            </div>
+                            <el-table :data="negotiationListData">
+                                <el-table-column
+                                        prop="negotiationId"
+                                        label="谈判ID">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="chname"
+                                        label="球员名">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="type"
+                                        label="来源">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="expectSalary"
+                                        label="期望薪资">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="status"
+                                        label="谈判状态">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="timeLeft"
+                                        label="剩余时间">
+                                </el-table-column>
+                                <el-table-column
+                                        label="操作"
+                                        width="100">
+                                    <template slot-scope="scope">
+                                        <el-button @click="negotiate(scope.row)" type="text" size="small">
+                                            谈判
+                                        </el-button>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
 
                         </el-tab-pane>
+
+
                         <el-tab-pane label="待签约" name="unsigned">
                             <el-table
                                     :data="unSignedData"
@@ -144,9 +186,10 @@
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header";
     import PlayerInfoDialog from "@/components/PlayerInfoDialog";
-    import {getSignContractList} from "@/api/sign";
+    import {getNegotiationList, getSignContractList, negotiate} from "@/api/sign";
     import {signContract} from "@/api/sign";
     import {refuseContract} from "@/api/sign";
+    import {secondsToTime} from "@/utils/timeUtil";
 
     export default {
         components: {Sidebar, NavBar,PlayerInfoDialog},
@@ -157,6 +200,7 @@
                 signedData: [],
                 colShow: false,
                 activeSignTab:"negotiation",
+                negotiationListData:[],
                 signRecordStatus:"已签约",
                 contractDetailDialogVisible: false,
                 contractDetailData: [
@@ -177,10 +221,12 @@
                         salary: "800万"
                     },
                 ],
-                loading: true
+                loading: true,
+                hasNegotiation:false
             }
         },
         mounted() {
+            this.getNegotiationList();
             this.getUnsignedContractList();
             this.getSignContractList(2);
         },
@@ -282,32 +328,85 @@
                     }
                 })
             },
+            getNegotiationList(){
+              getNegotiationList({}).then(res=>{
+                  if(res.code===0){
+                      this.negotiationListData=res.data.negotiationList;
+                      this.hasNegotiation=this.negotiationListData.length>0;
+                      this.negotiationListData.forEach(item=>{
+                          if(item.type===1){
+                              item.type="球员选秀"
+                          }
+                          if(item.status===1){
+                              item.status="未谈判";
+                          }else if(item.status===2){
+                              item.status="谈判中"
+                          }else if(item.status===3){
+                              item.status="已拒绝";
+                          }
+                      })
+                  }
+              })
+            },
             startTimer() {
-                const me = this;
                 let temp = [];
                 this.unSignedData.forEach(function (item) {
                     var t = parseInt((item.expireTime - new Date().getTime()) / 1000);
                     if (t > 0) {
                         item.timeValLeft = t;
                         // console.log(item.timeValLeft);
-                        item.timeLeft = me.secondsToTime(t);
+                        item.timeLeft = secondsToTime(t);
                     } else {
                         item.timeLeft = "已过期";
                     }
                     temp.push(item);
                 });
                 this.unSignedData = temp;
+
+                this.negotiationListData.forEach((item,index)=>{
+                    var t = parseInt((item.expireTime - new Date().getTime()) / 1000);
+                    if (t > 0) {
+                        item.timeValLeft = t;
+                        // console.log(item.timeValLeft);
+                        item.timeLeft = secondsToTime(t);
+                    } else {
+                        item.timeLeft = "已过期";
+                    }
+                    this.$set(this.negotiationListData,index,item)
+                })
             },
-            secondsToTime(s) {
-                let h;
-                h = Math.floor(s / 60);
-                s = s % 60;
-                h += '';
-                s += '';
-                h = (h.length == 1) ? '0' + h : h;
-                s = (s.length == 1) ? '0' + s : s;
-                return h + ':' + s;
+            switchTab(tab) {
+                if (tab.name === "negotiation") {
+                    this.getNegotiationList();
+                }else if(tab.name==="unsigned"){
+                    this.getUnsignedContractList();
+                }else if(tab.name==="history"){
+                    this.getSignContractList(2);
+                }
             },
+            negotiate(row){
+                negotiate({
+                    negotiationId:row.negotiationId,
+                    offer:{
+                        totalYear:2,
+                        totalSalary:3400,
+                        detail:[
+                            {
+                                salary:1400
+                            },
+                            {
+                                salary:2000
+                            }
+                        ]
+                    }}).then(res=>{
+                    if(res.code===0){
+                        this.$message({
+                            message: res.isAccepted?"球员接收了您的报价":"球员暂定了您的报价",
+                            type: "success"
+                        });
+                    }
+                });
+            }
         }
     }
 </script>

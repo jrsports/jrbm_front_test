@@ -24,6 +24,22 @@ export function getDraftPlayerList(data) {
     })
 }
 
+export function getDraftHistoryList(data) {
+    return request({
+        url:'/draft/draft/history',
+        method:'post',
+        data:data
+    })
+}
+
+export function getDraftResult(data) {
+    return request({
+        url:'/draft/draft/result',
+        method:'post',
+        data:data
+    })
+}
+
 export function signUpDraft(data) {
     return request({
         url:'/draft/signUp/',

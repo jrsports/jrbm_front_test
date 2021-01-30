@@ -39,3 +39,18 @@ export function getSignFlow(flowId) {
     })
 }
 
+export function getNegotiationList(data) {
+    return request({
+        url:'/sign/negotiation/list',
+        data:data,
+        method:'post'
+    })
+}
+
+export function negotiate(data) {
+    return request({
+        url:'/sign/negotiation/negotiate',
+        data:data,
+        method:'post'
+    })
+}
