@@ -19,7 +19,7 @@
         </el-row>
         <el-tabs v-model="activeTab" type="card">
             <el-tab-pane label="基本信息" name="basic">
-
+                <span>{{playerDetail.draftInfo.content}}</span>
             </el-tab-pane>
             <el-tab-pane label="能力信息" name="ability">
                 <el-card style="width: 100%">

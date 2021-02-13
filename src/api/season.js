@@ -63,12 +63,7 @@ export function getSeasonPlayerStatsRank(data) {
     })
 }
 
-export function viewStats(data) {
-    return request({
-        url:'/matchserver/match/getMatchDetailInfo/' + data,
-        method:'post'
-    })
-}
+
 
 export function getTeamRank(data) {
     return request({

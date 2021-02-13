@@ -28,11 +28,11 @@
                         </el-col>
                         <el-col :span="2">
                             <el-button type="primary" icon="el-icon-refresh" circle
-                                       @click="getFreePlayerList(-1,9)"></el-button>
+                                       @click="getFreePlayerList()"></el-button>
                         </el-col>
                     </el-row>
                     <el-row>
-                        <el-button type="info" plain @click="getHistoryOfferList()">签约记录</el-button>
+                        <el-button type="info" plain @click="getHistoryOfferList()">历史自由球员</el-button>
                     </el-row>
 
                     <el-table
@@ -140,8 +140,8 @@
                             <el-table-column type="index" label="排名" width="50"></el-table-column>
                             <el-table-column property="teamName" label="球队"></el-table-column>
                             <el-table-column property="offer" label="报价"></el-table-column>
-                            <el-table-column property="offerTime" label="报价时间"></el-table-column>
-                            <el-table-column property="intention" label="意向"></el-table-column>
+                            <el-table-column property="gmtCreate" label="报价时间"></el-table-column>
+                            <el-table-column property="ext.intention" label="意向"></el-table-column>
                         </el-table>
                     </el-dialog>
                     <el-dialog title="报价" :visible.sync="addOfferDialogVisible">
@@ -197,18 +197,17 @@
                         </el-row>
 
                     </el-dialog>
-                    <el-dialog title="签约历史" :visible.sync="signHistoryDialogVisible">
+                    <el-dialog title="历史自由球员" :visible.sync="signHistoryDialogVisible">
                         <el-table :data="signHistoryData" v-loading="loading">
                             <el-table-column property="playerName" label="球员"></el-table-column>
                             <el-table-column property="offerCount" label="报价人数"></el-table-column>
                             <el-table-column property="intendedOfferCount" label="球员心仪报价"></el-table-column>
                             <el-table-column property="expireTime" label="球员过期时间"></el-table-column>
                             <el-table-column property="status" label="状态"></el-table-column>
-                            <el-table-column property="offerFlowId" label="流程ID" width="0"></el-table-column>
                             <el-table-column label="签约流程">
                                 <template slot-scope="scope">
                                     <el-button
-                                            v-if="scope.row.offerFlowId!=null"
+                                            v-if="scope.row.offerTaskId!=null"
                                             size="mini"
                                             @click="viewSignFlow(scope.row)">查看
                                     </el-button>
@@ -224,7 +223,7 @@
                         </el-steps>
                         <el-table :data="signFlowData">
                             <el-table-column type="index" label="意向排名"></el-table-column>
-                            <el-table-column property="offerRecordDto.teamName" label="候选球队"></el-table-column>
+                            <el-table-column property="teamName" label="候选球队"></el-table-column>
                             <el-table-column property="sendTime" label="发送时间"></el-table-column>
                             <el-table-column property="expireTime" label="过期时间"></el-table-column>
                             <el-table-column property="finishTime" label="（拒绝）签署时间"></el-table-column>
@@ -350,7 +349,7 @@
         },
         mounted() {
             this.connectFreeMarketChannel();
-            this.getFreePlayerList(-1, 9);
+            this.getFreePlayerList();
             // setInterval(this.startTimer, 1000);
         },
         beforeDestroy(){
@@ -373,10 +372,12 @@
             handlePlayerDetail(upId) {
                 this.$refs.playerInfoDialogRef.show(upId);
             },
-            getFreePlayerList(fpIdOffset, count) {
+            getFreePlayerList() {
                 getFreePlayerList({
-                    fpIdOffset: fpIdOffset,
-                    count: count
+                    pageRequest:{
+                        pageNo:1,
+                        pageSize:10
+                    }
                 }).then(res => {
                     if (res.code === 0) {
                         this.$message({
@@ -384,8 +385,8 @@
                             type: "success"
                         });
                         // const newFreePlayerList=res.data.freePlayerList;
-                        this.freePlayerCount = res.data.count;
-                        this.freePlayerListData = res.data.freePlayerList;
+                        this.freePlayerCount = res.data.freePlayerList.totalRecordCount;
+                        this.freePlayerListData = res.data.freePlayerList.recordList;
 
                         this.freePlayerListData.forEach((item) => {
                             if (item.source === 1) {
@@ -417,7 +418,7 @@
 
             },
             handleNewFreePlayer() {
-                this.getFreePlayerList(-1, 9);
+                this.getFreePlayerList();
             },
             handleAddOffer(fpId) {
                 this.addOfferDialogVisible = true;
@@ -430,22 +431,19 @@
                         this.offerDialogVisible = true;
                         this.offerData = res.data;
                         this.offerData.forEach(function (item) {
-                            item.offerTime = formatDate(new Date(item.offerTime), "yyyy-MM-dd hh:mm:ss");
-                            const l = item.contractDetailReqDtoList;
-                            const totalSeason = l.length;
-                            let totalSalary = 0;
-                            l.forEach(function (i) {
-                                totalSalary += i.salary;
-                            });
-                            item.offer = totalSeason + "年" + totalSalary + "万"
+                            item.gmtCreate = formatDate(new Date(item.gmtCreate), "yyyy-MM-dd hh:mm:ss");
+                            const contract = item.contract;
+                            item.offer = contract.totalYear+ "年" + contract.totalSalary + "万"
                         });
                     }
                 });
             },
             getHistoryOfferList() {
                 getHistory({
-                    pageNo: 1,
-                    pageSize: 10
+                    pageRequest:{
+                        pageNo: 1,
+                        pageSize: 10
+                    }
                 }).then(res=>{
                     if (res.code === 0) {
                         this.signHistoryDialogVisible=true;
@@ -458,6 +456,7 @@
                             } else if (item.status == 4) {
                                 item.status = "消失";
                             }
+                            item.expireTime = formatDate(new Date(item.expireTime), "yyyy-MM-dd hh:mm:ss");
                         });
                         this.signHistoryData = d;
                         this.loading = false;
@@ -465,9 +464,10 @@
                 });
             },
             viewSignFlow(row) {
-                getSignFlow(row.offerFlowId).then(res => {
+                getSignFlow({offerTaskId:row.offerTaskId}).then(res => {
                     if (res.code === 0) {
                         this.signFlowDialogVisible=true;
+                        const of = res.data;
                         let candidate = res.data.flowOfferList;
                         candidate.forEach(function (item) {
                             if (item.status == 0) {
@@ -481,11 +481,15 @@
                             } else if (item.status == 4) {
                                 item.status = "签约过期";
                             }
+                            item.sendTime = formatDate(new Date(item.sendTime), "yyyy-MM-dd hh:mm:ss");
+                            item.finishTime = formatDate(new Date(item.finishTime), "yyyy-MM-dd hh:mm:ss");
+                            item.expireTime = formatDate(new Date(item.expireTime), "yyyy-MM-dd hh:mm:ss");
                         });
                         this.signFlowData = candidate;
-                        const of = res.data;
+
                         this.offerFlow.status = of.status;
-                        this.offerFlow.flowStartTime = of.flowStartTime;
+                        this.offerFlow.flowStartTime = formatDate(new Date(of.flowStartTime), "yyyy-MM-dd hh:mm:ss");
+                        this.offerFlow.flowFinishTime = formatDate(new Date(of.flowFinishTime), "yyyy-MM-dd hh:mm:ss");
                         if (of.status == 1) {
                             this.offerFlow.currentProgress = "等待" + of.currentSignTeam + "确认签约";
                         } else if (of.status == 2) {
@@ -495,7 +499,6 @@
                             this.offerFlow.currentProgress = "无人签约";
                             this.offerFlow.status=4
                         }
-                        this.offerFlow.flowFinishTime = of.flowFinishTime;
                     }
                 });
             },
@@ -503,7 +506,11 @@
                 this.addOfferLoading = true;
                 addOffer({
                     fpId: this.addOfferForm.fpId,
-                    contractDetailReqDtoList: this.addOfferForm.addOfferData
+                    contract: {
+                        totalYear:this.addOfferForm.totalSeason,
+                        totalSalary:this.addOfferForm.totalSalary,
+                        detail:this.addOfferForm.addOfferData
+                    }
                 }).then(res => {
                     if (res.code === 0) {
                         this.offerData = res.data;
@@ -512,7 +519,7 @@
                             type: "success"
                         });
                         this.addOfferDialogVisible = false;
-                        this.getFreePlayerList(-1, 9);
+                        this.getFreePlayerList();
                     }
                     this.addOfferLoading = false;
                 });

@@ -95,6 +95,14 @@
                                     </el-card>
                                 </el-tab-pane>
                                 <el-tab-pane label="历届选秀" name="history">
+                                    <el-date-picker
+                                            v-model="historyDate"
+                                            type="date"
+                                            value-format="yyyy-MM-dd"
+                                            placeholder="选择日期"
+                                            @change="getDraftHistory"
+                                    >
+                                    </el-date-picker>
                                     <el-table :data="draftHistoryList">
                                         <el-table-column property="draftId" label="选秀ID"></el-table-column>
                                         <el-table-column property="maxPlayerCount" label="参选球员数量"></el-table-column>
@@ -113,14 +121,6 @@
                                             </template>
                                         </el-table-column>
                                     </el-table>
-                                </el-tab-pane>
-                                <el-tab-pane label="选秀日历" name="calendar">
-
-                                    <el-card>
-                                        <div slot="header">
-                                            <span>下一场报名开放时间</span>
-                                        </div>
-                                    </el-card>
                                 </el-tab-pane>
                             </el-tabs>
 
@@ -206,7 +206,7 @@
                                                 label="期望薪资">
                                         </el-table-column>
                                         <el-table-column
-                                                v-if="draftStatus===3"
+                                                v-if="draftStatus===4"
                                                 fixed="right"
                                                 label="操作"
                                                 width="100">
@@ -221,7 +221,7 @@
                                         </el-table-column>
                                     </el-table>
                                 </el-tab-pane>
-                                <el-tab-pane label="球队名单&抽签结果" name="teamList" v-if="draftStatus!==5">
+                                <el-tab-pane label="球队名单&抽签结果" name="teamList" v-if="draftStatus!==4 && draftStatus!==5">
                                     <el-table :data="draftTeamListData">
                                         <el-table-column
                                                 prop="draftOrder"
@@ -319,7 +319,8 @@
                 isSignedUp: false,
                 draftRoomData: {},
                 draftHistoryList: [],
-                draftPickResultData:[]
+                draftPickResultData:[],
+                historyDate:new Date(),
             }
         },
         methods: {
@@ -366,7 +367,7 @@
                 if (tab.name === "draft") {
                     this.getDraftList();
                 } else if (tab.name === "history") {
-                    this.getDraftHistory();
+                    this.getDraftHistory(this.historyDate);
                 }
             },
             canPick(row) {
@@ -375,8 +376,8 @@
             isPicked(row) {
                 return row.teamId !== null;
             },
-            getDraftHistory() {
-                getDraftHistoryList({}).then(res => {
+            getDraftHistory(date) {
+                getDraftHistoryList({date:date}).then(res => {
                     if (res.code === 0) {
                         this.draftHistoryList = res.data.recordList;
                         this.draftHistoryList.forEach(item => {
@@ -469,11 +470,13 @@
             },
             handleDraftDetail(row, draftStatus) {
                 this.draftStatus = draftStatus;
-                if (this.draftStatus === 3) {
+                if (this.draftStatus === 4) {
                     this.connectDraftRoomChannel(row.draftId);
                     this.getDraftRoom(row.draftId);
+                    this.activeDraftDetailTab="pick";
                     this.dialogVisible = true;
                 } else {
+                    this.activeDraftDetailTab="playerList";
                     getDraftTeamList({draftId: row.draftId}).then(res => {
                         if (res.code === 0) {
                             this.draftTeamListData = res.data.teamList;

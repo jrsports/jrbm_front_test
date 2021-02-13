@@ -29,6 +29,7 @@
                 <el-menu-item index="4-1" @click="getSeasonPage">赛季</el-menu-item>
                 <el-menu-item index="4-2" @click="getMatchPage">排位</el-menu-item>
                 <el-menu-item index="4-3">杯赛</el-menu-item>
+                <el-menu-item index="4-4" @click="getMatchRecordPage">比赛记录</el-menu-item>
             </el-submenu>
             <el-menu-item index="5">
                 <i class="el-icon-document"></i>
@@ -95,6 +96,9 @@
             },
             getMyPlayerDetailPage(){
                 this.$router.push('/myplayerdetail')
+            },
+            getMatchRecordPage(){
+                this.$router.push('/matchrecord')
             }
         }
     }

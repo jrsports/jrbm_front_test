@@ -1,4 +1,6 @@
 // eslint-disable-next-line no-unused-vars
+import {formatDate} from "@/utils/date";
+
 export function convertPlayerInfo(item) {
 
         if(item.order==1){
@@ -63,5 +65,14 @@ export function convertPlayerInfo(item) {
         }else{
             item.type="历史";
         }
+
+
+        if(item.draftInfo!=null){
+            item.draftInfo.content="于 "+formatDate(new Date(item.draftInfo.pickTime), "yyyy-MM-dd hh:mm:ss")+" 在第"+item.draftInfo.draftOrder+"顺位 被 "+item.draftInfo.teamName+" 选中";
+        }else{
+            item.draftInfo={};
+            item.draftInfo.content="无选秀记录";
+        }
+
 
 }

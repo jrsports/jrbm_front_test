@@ -17,6 +17,35 @@
                                     <span>待谈判</span>
                                 </el-badge>
                             </div>
+                            <el-button @click="getNegotiationHistory">谈判历史</el-button>
+                            <el-dialog :visible.sync="negotiationHistoryDialog" width="1200px" title="谈判历史">
+                                <el-table :data="negotiationHistoryData">
+                                    <el-table-column
+                                            prop="negotiationId"
+                                            label="谈判ID">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="chname"
+                                            label="球员名">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="type"
+                                            label="来源">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="expectSalary"
+                                            label="期望薪资">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="lastOffer"
+                                            label="最近一次报价">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="status"
+                                            label="谈判状态">
+                                    </el-table-column>
+                                </el-table>
+                            </el-dialog>
                             <el-table :data="negotiationListData">
                                 <el-table-column
                                         prop="negotiationId"
@@ -33,6 +62,10 @@
                                 <el-table-column
                                         prop="expectSalary"
                                         label="期望薪资">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="lastOffer"
+                                        label="最近一次报价">
                                 </el-table-column>
                                 <el-table-column
                                         prop="status"
@@ -201,6 +234,8 @@
                 colShow: false,
                 activeSignTab:"negotiation",
                 negotiationListData:[],
+                negotiationHistoryData:[],
+                negotiationHistoryDialog:false,
                 signRecordStatus:"已签约",
                 contractDetailDialogVisible: false,
                 contractDetailData: [
@@ -226,7 +261,7 @@
             }
         },
         mounted() {
-            this.getNegotiationList();
+            this.getNegotiationList(false);
             this.getUnsignedContractList();
             this.getSignContractList(2);
         },
@@ -278,7 +313,7 @@
                             } else if (item.status == 4) {
                                 item.status = "已过期";
                             }
-                            item.contract = item.contractDto.totalSeason + "年" + item.contractDto.totalSalary + "万"
+                            item.contract = item.contractDto.totalYear + "年" + item.contractDto.totalSalary + "万"
                         });
                         this.signedData = sd;
                         this.loading = false;
@@ -328,8 +363,34 @@
                     }
                 })
             },
-            getNegotiationList(){
-              getNegotiationList({}).then(res=>{
+            getNegotiationHistory(){
+                getNegotiationList({history:true}).then(res=>{
+                    if(res.code===0){
+                        this.negotiationHistoryDialog=true;
+                        this.negotiationHistoryData=res.data.negotiationList;
+                        this.hasNegotiation=this.negotiationListData.length>0;
+                        this.negotiationHistoryData.forEach(item=>{
+                            if(item.type===1){
+                                item.type="球员选秀"
+                            }
+                            if(item.status===1){
+                                item.status="未谈判";
+                            }else if(item.status===2){
+                                item.status="谈判中"
+                            }else if(item.status===3){
+                                item.status="已拒绝";
+                            }else if(item.status===4){
+                                item.status="已接受";
+                            }
+                            if(item.lastOffer!==null){
+                                item.lastOffer=item.lastOffer.totalYear+"年"+item.lastOffer.totalSalary+"万";
+                            }
+                        })
+                    }
+                })
+            },
+            getNegotiationList(isHistory){
+              getNegotiationList({history:isHistory}).then(res=>{
                   if(res.code===0){
                       this.negotiationListData=res.data.negotiationList;
                       this.hasNegotiation=this.negotiationListData.length>0;
@@ -343,6 +404,11 @@
                               item.status="谈判中"
                           }else if(item.status===3){
                               item.status="已拒绝";
+                          }else if(item.status===4){
+                              item.status="已接受";
+                          }
+                          if(item.lastOffer!==null){
+                              item.lastOffer=item.lastOffer.totalYear+"年"+item.lastOffer.totalSalary+"万";
                           }
                       })
                   }
@@ -377,7 +443,7 @@
             },
             switchTab(tab) {
                 if (tab.name === "negotiation") {
-                    this.getNegotiationList();
+                    this.getNegotiationList(false);
                 }else if(tab.name==="unsigned"){
                     this.getUnsignedContractList();
                 }else if(tab.name==="history"){
@@ -401,9 +467,10 @@
                     }}).then(res=>{
                     if(res.code===0){
                         this.$message({
-                            message: res.isAccepted?"球员接收了您的报价":"球员暂定了您的报价",
+                            message: res.data.isAccepted?"球员接收了您的报价":"球员暂定了您的报价",
                             type: "success"
                         });
+                        this.getNegotiationList(false);
                     }
                 });
             }

@@ -75,6 +75,7 @@
         methods: {
             loadMatch(matchId){
                 this.matchLiveDialogVisible=true;
+                this.liveContent=[];
                 let channel="/channel/matchServer/live/" + matchId;
                 this.$store.dispatch('ws/addRouter', {
                     "channel": channel,

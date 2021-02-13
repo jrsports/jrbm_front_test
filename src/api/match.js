@@ -37,3 +37,18 @@ export function applyTicket(data) {
         method:'post'
     })
 }
+
+export function getMatchRecordList(data) {
+    return request({
+        url:'/matchserver/match/recordList',
+        method:'post',
+        data:data
+    })
+}
+
+export function viewStats(data) {
+    return request({
+        url:'/matchserver/match/getMatchDetailInfo/' + data,
+        method:'post'
+    })
+}

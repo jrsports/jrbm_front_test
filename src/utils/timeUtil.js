@@ -10,3 +10,14 @@ export function secondsToTime(seconds) {
     res += `${s}`;
     return res;
 }
+
+export function secondsToMatchTime(s) {
+    let h;
+    h = Math.floor(s / 60);
+    s = s % 60;
+    h += '';
+    s += '';
+    h = (h.length == 1) ? '0' + h : h;
+    s = (s.length == 1) ? '0' + s : s;
+    return h + ':' + s;
+}

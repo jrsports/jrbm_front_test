@@ -394,46 +394,9 @@
 
 
 
-                    <el-dialog title="数据统计" :visible.sync="matchStatsDialogVisible" width="80%">
-                        <el-table ref="statTable" :data="homeStatsData">
-                            <el-table-column property="order" label="球员序号"></el-table-column>
-                            <el-table-column property="chname" label="姓名"></el-table-column>
-                            <el-table-column property="time" label="上场时间"></el-table-column>
-                            <el-table-column property="score" label="得分"></el-table-column>
-                            <el-table-column property="rebound" label="篮板"></el-table-column>
-                            <el-table-column property="assist" label="助攻"></el-table-column>
-                            <el-table-column property="steal" label="抢断"></el-table-column>
-                            <el-table-column property="turnover" label="失误"></el-table-column>
-                            <el-table-column property="block" label="盖帽"></el-table-column>
-                            <el-table-column property="beBlocked" label="被盖"></el-table-column>
-                            <el-table-column property="foul" label="犯规"></el-table-column>
-                            <el-table-column property="totalAttempt" label="总出手数"></el-table-column>
-                            <el-table-column property="totalIn" label="总命中数"></el-table-column>
-                            <el-table-column property="threeAttempt" label="三分出手"></el-table-column>
-                            <el-table-column property="threeIn" label="三分命中"></el-table-column>
-                            <el-table-column property="freeThrowAttempt" label="罚球出手"></el-table-column>
-                            <el-table-column property="freeThrowIn" label="罚球命中"></el-table-column>
-                        </el-table>
-                        <el-table ref="statTable" :data="awayStatsData">
-                            <el-table-column property="order" label="球员序号"></el-table-column>
-                            <el-table-column property="chname" label="姓名"></el-table-column>
-                            <el-table-column property="time" label="上场时间"></el-table-column>
-                            <el-table-column property="score" label="得分"></el-table-column>
-                            <el-table-column property="rebound" label="篮板"></el-table-column>
-                            <el-table-column property="assist" label="助攻"></el-table-column>
-                            <el-table-column property="steal" label="抢断"></el-table-column>
-                            <el-table-column property="turnover" label="失误"></el-table-column>
-                            <el-table-column property="block" label="盖帽"></el-table-column>
-                            <el-table-column property="beBlocked" label="被盖"></el-table-column>
-                            <el-table-column property="foul" label="犯规"></el-table-column>
-                            <el-table-column property="totalAttempt" label="总出手数"></el-table-column>
-                            <el-table-column property="totalIn" label="总命中数"></el-table-column>
-                            <el-table-column property="threeAttempt" label="三分出手"></el-table-column>
-                            <el-table-column property="threeIn" label="三分命中"></el-table-column>
-                            <el-table-column property="freeThrowAttempt" label="罚球出手"></el-table-column>
-                            <el-table-column property="freeThrowIn" label="罚球命中"></el-table-column>
-                        </el-table>
-                    </el-dialog>
+
+
+                    <MatchStatsDialog ref="matchStatsDialogRef"></MatchStatsDialog>
 
                     <MatchLiveDialog ref="matchLiveDialogRef"></MatchLiveDialog>
 
@@ -448,6 +411,7 @@
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header";
     import MatchLiveDialog from "@/components/MatchLiveDialog";
+    import MatchStatsDialog from "@/components/MatchStatsDialog";
     import {} from "@/api/season";
     import {signUp} from "@/api/season";
     import {getSignUpStatus} from "@/api/season";
@@ -456,14 +420,13 @@
     import {getMyTodaySchedule} from "@/api/season";
     import {getPlayOffView} from "@/api/season";
     import {getSeasonPlayerStatsRank} from "@/api/season";
-    import {viewStats} from "@/api/season";
     import {secondsToTime} from "@/utils/timeUtil"
     import {getTeamRank} from "@/api/season";
     import {getSeasonStatsRank} from "@/api/season";
 
 
     export default {
-        components: {Sidebar, NavBar,MatchLiveDialog},
+        components: {Sidebar, NavBar,MatchLiveDialog,MatchStatsDialog},
         name: "season",
         data() {
             return {
@@ -471,8 +434,7 @@
                 scheduleDate: new Date(),
                 teamAvgLossRankData: [],
                 teamAvgRebRankData: [],
-                awayStatsData: [],
-                homeStatsData: [],
+
                 teamStatsRankData: [],
                 playerStatsRankData: [],
                 teamStatsTab: "west",
@@ -747,27 +709,7 @@
                 }
             },
             viewStats(row) {
-                viewStats(row.matchId).then(res=>{
-                    if (res.code === 0) {
-                        let data = res.data;
-                        let homeTeamId = data.matchBriefInfoDto.homeTeamId;
-                        let awayTeamId = data.matchBriefInfoDto.awayTeamId;
-                        let homeData = data.matchPlayerStatsDtoMap[homeTeamId];
-
-                        let awayData = data.matchPlayerStatsDtoMap[awayTeamId];
-                        //转换时间
-                        for (let i = 0; i < homeData.length; i++) {
-                            homeData[i]["time"] = this.secondsToTime(homeData[i]["time"] / 10)
-                        }
-                        for (let i = 0; i < awayData.length; i++) {
-                            awayData[i]["time"] = this.secondsToTime(awayData[i]["time"] / 10)
-                        }
-
-                        this.homeStatsData = homeData;
-                        this.awayStatsData = awayData;
-                        this.matchStatsDialogVisible = true;
-                    }
-                });
+                this.$refs.matchStatsDialogRef.loadStats(row.matchId);
             },
             secondsToTime(s) {
                 let h;

@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getFreePlayerList(data) {
     return request({
-        url:'/freemarket/freeMarket/getFreePlayerList',
+        url:'/freemarket/freeMarket/list',
         method:'post',
         data:data
     })
@@ -32,7 +32,7 @@ export function getOfferRecordList(data) {
 
 export function getHistory(data) {
     return request({
-        url:'/freemarket/freeMarket/getHistory',
+        url:'/freemarket/freeMarket/history',
         method:'post',
         data:data
     })

@@ -87,6 +87,13 @@ export const constantRouterMap = [
         meta:{
             needLogin:true
         }
+    },
+    {
+        path: "/matchrecord",
+        component: () => import('@/views/match/matchrecord'),
+        meta:{
+            needLogin:true
+        }
     }
 
 ];
