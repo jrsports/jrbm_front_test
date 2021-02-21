@@ -2,7 +2,6 @@
     <div>
         <h3>JRBM</h3>
         <el-button v-if="!ifLogin" @click="loginDialogVisible=true">登录</el-button>
-        <el-button @click="sendWs">SendWs</el-button>
         <el-dialog title="登录" :visible.sync="loginDialogVisible" width="30%">
             <el-row>
                 <el-col>

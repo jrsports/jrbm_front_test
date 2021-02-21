@@ -60,7 +60,7 @@ export function convertPlayerInfo(item) {
 
 
 
-        if(item.type==0){
+        if(item.basicPlayerType===0){
             item.type="现役";
         }else{
             item.type="历史";
@@ -74,5 +74,17 @@ export function convertPlayerInfo(item) {
             item.draftInfo.content="无选秀记录";
         }
 
+        item.contract.content = item.contract.totalYear + "年" + item.contract.totalSalary + "万";
+
+        let cp=item.contract.progress;
+        item.contract.detail.forEach((it,index)=>{
+            if(cp>0 && index===cp-1){
+                it.progress="履行中";
+            }else if(cp>0 && index<cp-1 || cp<0 &&index<=-cp){
+                it.progress="履行完毕";
+            }else {
+                it.progress="未履行";
+            }
+        });
 
 }

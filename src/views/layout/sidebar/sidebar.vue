@@ -42,9 +42,10 @@
             <el-submenu index="7">
                 <template slot="title">
                     <i class="el-icon-location"></i>
-                    <span>球员中心</span>
+                    <span>排行榜</span>
                 </template>
                 <el-menu-item index="6-1" @click="getCurrentAbilityPage">能力市价</el-menu-item>
+                <el-menu-item index="6-2" @click="getTeamRankPage">球队排名</el-menu-item>
             </el-submenu>
             <el-menu-item index="8">
                 <i class="el-icon-setting"></i>

@@ -34,7 +34,7 @@ export function dismiss(data) {
 
 export function getCurrentPlayerList(data) {
     return request({
-        url:'/player/basic/getCurrentPlayerList',
+        url:'/player/basic/getPlayerRank',
         method:'post',
         data:data
     })
@@ -44,5 +44,13 @@ export function getUserPlayerDetailList() {
     return request({
         url:'/player/userPlayer/getUserPlayerDetailList',
         method:'post'
+    })
+}
+
+export function getBasicPlayerDetail(data) {
+    return request({
+        url:'/player/basic/getBasicPlayerDetail',
+        method:'post',
+        data:data
     })
 }

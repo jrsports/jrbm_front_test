@@ -11,16 +11,17 @@
             </el-aside>
             <el-container>
                 <el-main>
-                    <el-tabs tab-position="left" style="height: 900px;">
-                        <el-tab-pane label="大名单">
+                    <el-tabs tab-position="left" style="height: 900px;" @tab-click="switchTab" v-model="activeTab">
+                        <el-tab-pane label="大名单" name="roster">
                             <el-row>
-                                <el-col ::span="12">
-                                    <div>
-
-                                    </div>
+                                <el-col :span="2">
+                                    <span>总身价:{{lineUpData.totalPrice}}万</span>
                                 </el-col>
-                                <el-col :span="10">
+                                <el-col :span="4">
                                     <span>总工资/工资帽:{{lineUpData.totalSalary}}万/{{lineUpData.salaryCap}}万</span>
+                                </el-col>
+                                <el-col :span="4">
+                                    <span>大名单人数:{{lineUpData.rosterList.length}}/{{lineUpData.rosterCount}}</span>
                                 </el-col>
                                 <el-button :icon="substituteLocked?'el-icon-lock':'el-icon-unlock'"
                                            @click="handleSubstituteLock" circle style="float: right"></el-button>
@@ -88,13 +89,23 @@
                                         <el-button @click="handlePlayerDetail(scope.row.upId)" type="text" size="small">
                                             详细
                                         </el-button>
-                                        <el-button @click="handlePlayerReserve(scope.row.upId)" type="text" size="small">下放</el-button>
-                                        <el-button @click="handlePlayerDismiss(scope.row.upId)" type="text" size="small">解雇</el-button>
+                                        <el-button @click="handlePlayerReserve(scope.row.upId)" type="text"
+                                                   size="small">下放
+                                        </el-button>
+                                        <el-button @click="handlePlayerDismiss(scope.row.upId)" type="text"
+                                                   size="small">解雇
+                                        </el-button>
                                     </template>
                                 </el-table-column>
                             </el-table>
                         </el-tab-pane>
-                        <el-tab-pane label="备选名单">
+                        <el-tab-pane label="候补名单" name="reserve">
+                            <el-row>
+                                <el-col :span="4">
+                                    <span>候补名单人数:{{lineUpData.reserveList.length}}/{{lineUpData.reserveCount}}</span>
+                                </el-col>
+                            </el-row>
+
                             <el-table
                                     :data="lineUpData.reserveList"
                                     style="width: 100%">
@@ -145,7 +156,9 @@
                                         <el-button @click="handlePlayerDetail(scope.row.upId)" type="text" size="small">
                                             详细
                                         </el-button>
-                                        <el-button @click="handlePlayerPromote(scope.row.upId)" type="text" size="small">提拔</el-button>
+                                        <el-button @click="handlePlayerPromote(scope.row.upId)" type="text"
+                                                   size="small">提拔
+                                        </el-button>
                                     </template>
                                 </el-table-column>
                             </el-table>
@@ -179,6 +192,7 @@
         data() {
             return {
                 teamName: "null",
+                activeTab:"roster",
                 lineUpData: {
                     totalSalary: 0,
                     salaryCap: 0,
@@ -230,7 +244,10 @@
                         this.lineUpData = res.data;
                         this.lineUpData.rosterList.forEach(function (item) {
                             convertPlayerInfo(item)
-                        })
+                        });
+                        this.lineUpData.reserveList.forEach(function (item) {
+                            convertPlayerInfo(item)
+                        });
                         this.rosterTableLoading = false;
                     }
                 })
@@ -238,34 +255,34 @@
             handlePlayerDetail(upId) {
                 this.$refs.playerInfoDialogRef.show(upId);
             },
-            handlePlayerReserve(upId){
-                reserve({upId:upId}).then(res=>{
-                    if(res.code===0){
+            handlePlayerReserve(upId) {
+                reserve({upId: upId}).then(res => {
+                    if (res.code === 0) {
                         this.$message({
-                            message:"下放成功",
-                            type:"success"
+                            message: "下放成功",
+                            type: "success"
                         });
                         this.getUserPlayerList();
                     }
                 });
             },
-            handlePlayerDismiss(upId){
-                dismiss({upId:upId}).then(res=>{
-                    if(res.code===0){
+            handlePlayerDismiss(upId) {
+                dismiss({upId: upId}).then(res => {
+                    if (res.code === 0) {
                         this.$message({
-                            message:"解雇成功",
-                            type:"success"
+                            message: "解雇成功",
+                            type: "success"
                         });
                         this.getUserPlayerList();
                     }
                 });
             },
-            handlePlayerPromote(upId){
-                promote({upId:upId}).then(res=>{
-                    if(res.code===0){
+            handlePlayerPromote(upId) {
+                promote({upId: upId}).then(res => {
+                    if (res.code === 0) {
                         this.$message({
-                            message:"提拔成功",
-                            type:"success"
+                            message: "提拔成功",
+                            type: "success"
                         });
                         this.getUserPlayerList();
                     }
@@ -291,6 +308,9 @@
             },
             handleSubstituteLock() {
                 this.substituteLocked = !this.substituteLocked;
+            },
+            switchTab() {
+                this.getUserPlayerList();
             },
             substitute(fromUpId, toUpId) {
                 substitute({

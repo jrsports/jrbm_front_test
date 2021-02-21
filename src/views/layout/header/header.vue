@@ -3,16 +3,16 @@
 
     <div>
         <el-menu :default-active="activeIndex" mode="horizontal">
-            <el-menu-item index="1" @click="drawerVisible=true;getNotificationList()">通知中心</el-menu-item>
             <el-avatar style="float:right" :src="getTeamAvatar"></el-avatar>
             <el-submenu index="2" style="float:right">
                 <template slot="title">{{getTeamName}}</template>
-                <el-menu-item index="3-1" @click="chatVisible=true;getFriendList()">好友</el-menu-item>
-                <el-menu-item index="3-2">选项2</el-menu-item>
+                <el-menu-item index="3-1" @click="drawerVisible=true;getNotificationList()">通知中心</el-menu-item>
+                <el-menu-item index="3-2" @click="chatVisible=true;getFriendList()">好友</el-menu-item>
                 <el-menu-item index="3-3" @click="exitTeam()">退出球队</el-menu-item>
             </el-submenu>
             <el-menu-item index="3" style="float:right" @click="toSeasonPage()">{{getSeason}}</el-menu-item>
-            <el-menu-item index="4" style="float:right">
+            <el-menu-item index="4" style="float:right">{{getExp}}</el-menu-item>
+            <el-menu-item index="5" style="float:right">
                 <i class="el-icon-money"></i>${{getTeamFund}}
                 <i class="el-icon-coin"></i>{{getTeamCoin}}
             </el-menu-item>
@@ -22,7 +22,16 @@
                 :visible.sync="drawerVisible"
                 :with-header="false">
             <div style="margin: 20px">
-                <h3>通知中心</h3>
+                <el-row>
+                    <el-col :span="10">
+                        <h3>通知中心</h3>
+                    </el-col>
+                    <el-col :span="10">
+<!--                        <el-button size="mini">全部已读</el-button>-->
+                    </el-col>
+                </el-row>
+
+
                 <el-collapse accordion>
                     <el-collapse-item v-for="(item,index) in notificationList" :key="index" :name="item.noteId">
                         <template slot="title">
@@ -76,10 +85,11 @@
                                     </el-row>
                                 </el-col>
                                 <el-col :span="4">
-                                    <el-button icon="el-icon-connection" @click="sendTradeInvitation(friend.friendTeamId,friend.friendTeamName)"></el-button>
+                                    <el-button v-if="friend.online" icon="el-icon-connection" @click="sendTradeInvitation(friend.friendTeamId,friend.friendTeamName)"></el-button>
                                 </el-col>
                                 <el-col :span="4">
-                                    <el-button icon="el-icon-cpu" @click="sendMatchRequest(friend.friendTeamId,friend.friendTeamName)"></el-button>
+                                    <el-button v-if="friend.online && !friend.matching" icon="el-icon-cpu" @click="sendMatchRequest(friend.friendTeamId,friend.friendTeamName)"></el-button>
+                                    <el-tag type="success" v-if="friend.matching">比赛中</el-tag>
                                 </el-col>
                                 <el-col :span="4">
                                     <el-button icon="el-icon-delete" @click="removeFriend(friend.friendId)"></el-button>
@@ -284,6 +294,9 @@
                 }else{
                     return "第"+season+"赛季";
                 }
+            },
+            getExp(){
+                return "Lv "+this.$store.getters.exp;
             }
         },
         mounted() {
@@ -292,6 +305,7 @@
         },
         created() {
             this.registerNotificationRouter();
+            this.registerFriendRouter();
         },
         data() {
             return {
@@ -346,7 +360,6 @@
                 var note = this.notificationList.filter((n) => {
                     return n.noteId == noteId;
                 });
-                console.log(note.read);
                 if (note[0].read == 1) {
                     return;
                 }
@@ -375,27 +388,6 @@
                 }).catch(()=>{
 
                 })
-                // this.axiosPost.post("http://www.jrsports.com/api/user/friend/getFriendList", null, {
-                //     headers: {
-                //         "userToken": localStorage.getItem("userToken"),
-                //         "teamToken": sessionStorage.getItem("teamToken")
-                //     }
-                // }).then(function (response) {
-                //     const res = response.data;
-                //     if (res.code == 0) {
-                //         let fl=res.data;
-                //         fl.forEach(function (item) {
-                //             item.unRead=0;
-                //         });
-                //         Friend.setFriendList(fl);
-                //         me.friendList=res.data;
-                //         setInterval(function () {
-                //             me.friendList=Friend.friendList();
-                //         }, 1000);
-                //     } else {
-                //         alert(res.msg);
-                //     }
-                // });
             },
             handleTabClick(tab) {
                 if (tab.name == "friendRequestPane") {
@@ -533,6 +525,9 @@
                     message: body.content
                 })
             },
+            handleReceiveFriendRefresh(){
+                this.initFriendList();
+            },
             registerNotificationRouter() {
                 this.$store.dispatch('ws/addRouter', {
                     "channel": "/user/queue/team",
@@ -542,6 +537,16 @@
                         function: this.handleReceiveNotification
                     }
                 ]})
+            },
+            registerFriendRouter() {
+                this.$store.dispatch('ws/addRouter', {
+                    "channel": "/user/queue/team",
+                    "routers":[
+                        {
+                            router:"/USER/friend/刷新好友列表",
+                            function: this.handleReceiveFriendRefresh
+                        }
+                    ]})
             }
 
         }

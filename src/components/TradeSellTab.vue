@@ -97,9 +97,12 @@
                                 :disabled="item.status!==0">
                         </el-option>
                     </el-select>
+                    <el-tag v-if="this.$store.getters.season>0" type="warning" style="margin-left: 10px">球队正在赛季中，只能出售候补名单球员</el-tag>
                 </el-form-item>
                 <el-form-item label="交易卡数量">
-                    <el-input-number v-model="sellPublishForm.cardCount" :min="1" :max="5"></el-input-number>
+                    <el-input-number v-model="sellPublishForm.cardCount" :min="1" :max="5" @change="handleCardCountChange"></el-input-number>
+                    <el-tag type="success" style="margin-left: 10px">{{currentSellCard}}</el-tag>
+                    <el-tag type="warning" style="margin-left: 10px">{{sellPublishTime}}</el-tag>
                 </el-form-item>
                 <el-form-item label="美元价格（万）">
                     <el-input-number v-model="sellPublishForm.fundPrice" :min="1"
@@ -297,13 +300,16 @@
                 sellPublishDialogVisible: false,
                 mySellPublishDialogVisible:false,
                 historySellPublishDialogVisible:false,
+                sellPublishTime:"出售信息将持续12小时",
                 sellPublishForm: {
                     upId: "",
                     cardCount: 0,
                     coinPrice: 0,
-                    fundPrice: 0
+                    fundPrice: 0,
+                    type:0
                 },
                 tradablePlayerList: [],
+                currentSellCard:"当前拥有无限张交易卡",
                 sellPublishSearchForm:{
                     bpId:null,
                     maxFundPrice:9999,
@@ -473,6 +479,9 @@
                     });
                     this.basicPlayerSearchLoading=false;
                 }
+            },
+            handleCardCountChange(current){
+                this.sellPublishTime="出售信息将持续"+current*12+"小时";
             }
         }
 

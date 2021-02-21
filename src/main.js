@@ -7,12 +7,16 @@ import store from './store'
 import 'element-ui/lib/theme-chalk/index.css'
 import locale from 'element-ui/lib/locale/lang/zh-CN'
 import GlobalWebsocket from "@/websocket/GlobalWebsocket";
+import ECharts from 'vue-echarts';
+import 'echarts/lib/chart/bar';
+import 'echarts/lib/component/tooltip';
 
 
 Vue.use(ElementUI, {locale});
 Vue.config.productionTip = false;
 // 将axios挂载到prototype上，在组件中可以直接使用this.axiosPost访问
 Vue.prototype.axiosPost = axiosPost;
+Vue.component('v-chart', ECharts)
 
 //登录校验（要写在vue实例创建前）
 router.beforeEach(function (to, from, next) {

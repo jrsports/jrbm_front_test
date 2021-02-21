@@ -98,11 +98,6 @@
                                         label="合同编号">
                                 </el-table-column>
                                 <el-table-column
-                                        prop="signToken"
-                                        label="签约令牌"
-                                        v-if="colShow">
-                                </el-table-column>
-                                <el-table-column
                                         label="球员"
                                         width="100">
                                     <template slot-scope="scope">
@@ -123,6 +118,10 @@
                                 <el-table-column
                                         prop="type"
                                         label="签约类型">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="contractContent"
+                                        label="合同">
                                 </el-table-column>
                                 <el-table-column
                                         prop="timeLeft"
@@ -187,7 +186,7 @@
                                         label="签约时间">
                                 </el-table-column>
                                 <el-table-column
-                                        prop="contract"
+                                        prop="contractContent"
                                         label="合同">
                                 </el-table-column>
                                 <el-table-column label="合同详情">
@@ -231,7 +230,6 @@
             return {
                 unSignedData: [],
                 signedData: [],
-                colShow: false,
                 activeSignTab:"negotiation",
                 negotiationListData:[],
                 negotiationHistoryData:[],
@@ -279,10 +277,13 @@
                         sd.forEach(function (item) {
                             if (item.source === 1) {
                                 item.source = "自由市场";
+                            }else if(item.source===2){
+                                item.source="选秀";
                             }
                             if (item.type === 1) {
                                 item.type = "签约";
                             }
+                            item.contractContent = item.contract.totalYear + "年" + item.contract.totalSalary + "万"
                         });
                         setInterval(this.startTimer, 1000);
                         this.unSignedData = sd;
@@ -302,6 +303,8 @@
                         sd.forEach(function (item) {
                             if (item.source == 1) {
                                 item.source = "自由市场";
+                            }else if(item.source===2){
+                                item.source="选秀";
                             }
                             if (item.type == 1) {
                                 item.type = "签约";
@@ -313,7 +316,7 @@
                             } else if (item.status == 4) {
                                 item.status = "已过期";
                             }
-                            item.contract = item.contractDto.totalYear + "年" + item.contractDto.totalSalary + "万"
+                            item.contractContent = item.contract.totalYear + "年" + item.contract.totalSalary + "万"
                         });
                         this.signedData = sd;
                         this.loading = false;

@@ -18,7 +18,7 @@
 
         </el-row>
         <el-tabs v-model="activeTab" type="card">
-            <el-tab-pane label="基本信息" name="basic">
+            <el-tab-pane label="基本信息" name="basic" v-if="dialogType==='userPlayer'">
                 <span>{{playerDetail.draftInfo.content}}</span>
             </el-tab-pane>
             <el-tab-pane label="能力信息" name="ability">
@@ -58,14 +58,14 @@
                     <el-row style="margin-top: 15px">
                         <el-col :span="4">内线倾向：{{playerDetail.ability.insideIncline}}</el-col>
                         <el-col :span="4">传球倾向：{{playerDetail.ability.passIncline}}</el-col>
-                        <el-col :span="4">进攻综合：{{playerDetail.ability.offensiveOverall}}</el-col>
-                        <el-col :span="4">防守综合：{{playerDetail.ability.defensiveOverall}}</el-col>
+                        <el-col :span="4">进攻综合：{{playerDetail.ability.offensive}}</el-col>
+                        <el-col :span="4">防守综合：{{playerDetail.ability.defensive}}</el-col>
                         <el-col :span="4">球权：{{playerDetail.ability.ballWeight}}</el-col>
                         <el-col :span="4"></el-col>
                     </el-row>
                 </el-card>
             </el-tab-pane>
-            <el-tab-pane label="生涯信息" name="career">
+            <el-tab-pane label="生涯信息" name="career" v-if="dialogType==='userPlayer'">
                 <el-table :data="playerDetail.careerRspDto.careerPeriodList">
                     <el-table-column type="expand">
                         <template slot-scope="props">
@@ -88,8 +88,19 @@
                     <el-table-column property="outTime" label="离队时间" :formatter="dateFormatter"></el-table-column>
                 </el-table>
             </el-tab-pane>
-            <el-tab-pane label="数据信息" name="stats">
+            <el-tab-pane label="数据信息" name="stats" v-if="dialogType==='userPlayer'">
 
+            </el-tab-pane>
+            <el-tab-pane label="合同信息" name="contract" v-if="dialogType==='userPlayer'">
+                <span>{{playerDetail.contract.content}}</span>
+                <el-table :data="playerDetail.contract.detail">
+                    <el-table-column type="index"></el-table-column>
+                    <el-table-column property="salary" label="薪资"></el-table-column>
+                    <el-table-column property="progress" label="履行情况"></el-table-column>
+                </el-table>
+            </el-tab-pane>
+            <el-tab-pane label="身价趋势" name="trend">
+                <v-chart :options="option" style="width: 900px"></v-chart>
             </el-tab-pane>
         </el-tabs>
     </el-dialog>
@@ -99,7 +110,14 @@
     import {getPlayerDetail} from "@/api/team";
     import {convertPlayerInfo} from "@/utils/PlayerInfoUtil";
     import {formatDate} from "@/utils/date"
+    import {getBasicPlayerDetail} from "@/api/player";
+    import 'echarts/lib/chart/line';
+    import 'echarts/lib/component/grid';
 
+    var trendData={
+        x:[],
+        y:[]
+    };
     export default {
         name: "PlayerInfoDialog",
         data(){
@@ -125,16 +143,73 @@
                             }
                         ]
                     }
-                ]
+                ],
+                dialogType:"userPlayer",
+                option:{
+                    title: {
+                        text: '身价趋势'
+                    },
+                    legend: {
+                        data: ['招商银行', '浦发银行', '广发银行', '上海银行']
+                    },
+                    xAxis: {
+                        type: 'category',   // 还有其他的type，可以去官网喵两眼哦
+                        data: trendData.x,   // x轴数据
+                        name: '日期',   // x轴名称
+                    },
+                    yAxis: {
+                        type: 'value',
+                        name: '身价',   // y轴名称
+                        scale:true
+                    },
+                    label: {},
+                    tooltip: {
+                        trigger: 'axis'   // axis   item   none三个值
+                    },
+                    series: [
+                        {
+                            data: trendData.y,
+                            type: 'line'
+                        }
+                    ]
+                }
             }
         },
         methods:{
+            showBasic(bpId){
+                getBasicPlayerDetail({bpId:bpId}).then(res=>{
+                    if(res.code===0){
+                        this.dialogType="basic";
+                        let detail=res.data;
+                        this.playerDetail.ability=detail.ability;
+                        this.playerDetail.avatarUrl=detail.basic.avatarUrl;
+                        this.playerDetail.overall=detail.ability.overall;
+                        this.playerDetail.grade=detail.ability.grade;
+                        trendData.x.splice(0, trendData.x.length)
+                        trendData.y.splice(0, trendData.y.length)
+                        detail.trend.nodes.forEach(item=>{
+                            trendData.x.push(item.date);
+                            trendData.y.push(item.value);
+                        });
+                        this.userPlayerDetailDialogVisible = true;
+                    }
+
+                });
+            },
             show(upId) {
                 getPlayerDetail(upId).then(res => {
                     if (res.code === 0) {
+                        this.dialogType="userPlayer";
                         let item = res.data;
                         convertPlayerInfo(item);
                         this.playerDetail = item;
+                        console.log(this.playerDetail.contract.detail);
+                        trendData.x.splice(0, trendData.x.length)
+                        trendData.y.splice(0, trendData.y.length)
+                        item.trend.nodes.forEach(item=>{
+                            trendData.x.push(item.date);
+                            trendData.y.push(item.value);
+                        });
                         this.userPlayerDetailDialogVisible = true;
                     }
                 })
@@ -150,6 +225,6 @@
     }
 </script>
 
-<style scoped>
+<style>
 
 </style>

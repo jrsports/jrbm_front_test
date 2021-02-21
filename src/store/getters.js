@@ -9,6 +9,7 @@ const getters = {
     fund: state => state.team.fund,
     coin: state => state.team.coin,
     season:state=>state.team.season,
+    exp:state=>state.team.exp,
     friendList:state=>state.team.friendList,
     wsMsgRouter: state=>state.ws.wsMsgRouter
 }
