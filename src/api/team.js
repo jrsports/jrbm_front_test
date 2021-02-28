@@ -8,6 +8,14 @@ export function teamLogin(data) {
     })
 }
 
+export function createTeam(data) {
+    return request({
+        url:'/user/team/createTeam',
+        method:'post',
+        data:data
+    })
+}
+
 export function getLineUp() {
     return request({
         url:'/user/team/getLineUp',
@@ -59,4 +67,23 @@ export function getTradeInfo(data) {
         data:data
     })
 }
+
+export function getRosterInitializationCandidate(data) {
+    return request({
+        url:'/user/team/getRosterInitializationCandidate',
+        method:'post',
+        data:data
+    })
+}
+
+export function confirmRosterInitialization(data) {
+    return request({
+        url:'/user/team/confirmRosterInitialization',
+        method:'post',
+        data:data
+    })
+}
+
+
+
 

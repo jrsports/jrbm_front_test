@@ -94,6 +94,14 @@ export const constantRouterMap = [
         meta:{
             needLogin:true
         }
+    },
+    ,
+    {
+        path: "/rosterInit",
+        component: () => import('@/views/team/rosterInit'),
+        meta:{
+            needLogin:true
+        }
     }
 
 ];

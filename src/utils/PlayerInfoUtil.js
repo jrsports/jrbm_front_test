@@ -14,17 +14,22 @@ export function convertPlayerInfo(item) {
         }else if(item.order==5){
             item.order="首发C"
         }
-        if(item.position==1){
-            item.position="PG"
-        }else if(item.position==2){
-            item.position="SG"
-        }else if(item.position==3){
-            item.position="SF"
-        }else if(item.position==4){
-            item.position="PF"
-        }else if(item.position==5){
-            item.position="C"
-        }
+
+        let pos="";
+        item.position.positionList.forEach(it=>{
+            if(it===1){
+                pos+="PG/"
+            }else if(it===2){
+                pos+="SG/"
+            }else if(it===3){
+                pos+="SF/"
+            }else if(it===4){
+                pos+="PF/"
+            }else if(it===5){
+                pos+="C/"
+            }
+        });
+        item.position=pos.substring(0,pos.length-1);
 
         if(item.grade==1){
             item.grade="S+"
@@ -60,7 +65,7 @@ export function convertPlayerInfo(item) {
 
 
 
-        if(item.basicPlayerType===0){
+        if(item.basicPlayerType===1){
             item.type="现役";
         }else{
             item.type="历史";

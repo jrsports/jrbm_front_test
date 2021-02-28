@@ -208,6 +208,7 @@
                         </el-table>
                     </el-dialog>
                     <PlayerInfoDialog ref="playerInfoDialogRef"></PlayerInfoDialog>
+                    <OfferDialog ref="offerDialogRef"></OfferDialog>
                 </el-main>
             </el-container>
         </el-container>
@@ -218,13 +219,16 @@
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header";
     import PlayerInfoDialog from "@/components/PlayerInfoDialog";
+    import OfferDialog from "@/components/OfferDialog";
+    // eslint-disable-next-line no-unused-vars
     import {getNegotiationList, getSignContractList, negotiate} from "@/api/sign";
     import {signContract} from "@/api/sign";
     import {refuseContract} from "@/api/sign";
     import {secondsToTime} from "@/utils/timeUtil";
+    import {formatDate} from "@/utils/date";
 
     export default {
-        components: {Sidebar, NavBar,PlayerInfoDialog},
+        components: {Sidebar, NavBar,PlayerInfoDialog,OfferDialog},
         name: "sign",
         data() {
             return {
@@ -316,7 +320,9 @@
                             } else if (item.status == 4) {
                                 item.status = "已过期";
                             }
-                            item.contractContent = item.contract.totalYear + "年" + item.contract.totalSalary + "万"
+                            item.contractContent = item.contract.totalYear + "年" + item.contract.totalSalary + "万";
+                            item.signTime = formatDate(new Date(item.signTime), "yyyy-MM-dd hh:mm:ss");
+
                         });
                         this.signedData = sd;
                         this.loading = false;
@@ -454,28 +460,23 @@
                 }
             },
             negotiate(row){
-                negotiate({
-                    negotiationId:row.negotiationId,
-                    offer:{
-                        totalYear:2,
-                        totalSalary:3400,
-                        detail:[
-                            {
-                                salary:1400
-                            },
-                            {
-                                salary:2000
-                            }
-                        ]
-                    }}).then(res=>{
-                    if(res.code===0){
-                        this.$message({
-                            message: res.data.isAccepted?"球员接收了您的报价":"球员暂定了您的报价",
-                            type: "success"
-                        });
-                        this.getNegotiationList(false);
-                    }
+                let me=this;
+                this.$refs.offerDialogRef.show((form)=>{
+                    negotiate({
+                        negotiationId:row.negotiationId,
+                        offer:form
+                    }).then(res=>{
+                        if(res.code===0){
+                            me.$message({
+                                message: res.data.isAccepted?"球员接收了您的报价":"球员暂定了您的报价",
+                                type: "success"
+                            });
+                            me.getNegotiationList(false);
+                        }
+                    });
                 });
+
+
             }
         }
     }

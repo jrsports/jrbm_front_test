@@ -23,6 +23,9 @@
                                 <el-col :span="4">
                                     <span>大名单人数:{{lineUpData.rosterList.length}}/{{lineUpData.rosterCount}}</span>
                                 </el-col>
+                                <el-col :span="4">
+                                    <span>平均能力值:{{lineUpData.averageOverall}}</span>
+                                </el-col>
                                 <el-button :icon="substituteLocked?'el-icon-lock':'el-icon-unlock'"
                                            @click="handleSubstituteLock" circle style="float: right"></el-button>
                             </el-row>
@@ -70,8 +73,14 @@
                                         label="身价">
                                 </el-table-column>
                                 <el-table-column
+                                        v-if="this.$store.getters.season>0"
                                         prop="currentSeasonSalary"
                                         label="本赛季工资">
+                                </el-table-column>
+                                <el-table-column
+                                        v-if="this.$store.getters.season<=0"
+                                        prop="nextSeasonSalary"
+                                        label="下赛季工资">
                                 </el-table-column>
                                 <el-table-column
                                         prop="overall"
@@ -242,6 +251,7 @@
                 getLineUp().then(res => {
                     if (res.code === 0) {
                         this.lineUpData = res.data;
+
                         this.lineUpData.rosterList.forEach(function (item) {
                             convertPlayerInfo(item)
                         });

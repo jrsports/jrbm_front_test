@@ -21,3 +21,20 @@ export function applyWsToken() {
         method:'post'
     })
 }
+
+export function getCaptcha() {
+    return request({
+        url:'/user/captcha/',
+        method:'get'
+    })
+}
+
+export function userRegister(data) {
+    return request({
+        url:'/user/user/userRegister',
+        method:'post',
+        data:data
+    })
+}
+
+

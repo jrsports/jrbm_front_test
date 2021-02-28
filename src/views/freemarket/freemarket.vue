@@ -380,10 +380,10 @@
                     }
                 }).then(res => {
                     if (res.code === 0) {
-                        this.$message({
-                            message: "自由市场已自动刷新",
-                            type: "success"
-                        });
+                        // this.$message({
+                        //     message: "自由市场已自动刷新",
+                        //     type: "success"
+                        // });
                         // const newFreePlayerList=res.data.freePlayerList;
                         this.freePlayerCount = res.data.freePlayerList.totalRecordCount;
                         this.freePlayerListData = res.data.freePlayerList.recordList;
