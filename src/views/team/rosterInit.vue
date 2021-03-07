@@ -3,7 +3,16 @@
         <el-container>
             <el-container>
                 <el-main>
-
+                    <el-alert
+                            title="新手引导-创建阵容"
+                            type="info"
+                            description="欢迎来到JRBM，我们列出了当天身价低于1500万的所有球员，
+                            您现在需要为您的球队挑选8个球员组成您的第一个大名单阵容，
+                            选择完后系统将自动为您选择的球员以当天身价为工资签约一份一年期的合同，
+                            注意球员工资总和不得超过工资帽6000万"
+                            show-icon>
+                    </el-alert>
+                    <el-divider></el-divider>
                     <el-form :inline="true" :model="searchForm">
                         <el-form-item label="球员">
                             <el-select
@@ -46,7 +55,8 @@
                             <el-table :data="selected" show-summary sum-text="总薪资">
                                 <el-table-column type="index" label="序号" width="100px"></el-table-column>
                                 <el-table-column property="name" label="球员"></el-table-column>
-                                <el-table-column property="price" label="身价"></el-table-column>
+                                <el-table-column property="position" label="位置"></el-table-column>
+                                <el-table-column property="price" label="身价/工资"></el-table-column>
                                 <el-table-column
                                         fixed="right"
                                         label="操作"
@@ -58,7 +68,7 @@
                                     </template>
                                 </el-table-column>
                             </el-table>
-                            <el-button @click="confirm">确认阵容</el-button>
+                            <el-button @click="confirm" v-if="canConfirm()">确认阵容</el-button>
                         </el-col>
                         <el-col :span="12">
                             <el-table :data="currentPlayerData">
@@ -66,6 +76,7 @@
                                 <el-table-column property="basic.chname" label="中文名"></el-table-column>
                                 <el-table-column property="basic.enname" label="英文名"></el-table-column>
                                 <el-table-column property="basic.price" label="市价"></el-table-column>
+                                <el-table-column property="basic.position" label="位置"></el-table-column>
                                 <el-table-column property="ability.overall" label="综合评分"></el-table-column>
                                 <el-table-column property="ability.offensive" label="进攻综合"></el-table-column>
                                 <el-table-column property="ability.defensive" label="防守综合"></el-table-column>
@@ -154,11 +165,33 @@
                         let rec = res.data.recordList;
                         rec.forEach(function (item, index) {
                             item.no = (res.data.pageNo - 1) * res.data.pageSize + index + 1;
-                            me.selected.forEach(it=>{
-                                if(me.selected.length>=8 || it.bpId===item.basic.bpId){
-                                    item.selected=true;
+                            if(me.selected.length>=8){
+                                item.selected=true;
+                            }else{
+                                let flag=false;
+                                me.selected.forEach(it=>{
+                                    if(it.bpId===item.basic.bpId){
+                                        flag=true;
+                                    }
+                                });
+                                item.selected=flag;
+                            }
+
+                            let pos="";
+                            item.basic.position.positionList.forEach(it=>{
+                                if(it===1){
+                                    pos+="PG/"
+                                }else if(it===2){
+                                    pos+="SG/"
+                                }else if(it===3){
+                                    pos+="SF/"
+                                }else if(it===4){
+                                    pos+="PF/"
+                                }else if(it===5){
+                                    pos+="C/"
                                 }
                             });
+                            item.basic.position=pos.substring(0,pos.length-1);
                         });
                         this.currentPlayerData = rec;
 
@@ -196,7 +229,8 @@
                 this.selected.push({
                     bpId:row.basic.bpId,
                     name:row.basic.chname,
-                    price:row.basic.price
+                    price:row.basic.price,
+                    position:row.basic.position
                 });
                 this.currentPlayerData.forEach((item,index)=>{
                     if(this.selected.length>=8){
@@ -244,6 +278,9 @@
                         this.$router.push('/myteam');
                     }
                 })
+            },
+            canConfirm(){
+                return this.selected.length===8;
             }
         }
     }

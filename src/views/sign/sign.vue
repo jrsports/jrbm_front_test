@@ -309,6 +309,8 @@
                                 item.source = "自由市场";
                             }else if(item.source===2){
                                 item.source="选秀";
+                            }else if(item.source===4){
+                                item.source="初始阵容";
                             }
                             if (item.type == 1) {
                                 item.type = "签约";

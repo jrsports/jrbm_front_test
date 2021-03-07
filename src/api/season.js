@@ -71,3 +71,18 @@ export function getTeamRank(data) {
         method:'post'
     })
 }
+
+export function getSignableSeason() {
+    return request({
+        url:'/season/signUp/getSignableSeason',
+        method:'post'
+    })
+}
+
+export function getPlayingSeason() {
+    return request({
+        url:'/season/signUp/getPlayingSeason',
+        method:'post'
+    })
+}
+

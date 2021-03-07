@@ -3,16 +3,17 @@ import {formatDate} from "@/utils/date";
 
 export function convertPlayerInfo(item) {
 
-        if(item.order==1){
-            item.order="首发PG"
+        if(item.order===1){
+            item.order="首发PG("+item.position.pgFit+")"
         }else if(item.order==2){
-            item.order="首发SG"
+            item.order="首发SG("+item.position.sgFit+")"
         }else if(item.order==3){
-            item.order="首发SF"
+            item.order="首发SF("+item.position.sfFit+")"
         }else if(item.order==4){
-            item.order="首发PF"
+            item.order="首发PF("+item.position.pfFit+")"
         }else if(item.order==5){
-            item.order="首发C"
+            // 不知道为什么这里cFit变成了cfit，后端传的是驼峰的啊...
+            item.order="首发C("+item.position.cfit+")"
         }
 
         let pos="";

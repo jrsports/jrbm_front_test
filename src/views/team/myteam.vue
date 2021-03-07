@@ -19,6 +19,7 @@
                                 </el-col>
                                 <el-col :span="4">
                                     <span>总工资/工资帽:{{lineUpData.totalSalary}}万/{{lineUpData.salaryCap}}万</span>
+                                    <i class="el-icon-circle-plus-outline" style="cursor: pointer" @click="confirmIncreaseSalaryCap"></i>
                                 </el-col>
                                 <el-col :span="4">
                                     <span>大名单人数:{{lineUpData.rosterList.length}}/{{lineUpData.rosterCount}}</span>
@@ -177,6 +178,7 @@
 
 
                     <PlayerInfoDialog ref="playerInfoDialogRef"></PlayerInfoDialog>
+
                 </el-main>
             </el-container>
         </el-container>
@@ -187,7 +189,7 @@
     import Sidebar from "@/views/layout/sidebar/sidebar";
     import NavBar from "@/views/layout/header/header"
     // import Chat from "@/views/layout/chat/chat";
-    import {getLineUp, substitute} from "@/api/team";
+    import {getLineUp, getSalaryCapIncreaseInfo, increaseSalaryCap, substitute} from "@/api/team";
     import {convertPlayerInfo} from "@/utils/PlayerInfoUtil";
     import PlayerInfoDialog from "@/components/PlayerInfoDialog";
     import {dismiss, promote, reserve} from "@/api/player";
@@ -286,6 +288,41 @@
                         this.getUserPlayerList();
                     }
                 });
+            },
+            confirmIncreaseSalaryCap(){
+                getSalaryCapIncreaseInfo().then(res=>{
+                    if(res.code===0){
+                        let currentSalaryCap = res.data.currentSalaryCap;
+                        let maxSalaryCap = res.data.maxSalaryCap;
+                        if(currentSalaryCap===maxSalaryCap){
+                            this.$message({
+                                type: 'warning',
+                                message: '您已达到当前等级最高工资帽'
+                            });
+                        }else{
+                            this.$confirm('您将消耗一张“工资帽提升卡”将工资帽从'+currentSalaryCap+"万提升至"+(currentSalaryCap+250)+"万", '提升工资帽', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+                                increaseSalaryCap({}).then(res=>{
+                                    if(res.code===0){
+                                        this.$message({
+                                            type: 'success',
+                                            message: '提升成功!'
+                                        });
+                                        this.getUserPlayerList();
+                                    }
+                                })
+
+                            }).catch(() => {
+
+                            });
+                        }
+
+                    }
+                });
+
             },
             handlePlayerPromote(upId) {
                 promote({upId: upId}).then(res => {

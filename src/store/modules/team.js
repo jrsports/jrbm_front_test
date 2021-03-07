@@ -11,7 +11,7 @@ const state = {
   coin:'-',
   season:0,
   exp:0,
-  friendList:[]
+  friendList:[],
 }
 
 const mutations = {

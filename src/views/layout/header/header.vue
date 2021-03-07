@@ -347,8 +347,13 @@
         },
         methods: {
             getMyTeamInfo(){
-                this.$store.dispatch('team/getMyTeamInfo').then(()=>{
-
+                let me=this;
+                this.$store.dispatch('team/getMyTeamInfo').then((res)=>{
+                    if(res.code===0){
+                        if(res.data.status===2){
+                            me.$router.push('/rosterInit');
+                        }
+                    }
                 }).catch(()=>{
 
                 })

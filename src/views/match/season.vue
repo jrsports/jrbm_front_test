@@ -9,7 +9,7 @@
             </el-aside>
             <el-container>
                 <el-main>
-                    <div v-if="seasonStatus.signUpStatus==2">
+                    <div v-if="seasonStatus.signUpStatus===2">
                         <el-tabs v-model="activeName" type="card" @tab-click="tabSwitch">
                             <el-tab-pane label="主页" name="main">
                                 <el-row>
@@ -350,32 +350,83 @@
                             <el-tab-pane label="联盟" name="league"></el-tab-pane>
                         </el-tabs>
                     </div>
-                    <div v-if="seasonStatus.signUpStatus!=2">
-                        <el-row>
-                            <h1 style="font-size: 5em;text-align: center">休赛期还剩{{seasonStatus.timeLeft}}</h1>
-                        </el-row>
-                        <el-row>
-                            <h1 style="font-size: 3em;text-align: center">新赛季：第{{seasonStatus.signUpSeason}}赛季</h1>
-                        </el-row>
-                        <el-row>
-                            <h1 style="font-size: 3em;text-align: center">组别：新秀赛季组</h1>
-                        </el-row>
-                        <el-row type="flex" justify="center">
-                            <el-button type="success" plain style="font-size: 2em"
-                                       v-if="seasonStatus.signUpStatus==0" @click="applySeasonDialogVisible=true">报名
-                            </el-button>
-                            <h3 v-if="seasonStatus.signUpStatus==1">已报名，请等待分配结果</h3>
-                        </el-row>
+                    <div v-if="seasonStatus.signUpStatus<2">
+                        <el-card>
+                            <div slot="header">
+                                <span>我的赛季{{seasonStatus.signUpStatus===0?'(未报名，下一个赛季为第'+seasonStatus.signUpSeason+'赛季)':'(已报名，等待分配)'}}</span>
+                            </div>
+                            <div v-if="seasonStatus.signUpStatus===0">
+                                <el-table :data="seasonSignUpData">
+                                    <el-table-column
+                                            prop="salaryCapLevel"
+                                            label="工资帽级别">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="reward"
+                                            label="奖金">
+                                    </el-table-column>
+                                    <el-table-column
+                                            fixed="right"
+                                            label="操作"
+                                            width="180">
+                                        <template slot-scope="scope">
+                                            <el-button @click="showSignUp(scope.row)"
+                                                       type="text" size="small">报名
+                                            </el-button>
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                            <div v-if="seasonStatus.signUpStatus===1">
+                                <el-alert
+                                        title="您已报名赛季，请耐心等待赛程安排"
+                                        type="success"
+                                        show-icon>
+                                </el-alert>
+                            </div>
+                        </el-card>
+
+                        <el-card style="margin-top: 100px">
+                            <div slot="header">
+                                <span>正在进行的赛季</span>
+                            </div>
+                            <div>
+                                <el-table :data="playingSeasonData">
+                                    <el-table-column
+                                            prop="seasonId"
+                                            label="赛季ID">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="salaryCapLevel"
+                                            label="工资帽级别">
+                                    </el-table-column>
+                                    <el-table-column
+                                            fixed="right"
+                                            label="操作"
+                                            width="180">
+                                        <template slot-scope="scope">
+                                            <el-button @click="showSeasonDetail(scope.row)"
+                                                       type="text" size="small">详情
+                                            </el-button>
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </el-card>
                     </div>
 
-
                     <el-dialog title="新赛季报名" :visible.sync="applySeasonDialogVisible">
+                        <el-alert
+                                title="赛季报名后，大名单变动将被限制"
+                                type="info"
+                                show-icon>
+                        </el-alert>
                         <el-form ref="form" :model="signUpForm" label-position="top">
                             <el-form-item label="赛季">
-                                <el-input disabled value="第4赛季"></el-input>
+                                <el-input disabled :value="'第'+seasonStatus.signUpSeason+'赛季'"></el-input>
                             </el-form-item>
                             <el-form-item label="组别">
-                                <el-input disabled value="新秀赛季组"></el-input>
+                                <el-input disabled :value="signUpForm.salaryCapLevel"></el-input>
                             </el-form-item>
                             <el-form-item label="赛区">
                                 <el-radio-group v-model="signUpForm.conference">
@@ -423,6 +474,8 @@
     import {secondsToTime} from "@/utils/timeUtil"
     import {getTeamRank} from "@/api/season";
     import {getSeasonStatsRank} from "@/api/season";
+    import {getSignableSeason} from "@/api/season";
+    import {getPlayingSeason} from "@/api/season";
 
 
     export default {
@@ -434,12 +487,13 @@
                 scheduleDate: new Date(),
                 teamAvgLossRankData: [],
                 teamAvgRebRankData: [],
-
+                seasonSignUpData:[],
                 teamStatsRankData: [],
                 playerStatsRankData: [],
                 teamStatsTab: "west",
                 playerStatsTab: "score",
                 statsTab: "teamStats",
+                playingSeasonData:[],
                 seasonStatus: {
                     signUpStatus: 0,
                     phase: 0,
@@ -451,7 +505,8 @@
                 applySeasonDialogVisible: false,
                 scheduleDialogVisible: false,
                 signUpForm: {
-                    conference: '西部'
+                    conference: '西部',
+                    salaryCapLevel:"",
                 },
                 matchStatsDialogVisible: false,
                 matchStatsData: [],
@@ -474,17 +529,26 @@
         },
         mounted() {
             this.getSignUpStatus();
+            this.getSignableSeason();
+            this.getPlayingSeason();
         },
         methods: {
+            showSignUp(row){
+                this.applySeasonDialogVisible=true;
+                this.signUpForm.salaryCapLevel=row.salaryCapLevel;
+                this.signUpForm.level=row.level;
+            },
             signUp() {
                 signUp({
-                    conference: this.signUpForm.conference == "西部" ? 1 : 2
+                    conference: this.signUpForm.conference === "西部" ? 1 : 2,
+                    level:this.signUpForm.level
                 }).then(res => {
                     if (res.code === 0) {
                         this.$message({
-                            message: res.msg,
+                            message: "报名成功",
                             type: "success"
                         });
+                        this.$store.dispatch('team/getMyTeamInfo');
                         this.applySeasonDialogVisible = false;
                     }
                 });
@@ -500,13 +564,50 @@
                             this.seasonStatus.timeLeft=secondsToTime(secondsLeft);
                             setInterval(this.handleSignUpTime,500);
                         }
-                        if (this.seasonStatus.signUpStatus == 2) {
+                        if (this.seasonStatus.signUpStatus === 2) {
                             this.getMyTodaySchedule();
                             this.getTeamRank(1);
                         }
 
                     }
                 });
+            },
+            getSignableSeason(){
+              getSignableSeason({}).then(res=>{
+                  if(res.code===0){
+                      this.seasonSignUpData=res.data;
+                      this.seasonSignUpData.forEach(item=>{
+                          if(item.level===1){
+                              item.salaryCapLevel="6000万";
+                          }else if(item.level===2){
+                              item.salaryCapLevel="7000万";
+                          }else if(item.level===3){
+                              item.salaryCapLevel="8000万";
+                          }else if(item.level===4){
+                              item.salaryCapLevel="9000万";
+                          }
+
+                      })
+                  }
+              })
+            },
+            getPlayingSeason(){
+              getPlayingSeason().then(res=>{
+                  if(res.code===0){
+                      this.playingSeasonData=res.data;
+                      this.playingSeasonData.forEach(item=>{
+                          if(item.level===1){
+                              item.salaryCapLevel="6000万";
+                          }else if(item.level===2){
+                              item.salaryCapLevel="7000万";
+                          }else if(item.level===3){
+                              item.salaryCapLevel="8000万";
+                          }else if(item.level===4){
+                              item.salaryCapLevel="9000万";
+                          }
+                      });
+                  }
+              })
             },
             handleSignUpTime(){
                 let secondsLeft = parseInt((this.seasonStatus.deadline - new Date().getTime()) / 1000);

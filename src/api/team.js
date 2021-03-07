@@ -84,6 +84,21 @@ export function confirmRosterInitialization(data) {
     })
 }
 
+export function getSalaryCapIncreaseInfo() {
+    return request({
+        url:'/user/team/getSalaryCapIncreaseInfo',
+        method:'post'
+    })
+}
+
+export function increaseSalaryCap(data) {
+    return request({
+        url:'/user/team/increaseSalaryCap',
+        method:'post',
+        data:data
+    })
+}
+
 
 
 
