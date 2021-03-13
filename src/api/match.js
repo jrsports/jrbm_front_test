@@ -52,3 +52,38 @@ export function viewStats(data) {
         method:'post'
     })
 }
+
+export function startMatching() {
+    return request({
+        url:'/matchserver/rankMatch/startMatching',
+        method:'post'
+    })
+}
+
+export function cancelMatching() {
+    return request({
+        url:'/matchserver/rankMatch/cancelMatching',
+        method:'post'
+    })
+}
+
+export function getRankNearby() {
+    return request({
+        url:'/matchserver/rankMatch/getRankNearby',
+        method:'post'
+    })
+}
+
+export function getMatchingInfo() {
+    return request({
+        url:'/matchserver/rankMatch/getMatchingInfo',
+        method:'post'
+    })
+}
+
+export function getTeamStats() {
+    return request({
+        url:'/matchserver/rankMatch/getTeamStats',
+        method:'post'
+    })
+}

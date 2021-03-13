@@ -80,6 +80,7 @@
                             v-if="!isPublisher(scope.row)"
                             size="mini"
                             type="success"
+                            :loading="buyBtnLoading"
                             @click="handleBuySell(scope.row)">购买</el-button>
                 </template>
             </el-table-column>
@@ -329,7 +330,8 @@
                     [1,"已出售"],
                     [2,"已过期"],
                     [3,"已撤销"]
-                ])
+                ]),
+                buyBtnLoading:false
             }
         },
         mounted() {
@@ -456,6 +458,7 @@
                 })
             },
             handleBuySell(row){
+                this.buyBtnLoading=true;
                 buySell({sellId:row.sellId}).then(res=>{
                     if(res.code===0){
                         this.$message({
@@ -464,7 +467,9 @@
                         });
                         this.getSellPublish();
                     }
-                })
+                    this.buyBtnLoading=false;
+                });
+
             },
             isPublisher(row){
                 return row.sellerTeamId===this.$store.getters.teamId;

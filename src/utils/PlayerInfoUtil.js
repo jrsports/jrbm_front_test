@@ -86,7 +86,7 @@ export function convertPlayerInfo(item) {
         item.contract.detail.forEach((it,index)=>{
             if(cp>0 && index===cp-1){
                 it.progress="履行中";
-            }else if(cp>0 && index<cp-1 || cp<0 &&index<=-cp){
+            }else if(cp>0 && index<cp-1 || cp<0 &&index<-cp){
                 it.progress="履行完毕";
             }else {
                 it.progress="未履行";
