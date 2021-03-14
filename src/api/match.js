@@ -87,3 +87,18 @@ export function getTeamStats() {
         method:'post'
     })
 }
+
+export function getMatchingTeamCount() {
+    return request({
+        url:'/matchserver/rankMatch/getMatchingTeamCount',
+        method:'post'
+    })
+}
+
+export function getRank(data) {
+    return request({
+        url:'/matchserver/rankMatch/getRank',
+        method:'post',
+        data:data
+    })
+}

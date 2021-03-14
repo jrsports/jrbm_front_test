@@ -1,17 +1,17 @@
 <template>
 
     <el-container>
-        <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" close-on-click-modal=false
+        <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" :close-on-click-modal="false"
                    width="100%"
                    @close="quitLive">
             <el-row>
-                <el-col span=8>
+                <el-col :span="8">
                     <h3>{{scores}}{{matchTime}}</h3>
                     <ul class="infinite-list" style="height: 500px;overflow-y:scroll;">
                         <li v-for="i in liveContent" :key="i" style="list-style-type:none;">{{ i }}</li>
                     </ul>
                 </el-col>
-                <el-col span=16>
+                <el-col :span="16">
                     <el-table ref="statTable" :data="stats" :row-class-name="onCourt" highlight-current-row
                               @current-change="handleSubstitute" height="500px">
                         <el-table-column property="order" label="球员序号" fixed></el-table-column>
@@ -102,7 +102,7 @@
             },
             handleTimeUpdate(body){
                 //时间更新
-                this.matchTime = body.matchTimeStr;
+                this.matchTime = "  "+body.matchTimeStr;
             },
             handleSubstitute(body){
                 //换人请求
