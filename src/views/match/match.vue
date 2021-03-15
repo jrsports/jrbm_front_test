@@ -117,6 +117,7 @@
 
     let timeElapsed = 0, timer;
     let matchId = 0;
+    let refreshMatchingTeamCountTimer;
     export default {
         name: "match",
         components: {Sidebar, NavBar, MatchLiveDialog},
@@ -126,6 +127,9 @@
             this.getTeamStats();
             this.initRouter();
             this.getMatchingTeamCount();
+        },
+        beforeDestroy(){
+            clearInterval(refreshMatchingTeamCountTimer);
         },
         data() {
             return {
@@ -169,15 +173,20 @@
                         }
                     ]
                 });
-                this.$store.dispatch('ws/addRouter', {
-                    "channel": "/match/rankMatch/refreshMatchingTeamCount",
-                    "routers": [
-                        {
-                            router: "/MATCH_SERVER/rankMatch/刷新排位人数",
-                            function: this.handleRankMatchingRefresh
-                        }
-                    ]
-                });
+                refreshMatchingTeamCountTimer = setInterval(()=>{
+                    this.getMatchingTeamCount();
+                },3000)
+                // let channel="/match/rankMatch/refreshMatchingTeamCount";
+                // this.$store.dispatch('ws/addRouter', {
+                //     "channel": channel,
+                //     "routers": [
+                //         {
+                //             router: "/MATCH_SERVER/rankMatch/刷新排位人数",
+                //             function: this.handleRankMatchingTeamCountRefresh
+                //         }
+                //     ]
+                // });
+                // GlobalWebsocket.subscribe(channel);
             },
             startMatching() {
                 startMatching().then(res => {

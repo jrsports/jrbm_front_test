@@ -1,16 +1,52 @@
 <template>
 
     <el-container>
-        <el-dialog title="比赛直播" :visible.sync="matchLiveDialogVisible" :close-on-click-modal="false"
+        <el-dialog :visible.sync="matchLiveDialogVisible" :close-on-click-modal="false"
+
                    width="100%"
+                   :modal="false"
+                   :fullscreen="true"
                    @close="quitLive">
             <el-row>
-                <el-col :span="8">
-                    <h3>{{scores}}{{matchTime}}</h3>
+                <h2 style="text-align: center">{{title}}</h2>
+                <h3 style="text-align: center">{{matchTime}}</h3>
+            </el-row>
+            <el-row>
+                <el-col :span="4">
+                    <div v-for="player in homeOnCourtPlayers" :key="player">
+                        <el-row>
+                            <el-col :span="6">
+                                <el-avatar shape="square" :size="50" src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"></el-avatar>
+                            </el-col>
+                            <el-col :span="18">
+                                <h3>{{player.chname}}</h3>
+                            </el-col>
+                        </el-row>
+                        <el-divider></el-divider>
+                    </div>
+
+                </el-col>
+                <el-col :span="12" :offset="2">
                     <ul class="infinite-list" style="height: 500px;overflow-y:scroll;">
                         <li v-for="i in liveContent" :key="i" style="list-style-type:none;">{{ i }}</li>
                     </ul>
                 </el-col>
+                <el-col :span="4" :offset="2">
+                    <div v-for="player in awayOnCourtPlayers" :key="player">
+                        <el-row>
+                            <el-col :span="6">
+                                <el-avatar shape="square" :size="50" src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"></el-avatar>
+                            </el-col>
+                            <el-col :span="18">
+                                <h3>{{player.chname}}</h3>
+                            </el-col>
+                        </el-row>
+                        <el-divider></el-divider>
+                    </div>
+                </el-col>
+            </el-row>
+
+            <el-row>
                 <el-col :span="16">
                     <el-table ref="statTable" :data="stats" :row-class-name="onCourt" highlight-current-row
                               @current-change="handleSubstitute" height="500px">
@@ -63,12 +99,14 @@
             return {
                 matchLiveDialogVisible: false,
                 liveContent: ["比赛直播即将开始"],
-                scores: "",
                 matchTime: "",
                 playerIn: -1,
                 playerOut: -1,
                 matchId:-1,
                 stats: [],
+                homeOnCourtPlayers:[],
+                awayOnCourtPlayers:[],
+                title:""
             }
 
         },
@@ -96,9 +134,22 @@
             handleLiveMsg(body){
                 //比赛直播
                 this.liveContent.unshift(body.message);
-                this.scores = body.homeStats.score + ":" + body.awayStats.score;
                 this.stats = body.stats;
+                this.title=body.homeTeamName+"  "+body.homeStats.score + ":" + body.awayStats.score+"  "+body.awayTeamName
                 onCourtPlayers = body.onCourtPlayers;
+                this.handleOnCourtPlayers(body.onCourtPlayers,body.playerList);
+            },
+            handleOnCourtPlayers(onCourtPlayers,playerList){
+                this.homeOnCourtPlayers.splice(0,this.homeOnCourtPlayers.length);
+                this.awayOnCourtPlayers.splice(0,this.awayOnCourtPlayers.length);
+                onCourtPlayers.forEach((item,index)=>{
+                   if(index<5){
+
+                       this.homeOnCourtPlayers.push(playerList[item].matchPlayerInfo);
+                   } else{
+                       this.awayOnCourtPlayers.push(playerList[item].matchPlayerInfo);
+                   }
+                });
             },
             handleTimeUpdate(body){
                 //时间更新
