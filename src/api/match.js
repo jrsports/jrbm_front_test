@@ -102,3 +102,12 @@ export function getRank(data) {
         data:data
     })
 }
+
+
+export function substitute(data) {
+    return request({
+        url:'/matchserver/ops/substitute',
+        method:'post',
+        data:data
+    })
+}
