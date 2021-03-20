@@ -45,7 +45,7 @@
                                             </el-card>
                                         </el-row>
                                     </el-col>
-                                    <el-col span="9" :offset="1">
+                                    <el-col :span="9" :offset="1">
                                         <el-row>
                                             <el-card>
                                                 <div slot="header">
@@ -96,6 +96,7 @@
                                 <el-date-picker
                                         v-model="scheduleDate"
                                         type="date"
+                                        @change="scheduleDateChange"
                                         placeholder="选择日期">
                                 </el-date-picker>
                                 <el-button @click="getPlayOffView">季后赛视图</el-button>
@@ -105,19 +106,19 @@
                                     <el-table-column property="result" label="结果"></el-table-column>
                                     <el-table-column property="homeTeamName" label="主队"></el-table-column>
                                     <el-table-column property="awayTeamName" label="客队"></el-table-column>
-                                    <el-table-column property="matchBriefInfoDto.homeScore"
+                                    <el-table-column property="matchBriefInfoRspDto.homeScore"
                                                      label="主队比分"></el-table-column>
-                                    <el-table-column property="matchBriefInfoDto.awayScore"
+                                    <el-table-column property="matchBriefInfoRspDto.awayScore"
                                                      label="客队比分"></el-table-column>
                                     <el-table-column label="操作">
                                         <template slot-scope="scope">
                                             <el-button
-                                                    v-if="scope.row.status==1"
+                                                    v-if="scope.row.status===1"
                                                     size="mini"
                                                     @click="enterLive(scope.row)">进入直播
                                             </el-button>
                                             <el-button
-                                                    v-if="scope.row.status==2"
+                                                    v-if="scope.row.status===2"
                                                     size="mini"
                                                     @click="viewStats(scope.row)">数据统计
                                             </el-button>
@@ -358,8 +359,8 @@
                             <div v-if="seasonStatus.signUpStatus===0">
                                 <el-table :data="seasonSignUpData">
                                     <el-table-column
-                                            prop="salaryCapLevel"
-                                            label="工资帽级别">
+                                            prop="level"
+                                            label="级别">
                                     </el-table-column>
                                     <el-table-column
                                             prop="reward"
@@ -397,8 +398,8 @@
                                             label="赛季ID">
                                     </el-table-column>
                                     <el-table-column
-                                            prop="salaryCapLevel"
-                                            label="工资帽级别">
+                                            prop="level"
+                                            label="级别">
                                     </el-table-column>
                                     <el-table-column
                                             fixed="right"
@@ -425,8 +426,8 @@
                             <el-form-item label="赛季">
                                 <el-input disabled :value="'第'+seasonStatus.signUpSeason+'赛季'"></el-input>
                             </el-form-item>
-                            <el-form-item label="组别">
-                                <el-input disabled :value="signUpForm.salaryCapLevel"></el-input>
+                            <el-form-item label="级别">
+                                <el-input disabled :value="signUpForm.level"></el-input>
                             </el-form-item>
                             <el-form-item label="赛区">
                                 <el-radio-group v-model="signUpForm.conference">
@@ -575,19 +576,17 @@
             getSignableSeason(){
               getSignableSeason({}).then(res=>{
                   if(res.code===0){
-                      this.seasonSignUpData=res.data;
-                      this.seasonSignUpData.forEach(item=>{
-                          if(item.level===1){
-                              item.salaryCapLevel="6000万";
-                          }else if(item.level===2){
-                              item.salaryCapLevel="7000万";
-                          }else if(item.level===3){
-                              item.salaryCapLevel="8000万";
-                          }else if(item.level===4){
-                              item.salaryCapLevel="9000万";
-                          }
-
-                      })
+                      let level=res.data.level;
+                      if(level===1){
+                          level="业余";
+                      }else if(level===2){
+                          level="职业";
+                      }else if(level===3){
+                          level="巅峰";
+                      }
+                      this.seasonSignUpData.push({
+                          level:level
+                      });
                   }
               })
             },
@@ -597,13 +596,11 @@
                       this.playingSeasonData=res.data;
                       this.playingSeasonData.forEach(item=>{
                           if(item.level===1){
-                              item.salaryCapLevel="6000万";
+                              item.level="业余";
                           }else if(item.level===2){
-                              item.salaryCapLevel="7000万";
+                              item.level="职业";
                           }else if(item.level===3){
-                              item.salaryCapLevel="8000万";
-                          }else if(item.level===4){
-                              item.salaryCapLevel="9000万";
+                              item.level="巅峰";
                           }
                       });
                   }
@@ -628,18 +625,14 @@
                         let me = this;
                         let d = res.data;
                         d.forEach(function (item) {
-                            if (item.status == 0) {
+                            if (item.status === 0) {
                                 item.result = "未赛";
-                                item.matchBriefInfoDto.homeScore = "-";
-                                item.matchBriefInfoDto.awayScore = "-";
-                            } else if (item.status == 1) {
+                                item.matchBriefInfoRspDto.homeScore = "-";
+                                item.matchBriefInfoRspDto.awayScore = "-";
+                            } else if (item.status === 1) {
                                 item.result = "进行中";
                             } else {
-                                if (item.result == 0) {
-                                    item.result = "负";
-                                } else if (item.result == 1) {
-                                    item.result = "胜";
-                                }
+                                item.result = item.result?"胜":"负";
                             }
                         });
                         me.myScheduleData = d;
@@ -654,11 +647,11 @@
                     if (res.code === 0) {
                         let d = res.data;
                         d.forEach(function (item) {
-                            if (item.status == 0) {
+                            if (item.status === 0) {
                                 item.result = "未赛";
-                                item.matchBriefInfoDto.homeScore = "-";
-                                item.matchBriefInfoDto.awayScore = "-";
-                            } else if (item.status == 1) {
+                                item.matchBriefInfoRspDto.homeScore = "-";
+                                item.matchBriefInfoRspDto.awayScore = "-";
+                            } else if (item.status === 1) {
                                 item.result = "进行中";
                             } else {
                                 // if (item.result == 0) {
@@ -757,50 +750,50 @@
                 this.$refs.matchLiveDialogRef.loadMatch(row.matchId);
             },
             tabSwitch(tab) {
-                if (tab.name == "schedule") {
+                if (tab.name === "schedule") {
                     this.getMySchedule();
                 }
             },
             rankSwitch(tab) {
-                if (tab.name == "west") {
+                if (tab.name === "west") {
                     this.getTeamRank(1);
-                } else if (tab.name == "east") {
+                } else if (tab.name === "east") {
                     this.getTeamRank(2);
                 }
             },
             handleTeamStatsSwitch(tab) {
-                if (tab.name == "west") {
+                if (tab.name === "west") {
                     this.getTeamRank(1);
-                } else if (tab.name == "east") {
+                } else if (tab.name === "east") {
                     this.getTeamRank(2);
-                } else if (tab.name == "score") {
+                } else if (tab.name === "score") {
                     this.getSeasonStatsRank("score", 0, 0);
-                } else if (tab.name == "loss") {
+                } else if (tab.name === "loss") {
                     this.getSeasonStatsRank("score", 0, 1);
-                } else if (tab.name == "reb") {
+                } else if (tab.name === "reb") {
                     this.getSeasonStatsRank("rebound", 0, 0);
-                } else if (tab.name == "assist") {
+                } else if (tab.name === "assist") {
                     this.getSeasonStatsRank("assist", 0, 0);
-                } else if (tab.name == "steal") {
+                } else if (tab.name === "steal") {
                     this.getSeasonStatsRank("steal", 0, 0);
-                } else if (tab.name == "turnover") {
+                } else if (tab.name === "turnover") {
                     this.getSeasonStatsRank("turnover", 0, 0);
-                } else if (tab.name == "block") {
+                } else if (tab.name === "block") {
                     this.getSeasonStatsRank("block", 0, 0);
                 }
             },
             handlePlayerStatsSwitch(tab) {
-                if (tab.name == "score") {
+                if (tab.name === "score") {
                     this.getSeasonPlayerStatsRank("score", 0);
-                } else if (tab.name == "reb") {
+                } else if (tab.name === "reb") {
                     this.getSeasonPlayerStatsRank("rebound", 0);
-                } else if (tab.name == "assist") {
+                } else if (tab.name === "assist") {
                     this.getSeasonPlayerStatsRank("assist", 0);
-                } else if (tab.name == "steal") {
+                } else if (tab.name === "steal") {
                     this.getSeasonPlayerStatsRank("steal", 0);
-                } else if (tab.name == "turnover") {
+                } else if (tab.name === "turnover") {
                     this.getSeasonPlayerStatsRank("turnover", 0);
-                } else if (tab.name == "block") {
+                } else if (tab.name === "block") {
                     this.getSeasonPlayerStatsRank("block", 0);
                 }
             },
@@ -822,6 +815,13 @@
                 s = (s.length == 1) ? '0' + s : s;
                 return h + ':' + s;
             },
+            scheduleDateChange(){
+                if (this.scheduleSwitch) {
+                    this.getMySchedule();
+                } else {
+                    this.getAllSchedule();
+                }
+            }
         }
     }
 </script>

@@ -74,14 +74,6 @@ export const constantRouterMap = [
         }
     },
     {
-        path: "/myplayerdetail",
-        component: () => import('@/views/team/myplayerdetail'),
-        meta:{
-            needLogin:true
-        }
-    },
-
-    {
         path: "/trade",
         component: () => import('@/views/trade/trade'),
         meta:{
@@ -95,7 +87,6 @@ export const constantRouterMap = [
             needLogin:true
         }
     },
-    ,
     {
         path: "/rosterInit",
         component: () => import('@/views/team/rosterInit'),

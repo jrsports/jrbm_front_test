@@ -11,7 +11,6 @@
                     <span>我的球队</span>
                 </template>
                 <el-menu-item index="1-1" @click="getMyTeamPage">我的阵容</el-menu-item>
-                <el-menu-item index="1-2" @click="getMyPlayerDetailPage">球员数据</el-menu-item>
             </el-submenu>
             <el-menu-item index="2">
                 <i class="el-icon-menu"></i>
@@ -45,7 +44,7 @@
                     <span>排行榜</span>
                 </template>
                 <el-menu-item index="6-1" @click="getCurrentAbilityPage">能力市价</el-menu-item>
-                <el-menu-item index="6-2" @click="getTeamRankPage">球队排名</el-menu-item>
+<!--                <el-menu-item index="6-2" @click="getTeamRankPage">球队排名</el-menu-item>-->
             </el-submenu>
             <el-menu-item index="8">
                 <i class="el-icon-setting"></i>
@@ -94,9 +93,6 @@
             },
             getCurrentAbilityPage(){
                 this.$router.push('/currentplayer')
-            },
-            getMyPlayerDetailPage(){
-                this.$router.push('/myplayerdetail')
             },
             getMatchRecordPage(){
                 this.$router.push('/matchrecord')

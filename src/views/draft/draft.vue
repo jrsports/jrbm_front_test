@@ -541,6 +541,23 @@
                     this.draftRoomData = data;
 
                     this.draftPlayerListData = res.data.playerList;
+                    this.draftPlayerListData.forEach(item=>{
+                        let pos="";
+                        item.position.positionList.forEach(it=>{
+                            if(it===1){
+                                pos+="PG/"
+                            }else if(it===2){
+                                pos+="SG/"
+                            }else if(it===3){
+                                pos+="SF/"
+                            }else if(it===4){
+                                pos+="PF/"
+                            }else if(it===5){
+                                pos+="C/"
+                            }
+                        });
+                        item.position=pos.substring(0,pos.length-1);
+                    });
                     setInterval(this.handlePickTimer, 200, this.draftRoomData)
                 });
             },

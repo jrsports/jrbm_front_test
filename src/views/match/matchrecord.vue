@@ -78,6 +78,20 @@
                                         prop="result"
                                         label="结果">
                                 </el-table-column>
+                                <el-table-column label="操作">
+                                    <template slot-scope="scope">
+                                        <el-button
+                                                v-if="scope.row.status===1"
+                                                size="mini"
+                                                @click="enterLive(scope.row)">进入直播
+                                        </el-button>
+                                        <el-button
+                                                v-if="scope.row.status===2"
+                                                size="mini"
+                                                @click="viewStats(scope.row)">数据统计
+                                        </el-button>
+                                    </template>
+                                </el-table-column>
                             </el-table>
                         </el-tab-pane>
                         <el-tab-pane label="友谊赛" name="friend">
@@ -160,7 +174,7 @@
         components: {Sidebar,NavBar,MatchStatsDialog,MatchLiveDialog},
         data() {
             return {
-                activeTab:"friend",
+                activeTab:"rank",
                 friendMatchRecordData:[],
                 seasonMatchRecordData:[],
                 rankMatchRecordData:[],
@@ -173,7 +187,7 @@
             }
         },
         mounted(){
-            this.switchTab({name:"friend"});
+            this.switchTab({name:"rank"});
         },
         methods:{
             switchTab(tab) {

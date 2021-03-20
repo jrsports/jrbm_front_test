@@ -13,7 +13,7 @@
             </el-row>
             <el-row>
                 <el-col :span="4">
-                    <div v-for="player in homeOnCourtPlayers" :key="player">
+                    <div v-for="player in homeOnCourtPlayers" :key="player.upId">
                         <el-row>
                             <el-col :span="6">
                                 <el-avatar shape="square" :size="50" src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"></el-avatar>
@@ -36,6 +36,7 @@
                         <el-tab-pane label="主队数据">
                             <el-table ref="statTable" :data="homeStats" :row-class-name="onCourt" highlight-current-row
                                       @current-change="handleSubstitute" height="500px">
+                                <el-table-column type="index" :index="indexMethod" fixed></el-table-column>
                                 <el-table-column property="chname" label="姓名" fixed width="200px"></el-table-column>
                                 <el-table-column property="timeMinutes" label="上场时间"></el-table-column>
                                 <el-table-column property="score" label="得分"></el-table-column>
@@ -55,6 +56,7 @@
                         <el-tab-pane label="客队数据">
                             <el-table ref="statTable" :data="awayStats" :row-class-name="onCourt" highlight-current-row
                                       @current-change="handleSubstitute" height="500px">
+                                <el-table-column type="index" :index="indexMethod" fixed></el-table-column>
                                 <el-table-column property="chname" label="姓名" fixed width="200px"></el-table-column>
                                 <el-table-column property="timeMinutes" label="上场时间"></el-table-column>
                                 <el-table-column property="score" label="得分"></el-table-column>
@@ -70,7 +72,7 @@
                                 <el-table-column property="foul" label="犯规"></el-table-column>
                             </el-table>
                         </el-tab-pane>
-                        <el-tab-pane label="战术面板">
+                        <el-tab-pane label="战术面板" v-if="tacTabVisible">
                             <el-collapse v-model="activeTacTab" accordion>
                                 <el-collapse-item title="换人" name="substitution">
                                     <el-select v-model="playerOut" multiple placeholder="请选择被替换的球员">
@@ -106,7 +108,7 @@
 
                 </el-col>
                 <el-col :span="4" :offset="2">
-                    <div v-for="player in awayOnCourtPlayers" :key="player">
+                    <div v-for="player in awayOnCourtPlayers" :key="player.upId">
                         <el-row>
                             <el-col :span="6">
                                 <el-avatar shape="square" :size="50" src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"></el-avatar>
@@ -155,6 +157,7 @@
                 playerToBeSubstituteCandidate:[],
                 playerIn:[],
                 playerOut:[],
+                tacTabVisible:true
             }
 
         },
@@ -256,9 +259,9 @@
                 //换人请求
                 this.liveContent.unshift(body.message);
             },
-            onCourt({rowIndex}) {
-                for (var i of onCourtPlayers) {
-                    if (rowIndex == i) {
+            onCourt({row}) {
+                for (let i of onCourtPlayers) {
+                    if (row.order === i) {
                         return 'success-row';
                     }
                 }
@@ -266,6 +269,9 @@
             },
             websocketsend(Data) {//数据发送
                 this.websock.send(Data)
+            },
+            indexMethod(index){
+                return index<5?"首发":"替补";
             },
             quitLive() {
                 let channel="/channel/matchServer/live/" + this.matchId;
