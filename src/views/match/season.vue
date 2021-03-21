@@ -444,6 +444,33 @@
                     </el-dialog>
 
 
+                    <el-dialog title="季后赛视图" :visible.sync="playoffsViewDialogVisible">
+                        <el-table :data="playoffsViewData">
+                            <el-table-column prop="series"
+                                             label="系列">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="homeTeamName"
+                                    label="主场优势球队">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="homeTeamScore"
+                                    label="主场优势球队得分">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="awayTeamScore"
+                                    label="主场劣势球队得分">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="awayTeamName"
+                                    label="主场劣势球队">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="status"
+                                    label="状态">
+                            </el-table-column>
+                        </el-table>
+                    </el-dialog>
 
 
 
@@ -526,6 +553,8 @@
                 awayTeamName: "",
                 matchCount: 0,
                 ongoingPrompt: "匹配",
+                playoffsViewDialogVisible:false,
+                playoffsViewData:[]
             }
         },
         mounted() {
@@ -697,8 +726,28 @@
             getPlayOffView() {
                 getPlayOffView().then(res=>{
                     if (res.code === 0) {
-                        let d = res.data;
-                        console.log(d);
+                        this.playoffsViewData=res.data.seriesList;
+                        this.playoffsViewData.forEach((item,index)=>{
+                            if(item.status===0){
+                                item.status="未开始";
+                            }else if(item.status===1){
+                                item.status="进行中";
+                            }else if (item.status===2){
+                                item.status="已结束";
+                            }
+                            if(index<=1){
+                                item.series= "西部半决赛";
+                            }else if(index<=3){
+                                item.series="东部半决赛";
+                            }else if(index===4) {
+                                item.series="西部决赛";
+                            }else if(index===5){
+                                item.series= "东部决赛"
+                            }else if(index===6){
+                                item.series="总决赛"
+                            }
+                        });
+                        this.playoffsViewDialogVisible=true;
                     }
                 });
             },
@@ -752,6 +801,9 @@
             tabSwitch(tab) {
                 if (tab.name === "schedule") {
                     this.getMySchedule();
+                }else if(tab.name==="main"){
+                    this.getMyTodaySchedule();
+                    this.getTeamRank(1);
                 }
             },
             rankSwitch(tab) {

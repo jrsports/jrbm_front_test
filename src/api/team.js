@@ -25,14 +25,14 @@ export function getLineUp() {
 
 export function getPlayerDetail(upId) {
     return request({
-        url:'/player/userPlayer/getUserPlayerDetail/' + upId,
+        url:'/player/player/query/getUserPlayerDetail/' + upId,
         method:'post'
     })
 }
 
 export function substitute(data) {
     return request({
-        url:'/player/userPlayer/substitute',
+        url:'/player/player/ops/substitute',
         method:'post',
         data:data
     })

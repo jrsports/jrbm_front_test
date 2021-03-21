@@ -383,6 +383,10 @@
                         this.negotiationHistoryData.forEach(item=>{
                             if(item.type===1){
                                 item.type="球员选秀"
+                            }else if(item.type===2){
+                                item.type="新秀选秀"
+                            }else if(item.type===3){
+                                item.type="续约"
                             }
                             if(item.status===1){
                                 item.status="未谈判";
@@ -408,6 +412,10 @@
                       this.negotiationListData.forEach(item=>{
                           if(item.type===1){
                               item.type="球员选秀"
+                          }else if(item.type===2){
+                              item.type="新秀选秀"
+                          }else if(item.type===3){
+                              item.type="续约"
                           }
                           if(item.status===1){
                               item.status="未谈判";

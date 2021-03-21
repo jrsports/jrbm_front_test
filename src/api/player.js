@@ -10,7 +10,7 @@ export function searchBasicPlayer(data) {
 
 export function reserve(data) {
     return request({
-        url:'/player/userPlayer/reserve',
+        url:'/player/player/ops/reserve',
         method:'post',
         data:data
     })
@@ -18,7 +18,7 @@ export function reserve(data) {
 
 export function promote(data) {
     return request({
-        url:'/player/userPlayer/promote',
+        url:'/player/player/ops/promote',
         method:'post',
         data:data
     })
@@ -26,7 +26,7 @@ export function promote(data) {
 
 export function dismiss(data) {
     return request({
-        url:'/player/userPlayer/dismiss',
+        url:'/player/player/ops/dismiss',
         method:'post',
         data:data
     })
@@ -37,13 +37,6 @@ export function getCurrentPlayerList(data) {
         url:'/player/basic/getPlayerRank',
         method:'post',
         data:data
-    })
-}
-
-export function getUserPlayerDetailList() {
-    return request({
-        url:'/player/userPlayer/getUserPlayerDetailList',
-        method:'post'
     })
 }
 
